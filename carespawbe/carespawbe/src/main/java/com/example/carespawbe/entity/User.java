@@ -21,7 +21,7 @@ public class User {
     private Long id;
 
     @Column(nullable = false)
-    private String fullName;
+    private String fullname;
 
     private String gentle;
 
@@ -30,20 +30,22 @@ public class User {
 
     private String phoneNumber;
 
-    @Column(nullable = false)
+    @Column(name = "pass_word", nullable = false)
     private String password;
 
-    private String avatar, role, status;
+    private String avatar;
+    private String role;
+    private String status;
     private LocalDate birthDate;
-
     private LocalDate createdAt;
 
     @PrePersist
     protected void onCreate() {
-//        set current date
+//        set current date + avatar + role + status
         createdAt = LocalDate.now();
-//        set default avatar
         avatar = "no-avatar-img.png";
+        role = "normal";
+        status = "active";
     }
 
 }
