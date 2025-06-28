@@ -23,7 +23,7 @@ public class User {
     @Column(nullable = false)
     private String fullname;
 
-    private String gentle;
+    private String gender;
 
     @Column(nullable = false)
     private String email;
@@ -36,7 +36,7 @@ public class User {
     private String avatar;
     private String role;
     private String status;
-    private LocalDate birthDate;
+    private LocalDate birthday;
     private LocalDate createdAt;
 
     @PrePersist
