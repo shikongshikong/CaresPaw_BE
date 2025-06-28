@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponse {
-//    must have same name with entity to make mapper work correctly!
+//    must hav
+//    e same name with entity to make mapper work correctly!
 //    if name is not match, declare clearly by @Mapping(source = "fullName", target = "name")
     private Long id;
     private String fullname;
