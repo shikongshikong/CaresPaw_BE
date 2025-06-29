@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -19,7 +21,21 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public User login(String email, String password) {
-        return userRepository.findByEmailAndPassword(email, password).orElse(null);
+//        String encodedPassword = passwordEncoder.encode(password);
+//        System.out.println("Login pass: " + encodedPassword);
+//        return userRepository.findByEmailAndPassword(email, encodedPassword).orElse(null);
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) return null;
+
+        String dbPass = user.get().getPassword();
+
+        boolean matched = passwordEncoder.matches(password, dbPass);
+
+        if (matched)
+            return user.get();
+        else
+            return null;
     }
 
     public User register(RegisterRequest request) {
