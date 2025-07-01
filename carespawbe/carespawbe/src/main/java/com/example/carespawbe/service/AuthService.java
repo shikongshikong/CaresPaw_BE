@@ -1,6 +1,6 @@
 package com.example.carespawbe.service;
 
-import com.example.carespawbe.dto.RegisterRequest;
+import com.example.carespawbe.dto.Auth.RegisterRequest;
 import com.example.carespawbe.entity.User;
 import com.example.carespawbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

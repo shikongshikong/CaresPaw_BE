@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -18,6 +20,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false)
@@ -38,6 +41,10 @@ public class User {
     private String status;
     private LocalDate birthday;
     private LocalDate createdAt;
+
+//    optional, but useful when user.getPosts();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ForumPost> posts = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

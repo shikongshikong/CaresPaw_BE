@@ -1,4 +1,4 @@
-package com.example.carespawbe.dto;
+package com.example.carespawbe.dto.Auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
