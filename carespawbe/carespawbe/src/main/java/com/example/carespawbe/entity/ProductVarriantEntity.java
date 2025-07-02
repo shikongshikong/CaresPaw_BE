@@ -21,10 +21,10 @@ public class ProductVarriantEntity {
     private Integer type;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    @JoinColumn(name = "product_id")
     private ProductEntity productVarriants;
 
     @ManyToOne
-    @JoinColumn(name = "varriant_id", insertable = false, updatable = false)
+    @JoinColumn(name = "varriant_id")
     private VarriantEntity varriants;
 }

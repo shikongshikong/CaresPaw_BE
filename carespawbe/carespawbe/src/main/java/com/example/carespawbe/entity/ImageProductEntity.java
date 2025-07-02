@@ -22,7 +22,7 @@ public class ImageProductEntity {
 
 //    @Column(nullable = false)
 //    private Long source_id;
-
+//
 //    @Column(nullable = false)
 //    private String source_type;
 
@@ -30,6 +30,7 @@ public class ImageProductEntity {
     private Date uploaded_at;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+//    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    @JoinColumn(name = "product_id")
     private ProductEntity imageProduct;
 }

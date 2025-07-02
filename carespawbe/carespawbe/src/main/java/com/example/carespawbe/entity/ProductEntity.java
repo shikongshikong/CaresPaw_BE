@@ -39,11 +39,11 @@ public class ProductEntity {
     private String using;
 
     @ManyToOne
-    @JoinColumn(name = "shop_id", insertable = false, updatable = false)
+    @JoinColumn(name = "shop_id")
     private ShopEntity shop;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    @JoinColumn(name = "category_id")
     private CategoryEntity category;
 
     @OneToMany(mappedBy = "productVarriants")
