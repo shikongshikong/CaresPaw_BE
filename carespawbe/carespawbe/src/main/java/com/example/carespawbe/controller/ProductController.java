@@ -4,6 +4,7 @@ import com.example.carespawbe.dto.request.ProductRequest;
 import com.example.carespawbe.dto.request.ProductVarriantRequest;
 import com.example.carespawbe.dto.response.ProductResponse;
 import com.example.carespawbe.service.ProductService;
+import jakarta.servlet.annotation.MultipartConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+@MultipartConfig
 @CrossOrigin(origins = "*")
 public class ProductController {
 
@@ -35,7 +37,7 @@ public class ProductController {
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("shopId") Long shopId,
             @RequestParam(value = "productVarriants", required = false) String productVarriantsJson,
-            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestParam(value = "images", required = false) MultipartFile[] images,
             @RequestPart(value = "video", required = false) MultipartFile video
     ) {
         try {
