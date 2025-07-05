@@ -1,7 +1,10 @@
-package com.example.carespawbe.entity;
+package com.example.carespawbe.entity.shop;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -18,7 +21,7 @@ public class ImageProductEntity {
     private Long imageProductId;
 
     @Column(nullable = false)
-    private String imageProduct_url;
+    private String imageProductUrl;
 
 //    @Column(nullable = false)
 //    private Long source_id;
@@ -26,8 +29,15 @@ public class ImageProductEntity {
 //    @Column(nullable = false)
 //    private String source_type;
 
-    @Column(nullable = false)
-    private Date uploaded_at;
+//    @Column(nullable = false)
+//    private Date uploadedAt;
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime uploadedAt;
+
+    @UpdateTimestamp
+    @Column
+    private LocalDateTime updatedAt;
 
     @ManyToOne
 //    @JoinColumn(name = "product_id", insertable = false, updatable = false)

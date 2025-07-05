@@ -1,7 +1,6 @@
-package com.example.carespawbe.dto.request;
+package com.example.carespawbe.dto.response;
 
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -9,7 +8,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductRequest {
+public class ProductResponse {
+    private Long productId;
     private String productName;
     private String productDescribe;
     private Double productPrice;
@@ -18,6 +18,7 @@ public class ProductRequest {
     private String productUsing;
     private Long categoryId;
     private Long shopId;
-    private List<ProductVarriantRequest> productVarriants;
+    private List<String> productVarriants;
     private List<String> imageUrls;
 }
+

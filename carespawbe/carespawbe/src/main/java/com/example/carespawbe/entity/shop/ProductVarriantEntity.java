@@ -1,4 +1,4 @@
-package com.example.carespawbe.entity;
+package com.example.carespawbe.entity.shop;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,10 +15,10 @@ public class ProductVarriantEntity {
     private Long productVarriantId;
 
     @Column(nullable = false)
-    private String value;
+    private String productVarriantValue;
 
-    @Column(nullable = false)
-    private Integer type;
+//    @Column(nullable = false)
+//    private Integer productVarriantType;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

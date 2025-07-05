@@ -1,6 +1,6 @@
-package com.example.carespawbe.repository;
+package com.example.carespawbe.repository.shop;
 
-import com.example.carespawbe.entity.ProductEntity;
+import com.example.carespawbe.entity.shop.ProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {

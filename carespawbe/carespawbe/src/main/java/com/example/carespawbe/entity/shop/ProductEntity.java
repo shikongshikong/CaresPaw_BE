@@ -1,4 +1,4 @@
-package com.example.carespawbe.entity;
+package com.example.carespawbe.entity.shop;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,29 +21,32 @@ public class ProductEntity {
     private Long productId;
 
     @Column(nullable = false)
-    private String name;
+    private String productName;
 
     @Column(nullable = false)
-    private String describe;
+    private String productDescribe;
 
     @Column(nullable = false)
-    private Double price;
+    private Double productPrice;
 
     @Column(nullable = false)
-    private Integer amount;
+    private Integer productAmount;
 
     @Column(nullable = false)
-    private Integer status;
+    private Integer productStatus;
 
     @Column(nullable = false)
-    private String using;
+    private String productUsing;
+
+    @Column(nullable = true)
+    private String productVideoUrl;
 
     @ManyToOne
-    @JoinColumn(name = "shop_id")
+    @JoinColumn(name = "shop_id", nullable = false)
     private ShopEntity shop;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
     @OneToMany(mappedBy = "productVarriants")
