@@ -23,7 +23,7 @@ public class User {
     @Column(nullable = false)
     private String fullname;
 
-    private String gender;
+    private int gender;
 
     @Column(nullable = false)
     private String email;
@@ -34,8 +34,8 @@ public class User {
     private String password;
 
     private String avatar;
-    private String role;
-    private String status;
+    private int role;
+    private int status;
     private LocalDate birthday;
     private LocalDate createdAt;
 
@@ -44,8 +44,8 @@ public class User {
 //        set current date + avatar + role + status
         createdAt = LocalDate.now();
         avatar = "no-avatar-img.png";
-        role = "normal";
-        status = "active";
+        role = 1;
+        status = 1;
     }
 
 }
