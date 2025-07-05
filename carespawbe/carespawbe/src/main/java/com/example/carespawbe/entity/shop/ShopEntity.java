@@ -1,4 +1,4 @@
-package com.example.carespawbe.entity;
+package com.example.carespawbe.entity.shop;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

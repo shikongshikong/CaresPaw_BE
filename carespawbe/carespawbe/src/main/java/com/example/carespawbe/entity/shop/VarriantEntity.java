@@ -1,4 +1,4 @@
-package com.example.carespawbe.entity;
+package com.example.carespawbe.entity.shop;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +17,7 @@ public class VarriantEntity {
     private Long varriantId;
 
     @Column(nullable = false)
-    private String name;
+    private String varriantName;
 
     @OneToMany(mappedBy = "varriants")
     private List<ProductVarriantEntity> varriantList;
