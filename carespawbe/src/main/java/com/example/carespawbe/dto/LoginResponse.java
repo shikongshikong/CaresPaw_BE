@@ -15,7 +15,7 @@ public class LoginResponse {
     private String fullname;
     private String email;
     private String avatar;
-    private String role;
+    private int role;
 
 //    public String getFullname() {
 //        return fullname;
