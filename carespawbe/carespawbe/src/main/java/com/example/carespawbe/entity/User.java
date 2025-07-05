@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,6 +45,7 @@ public class User {
 
 //    optional, but useful when user.getPosts();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    @JsonManagedReference
     private List<ForumPost> posts = new ArrayList<>();
 
     @PrePersist

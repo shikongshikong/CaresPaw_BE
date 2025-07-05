@@ -46,7 +46,6 @@ public class AuthService {
                 .email(request.getEmail())
                 .gender(request.getGender())
                 .password(encodedPassword)
-//                .password(request.getPassword())
                 .build();
         return userRepository.save(user);
     }

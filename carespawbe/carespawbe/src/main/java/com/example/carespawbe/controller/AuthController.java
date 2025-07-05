@@ -35,22 +35,16 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-//        System.out.println("Before register");
-//        System.out.println("receive: " + request.getFullname());
         User user = authService.register(request);
-//        System.out.println("Name: " + user.getFullname());
         LoginResponse response = userMapper.toResponse(user);
-//        System.out.println("Response: " + response.getFullname());
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/check-email")
     public ResponseEntity<?> checkExistingEmail(@RequestBody Map<String, String> request) {
-//        System.out.println("Check existing email: " + request.get("email"));
         String email = request.get("email");
         User user = authService.checkExistingEmail(email);
         if (user == null) {
-//            System.out.println("No exists, OK");
             return ResponseEntity.ok(Map.of("message", "Valid email."));
         }
         else {
