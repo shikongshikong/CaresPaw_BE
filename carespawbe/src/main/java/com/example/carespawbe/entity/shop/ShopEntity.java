@@ -1,12 +1,13 @@
 package com.example.carespawbe.entity.shop;
 
+import com.example.carespawbe.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -22,20 +23,36 @@ public class ShopEntity {
     private Long shopId;
 
     @Column(nullable = false)
-    private String name;
+    private String shopName;
 
     @Column(nullable = false)
-    private String address;
+    private String shopAddress;
+
+    @Column(nullable = true)
+    private String shopLogo;
 
     @Column(nullable = false)
-    private String logo;
+    private int shopAmountFollower;
 
     @Column(nullable = false)
-    private Integer amount_follower;
+    private LocalDateTime created_at;
 
     @Column(nullable = false)
-    private Date created_at;
+    private int status;
+
+    @Column(nullable = true)
+    private LocalDateTime update_at;
+
+    @Column(nullable = true)
+    private String shopLogoPublicId;
 
     @OneToMany(mappedBy = "shop")
     private List<ProductEntity> productShopList;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
+    private UserEntity user;
+
+    @OneToMany(mappedBy = "shop")
+    private List<VoucherEntity> voucherEntityList;
 }

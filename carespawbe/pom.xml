@@ -84,12 +84,18 @@
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
+<!--		cau hinhh cloudinary-->
 		<dependency>
 			<groupId>com.cloudinary</groupId>
 			<artifactId>cloudinary-http44</artifactId>
 			<version>1.37.0</version> <!-- hoặc mới nhất -->
 		</dependency>
 
+<!--		cau hinh email-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

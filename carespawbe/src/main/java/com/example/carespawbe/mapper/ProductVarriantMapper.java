@@ -9,9 +9,9 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProductVarriantMapper {
-    @Mapping(target = "id", source = "productVarriantId")
-    @Mapping(target = "varriant.varriantId", source = "varriants.varriantId")
-    @Mapping(target = "varriant.varriantName", source = "varriants.varriantName")
+
+    @Mapping(target = "varriantId", source = "varriants.varriantId")
+    @Mapping(target = "productVarriantValue", source = "productVarriantValue")
     ProductVarriantResponse toResponse(ProductVarriantEntity entity);
 
     List<ProductVarriantResponse> toResponseList(List<ProductVarriantEntity> entities);

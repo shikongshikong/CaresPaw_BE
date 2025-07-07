@@ -17,10 +17,13 @@ public class CategoryEntity {
     private Long categoryId;
 
     @Column(nullable = false)
-    private String name;
+    private String categoryName;
 
     @Column(nullable = false)
-    private String logo;
+    private String categoryLogo;
+
+    @Column(nullable = false)
+    private String categoryLogoPublicId;
 
     @OneToMany(mappedBy = "category")
     private List<ProductEntity> productCategoryList;

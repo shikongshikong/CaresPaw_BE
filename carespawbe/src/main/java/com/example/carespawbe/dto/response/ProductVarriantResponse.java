@@ -7,8 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ProductVarriantResponse {
-    private Long id;
-    private String value;
-    private Integer type;
-    private VarriantResponse varriant;
+    private Long varriantId;
+    private String productVarriantValue;
 }
