@@ -39,6 +39,9 @@ public class ImageProductEntity {
     @Column
     private LocalDateTime updatedAt;
 
+    @Column
+    private String imagePublicId;
+
     @ManyToOne
 //    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     @JoinColumn(name = "product_id")

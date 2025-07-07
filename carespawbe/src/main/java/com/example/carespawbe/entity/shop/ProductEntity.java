@@ -41,6 +41,9 @@ public class ProductEntity {
     @Column(nullable = true)
     private String productVideoUrl;
 
+    @Column
+    private String productVideoPublicId;
+
     @ManyToOne
     @JoinColumn(name = "shop_id", nullable = false)
     private ShopEntity shop;

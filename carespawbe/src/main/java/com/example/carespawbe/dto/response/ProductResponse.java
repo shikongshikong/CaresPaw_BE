@@ -18,7 +18,10 @@ public class ProductResponse {
     private String productUsing;
     private Long categoryId;
     private Long shopId;
-    private List<String> productVarriants;
+//    private List<String> productVarriants;
+    private List<ProductVarriantResponse> productVarriants;
     private List<String> imageUrls;
+//    private List<ImageProductResponse> imageUrls;
+    private String productVideoUrl;
 }
 

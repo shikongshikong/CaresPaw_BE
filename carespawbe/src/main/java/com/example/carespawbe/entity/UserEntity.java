@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity;
 
+import com.example.carespawbe.entity.shop.ShopEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +39,9 @@ public class User {
     private int status;
     private LocalDate birthday;
     private LocalDate createdAt;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private ShopEntity shop;
 
     @PrePersist
     protected void onCreate() {

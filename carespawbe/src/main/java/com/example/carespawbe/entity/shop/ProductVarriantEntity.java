@@ -17,9 +17,6 @@ public class ProductVarriantEntity {
     @Column(nullable = false)
     private String productVarriantValue;
 
-//    @Column(nullable = false)
-//    private Integer productVarriantType;
-
     @ManyToOne
     @JoinColumn(name = "product_id")
     private ProductEntity productVarriants;
