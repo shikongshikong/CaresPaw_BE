@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity;
 
+import com.example.carespawbe.entity.shop.CartEntity;
 import com.example.carespawbe.entity.shop.ShopEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,6 +43,10 @@ public class UserEntity {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private ShopEntity shop;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private CartEntity cart;
+
 
     @PrePersist
     protected void onCreate() {

@@ -2,6 +2,8 @@ package com.example.carespawbe.entity.shop;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "product_varriant")
 @Data
@@ -24,4 +26,8 @@ public class ProductVarriantEntity {
     @ManyToOne
     @JoinColumn(name = "varriant_id")
     private VarriantEntity varriants;
+
+    @OneToMany(mappedBy = "productVariant")
+    private List<CartItemEntity> cartItemEntityList;
+
 }

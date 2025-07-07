@@ -53,4 +53,6 @@ public class ShopEntity {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private UserEntity user;
 
+    @OneToMany(mappedBy = "shop")
+    private List<VoucherEntity> voucherEntityList;
 }
