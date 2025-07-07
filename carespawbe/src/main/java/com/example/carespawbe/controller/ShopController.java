@@ -27,7 +27,7 @@ public class ShopController {
     public ResponseEntity<?> registerShop(
             @RequestParam("shopName") String shopName,
             @RequestParam("shopAddress") String shopAddress,
-            @RequestParam("shopPhoneNumber") String shopPhoneNumber,
+            @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("userId") Long userId,
             @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo
     ){
@@ -35,7 +35,7 @@ public class ShopController {
             ShopRequest shopRequest = new ShopRequest();
             shopRequest.setShopName(shopName);
             shopRequest.setShopAddress(shopAddress);
-            shopRequest.setShopPhone(shopPhoneNumber);
+            shopRequest.setShopPhone(phoneNumber);
             shopRequest.setUserId(userId);
 
             ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo);
@@ -45,4 +45,33 @@ public class ShopController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PutMapping(value = "/update/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateShop(
+            @RequestParam("shopName") String shopName,
+            @RequestParam("shopAddress") String shopAddress,
+            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("userId") Long userId,
+            @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo
+    ){
+        try {
+            ShopRequest shopRequest = new ShopRequest();
+            shopRequest.setShopName(shopName);
+            shopRequest.setShopAddress(shopAddress);
+            shopRequest.setShopPhone(phoneNumber);
+            shopRequest.setUserId(userId);
+
+            ShopResponse shopResponse = shopService.updateShopInfo(userId, shopRequest, shopLogo);
+            return ResponseEntity.ok(shopResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ShopResponse> getShopByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(shopService.getShopByUserId(userId));
+    }
+
 }

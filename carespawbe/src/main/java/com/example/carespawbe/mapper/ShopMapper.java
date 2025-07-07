@@ -8,6 +8,8 @@ import org.mapstruct.NullValueMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
 public interface ShopMapper {
+    @Mapping(source = "shopId", target = "shopId")
+    @Mapping(source = "shopLogo", target = "shopLogo")
     @Mapping(target = "email", source = "user.email")
     @Mapping(target = "phoneNumber", source = "user.phoneNumber")
     ShopResponse toResponse(ShopEntity shop);

@@ -7,10 +7,10 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class ShopResponse {
-    private Long id;
+    private Long shopId;
     private String shopName;
     private String shopAddress;
-    private String logo;
+    private String shopLogo;
     private String email;
     private String phoneNumber;
 }

@@ -40,6 +40,12 @@ public class ShopEntity {
     @Column(nullable = false)
     private int status;
 
+    @Column(nullable = true)
+    private LocalDateTime update_at;
+
+    @Column(nullable = true)
+    private String shopLogoPublicId;
+
     @OneToMany(mappedBy = "shop")
     private List<ProductEntity> productShopList;
 

@@ -10,37 +10,30 @@ import com.example.carespawbe.repository.shop.ShopRepository;
 import com.example.carespawbe.service.CloudinaryService;
 import com.example.carespawbe.service.ShopService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ShopServiceImp implements ShopService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ShopRepository shopRepository;
-    @Autowired
-    private CloudinaryService cloudinaryService;
-    @Autowired
-    private ShopMapper shopMapper;
+
+    private final UserRepository userRepository;
+    private final ShopRepository shopRepository;
+    private final CloudinaryService cloudinaryService;
+    private final ShopMapper shopMapper;
 
     @Override
     public ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo) {
         UserEntity user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-//        shopRepository.findByUserId(request.getUserId())
-//                .orElseThrow(() -> new RuntimeException("User have registered shop"));
 
-        // Nếu đã có shop rồi thì không cho đăng ký nữa
         if (shopRepository.findByUserId(request.getUserId()).isPresent()) {
-            throw new RuntimeException("User have registered shop");
+            throw new RuntimeException("User has already registered a shop");
         }
 
-        // Cập nhật phone nếu có thay đổi
         user.setPhoneNumber(request.getShopPhone());
         user.setRole(2);
         userRepository.save(user);
@@ -52,11 +45,47 @@ public class ShopServiceImp implements ShopService {
         shopEntity.setCreated_at(LocalDateTime.now());
         shopEntity.setShopAmountFollower(0);
 
-        if (shopLogo != null) {
-            String imageUrl = cloudinaryService.uploadImage(shopLogo);
-            shopEntity.setShopLogo(imageUrl);
+        if (shopLogo != null && !shopLogo.isEmpty()) {
+            Map<String, String> result = cloudinaryService.uploadImageUrlAndPublicId(shopLogo, "shops");
+            shopEntity.setShopLogo(result.get("url"));
+            shopEntity.setShopLogoPublicId(result.get("public_id"));
+        } else {
+            shopEntity.setShopLogo("");
+            shopEntity.setShopLogoPublicId(""); // hoặc null nếu database chấp nhận
         }
+
         return shopMapper.toResponse(shopRepository.save(shopEntity));
+    }
+
+    @Override
+    public ShopResponse updateShopInfo(Long userId, ShopRequest request, MultipartFile newShopLogo) {
+        ShopEntity existingShop = shopRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        existingShop.setShopName(request.getShopName());
+        existingShop.setShopAddress(request.getShopAddress());
+        existingShop.setUpdate_at(LocalDateTime.now());
+
+        if (newShopLogo != null && !newShopLogo.isEmpty()) {
+            // Xóa logo cũ
+            if (existingShop.getShopLogoPublicId() != null) {
+                cloudinaryService.deleteImage(existingShop.getShopLogoPublicId());
+            }
+
+            Map<String, String> result = cloudinaryService.uploadImageUrlAndPublicId(newShopLogo, "shops");
+            existingShop.setShopLogo(result.get("url"));
+            existingShop.setShopLogoPublicId(result.get("public_id"));
+        }
+
+        return shopMapper.toResponse(shopRepository.save(existingShop));
+    }
+
+    @Override
+    public ShopResponse getShopByUserId(Long userId) {
+        ShopEntity shop = shopRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Shop not found for user ID: " + userId));
+
+        return shopMapper.toResponse(shop);
     }
 
 }
