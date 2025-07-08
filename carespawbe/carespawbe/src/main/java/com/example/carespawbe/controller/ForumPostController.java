@@ -25,15 +25,15 @@ public class ForumPostController {
 
     @PostMapping("")
     public ResponseEntity<?> getForumData(@RequestBody ForumRequest request) {
-//        System.out.println("User Id: " + request.getUserId());
+        System.out.println("User Id: " + request.getUserId());
 //        Long userId = request.getUserId();
 
-        return ResponseEntity.ok(forumService.getForumData());
+        return ResponseEntity.ok(forumService.getForumData(request.getUserId()));
     }
 
     @GetMapping("/search/{key}")
     public ResponseEntity<?> searchPost(@PathVariable String key) {
-        System.out.println("Search key: " + key);
+//        System.out.println("Search key: " + key);
         List<ShortForumPost> posts = forumPostService.getForumPostByKeyword(key);
         return ResponseEntity.ok(posts);
     }
@@ -46,8 +46,8 @@ public class ForumPostController {
 
     @PostMapping("/post-detail")
     public ResponseEntity<?> getForumDetail(@RequestBody PostDetailRequest postDetailRequest, HttpServletRequest request) {
-        PostResponse post = forumPostService.getForumPostById(postDetailRequest.getPostId(), request);
-        System.out.println(postDetailRequest.getPostId() + " : " + request.getRequestURI());
+        PostResponse post = forumPostService.getForumPostById(postDetailRequest, request);
+//        System.out.println(postDetailRequest.getPostId() + " : " + request.getRequestURI());
         return ResponseEntity.ok(post);
     }
 
@@ -56,5 +56,10 @@ public class ForumPostController {
         List<ShortForumPost> posts = forumPostService.getForumPostListReverse();
         return ResponseEntity.ok(posts);
     }
+
+//    @PostMapping("/save-post")
+//    public ResponseEntity<?> saveForumPost(@RequestBody ForumPostRequest forumPostRequest) {
+//
+//    }
 
 }

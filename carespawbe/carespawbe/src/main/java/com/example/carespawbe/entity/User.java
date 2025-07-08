@@ -39,14 +39,16 @@ public class User {
 
     private String avatar;
     private String role;
-    private String status;
+    private String state;
     private LocalDate birthday;
     private LocalDate createdAt;
 
 //    optional, but useful when user.getPosts();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    @JsonManagedReference
     private List<ForumPost> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ForumPostHistory> histories = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -54,7 +56,7 @@ public class User {
         createdAt = LocalDate.now();
         avatar = "no-avatar-img.png";
         role = "normal";
-        status = "active";
+        state = "active";
     }
 
 }
