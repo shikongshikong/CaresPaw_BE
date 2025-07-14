@@ -42,7 +42,7 @@ public class CartItemEntity {
     private ProductEntity product;
 
     @ManyToOne
-    @JoinColumn(name = "product_variant_id")
-    private ProductVarriantEntity productVariant;
+    @JoinColumn(name = "product_varriant_id")
+    private ProductVarriantEntity productVarriant;
 }
 

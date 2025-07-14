@@ -25,6 +25,6 @@ public class CategoryEntity {
     @Column(nullable = false)
     private String categoryLogoPublicId;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<ProductEntity> productCategoryList;
 }

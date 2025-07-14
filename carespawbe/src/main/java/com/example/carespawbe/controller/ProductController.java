@@ -33,6 +33,7 @@ public class ProductController {
             @RequestParam("productName") String productName,
             @RequestParam("productDescribe") String productDescribe,
             @RequestParam("productPrice") Double productPrice,
+            @RequestParam("productPriceSale") Double productPriceSale,
             @RequestParam("productAmount") Integer productAmount,
             @RequestParam("productStatus") Integer productStatus,
             @RequestParam("productUsing") String productUsing,
@@ -40,7 +41,7 @@ public class ProductController {
             @RequestParam("shopId") Long shopId,
             @RequestParam(value = "productVarriants", required = false) String productVarriantsJson,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
-            @RequestPart(value = "video", required = false) MultipartFile video
+            @RequestParam(value = "video", required = false) MultipartFile video
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -58,6 +59,7 @@ public class ProductController {
             request.setProductName(productName);
             request.setProductDescribe(productDescribe);
             request.setProductPrice(productPrice);
+            request.setProductPriceSale(productPriceSale);
             request.setProductAmount(productAmount);
             request.setProductStatus(productStatus);
             request.setProductUsing(productUsing);
@@ -80,6 +82,7 @@ public class ProductController {
             @RequestParam("productName") String productName,
             @RequestParam("productDescribe") String productDescribe,
             @RequestParam("productPrice") Double productPrice,
+            @RequestParam("productPriceSale") Double productPriceSale,
             @RequestParam("productAmount") Integer productAmount,
             @RequestParam("productStatus") Integer productStatus,
             @RequestParam("productUsing") String productUsing,
@@ -87,7 +90,7 @@ public class ProductController {
             @RequestParam("shopId") Long shopId,
             @RequestParam(value = "productVarriants", required = false) String productVarriantsJson,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
-            @RequestPart(value = "video", required = false) MultipartFile video
+            @RequestParam(value = "video", required = false) MultipartFile video
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -104,6 +107,7 @@ public class ProductController {
             request.setProductName(productName);
             request.setProductDescribe(productDescribe);
             request.setProductPrice(productPrice);
+            request.setProductPriceSale(productPriceSale);
             request.setProductAmount(productAmount);
             request.setProductStatus(productStatus);
             request.setProductUsing(productUsing);
@@ -141,5 +145,23 @@ public class ProductController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/getAllProduct")
+    public ResponseEntity<List<ProductResponse>> getAllProducts() {
+        try {
+            List<ProductResponse> products = productService.getAllProducts();
+            return ResponseEntity.ok(products);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
+
+    @GetMapping("/new")
+    public ResponseEntity<List<ProductResponse>> getNewProducts() {
+        List<ProductResponse> newProducts = productService.getNewProducts();
+        return ResponseEntity.ok(newProducts);
+    }
+
 
 }

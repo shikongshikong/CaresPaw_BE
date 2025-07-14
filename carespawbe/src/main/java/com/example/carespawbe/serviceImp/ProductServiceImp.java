@@ -13,10 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -58,9 +60,12 @@ public class ProductServiceImp implements ProductService {
             productEntity.setProductName(request.getProductName());
             productEntity.setProductDescribe(request.getProductDescribe());
             productEntity.setProductPrice(request.getProductPrice());
+            productEntity.setProductPriceSale(request.getProductPriceSale());
             productEntity.setProductAmount(request.getProductAmount());
             productEntity.setProductStatus(request.getProductStatus());
             productEntity.setProductUsing(request.getProductUsing());
+            productEntity.setProductCreatedAt(LocalDate.now());
+            productEntity.setProductUpdatedAt(LocalDate.now());
 
             ProductEntity savedProduct = productRepository.save(productEntity);
 
@@ -104,6 +109,7 @@ public class ProductServiceImp implements ProductService {
                 savedProduct.setProductVarriantList(variantEntities);
             }
 
+            savedProduct = productRepository.save(savedProduct);
             return productMapper.toProductResponse(savedProduct);
         } catch (Exception e) {
             e.printStackTrace();
@@ -131,6 +137,7 @@ public class ProductServiceImp implements ProductService {
             existingProduct.setProductName(request.getProductName());
             existingProduct.setProductDescribe(request.getProductDescribe());
             existingProduct.setProductPrice(request.getProductPrice());
+            existingProduct.setProductPriceSale(request.getProductPriceSale());
             existingProduct.setProductAmount(request.getProductAmount());
             existingProduct.setProductStatus(request.getProductStatus());
             existingProduct.setProductUsing(request.getProductUsing());
@@ -222,5 +229,22 @@ public class ProductServiceImp implements ProductService {
 
         productRepository.delete(product); // hoặc set status = -1 nếu dùng xóa mềm
     }
+
+    @Override
+    public List<ProductResponse> getAllProducts() {
+        List<ProductEntity> productEntities = productRepository.findAll();
+        return productEntities.stream()
+                .map(productMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> getNewProducts() {
+        List<ProductEntity> newProducts = productRepository.findTop6ByOrderByProductCreatedAtDesc();
+        return newProducts.stream()
+                .map(productMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+
 
 }

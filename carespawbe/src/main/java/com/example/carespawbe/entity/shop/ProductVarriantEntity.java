@@ -27,7 +27,7 @@ public class ProductVarriantEntity {
     @JoinColumn(name = "varriant_id")
     private VarriantEntity varriants;
 
-    @OneToMany(mappedBy = "productVariant")
+    @OneToMany(mappedBy = "productVarriant")
     private List<CartItemEntity> cartItemEntityList;
 
 }
