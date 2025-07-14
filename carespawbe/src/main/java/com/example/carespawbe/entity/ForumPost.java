@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "forum_post")
@@ -31,9 +33,11 @@ public class ForumPost {
     private Long commentedAmount;
 
     @ManyToOne
-//    @JsonBackReference
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<ForumPostHistory> histories = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

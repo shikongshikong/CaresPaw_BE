@@ -1,17 +1,19 @@
 package com.example.carespawbe.service;
 
 import com.example.carespawbe.dto.Forum.ForumPostRequest;
+import com.example.carespawbe.dto.Forum.PostDetailRequest;
 import com.example.carespawbe.dto.Forum.PostResponse;
 import com.example.carespawbe.dto.Forum.ShortForumPost;
 import com.example.carespawbe.entity.ForumPost;
 import com.example.carespawbe.mapper.ForumPostMapper;
+import com.example.carespawbe.mapper.PostHistoryMapper;
+import com.example.carespawbe.mapper.PostSaveMapper;
 import com.example.carespawbe.repository.ForumPostRepository;
 import com.example.carespawbe.utils.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -22,7 +24,19 @@ public class ForumPostService {
     private ForumPostMapper  forumPostMapper;
 
     @Autowired
+    private PostHistoryMapper postHistoryMapper;
+
+    @Autowired
+    private PostSaveMapper postSaveMapper;
+
+    @Autowired
     private ForumPostRepository forumPostRepository;
+
+//    @Autowired
+//    private PostHistoryRepository postHistoryRepository;
+
+    @Autowired
+    private PostHistoryService postHistoryService;
 
     @Autowired
     private ViewLimiterService viewLimiterService;
@@ -44,14 +58,27 @@ public class ForumPostService {
         }
     }
 
-    public PostResponse getForumPostById(Long postId, HttpServletRequest request) {
-        ForumPost post = forumPostRepository.findForumPostById(postId).orElse(null);
+    public PostResponse getForumPostById(PostDetailRequest postDetailRequest, HttpServletRequest request) {
+        Long userId = postDetailRequest.getUserId();
+        Long postId = postDetailRequest.getPostId();
 
+        ForumPost post = forumPostRepository.findForumPostById(postDetailRequest.getPostId()).orElse(null);
+
+        //      add view for logined user + add history
+        if (userId != 0) {
+            if (!postHistoryService.isExistHistoryByUserIdAndPostId(userId, postId)) {
+                increasePostViewCount(postId);
+            }
+            postHistoryService.addPostHistory(postDetailRequest);
+        }
 //      view increasing control
-        String ipAddress = UserInfo.getClientIp(request);
-        if (viewLimiterService.isAllowedToView(postId, ipAddress)) {
-            increasePostViewCount(postId);
-        } else System.out.println("View Exist!");
+        else {
+            String ipAddress = UserInfo.getClientIp(request);
+
+            if (viewLimiterService.isAllowedToView(postId, ipAddress)) {
+                increasePostViewCount(postId);
+            } else System.out.println("View Exist!");
+        }
         return forumPostMapper.toPostResponse(post);
     }
 
