@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -29,6 +30,9 @@ public class ProductEntity {
     @Column(nullable = false)
     private Double productPrice;
 
+    @Column(nullable = true)
+    private Double productPriceSale;
+
     @Column(nullable = false)
     private Integer productAmount;
 
@@ -43,6 +47,12 @@ public class ProductEntity {
 
     @Column
     private String productVideoPublicId;
+
+    @Column(nullable = false)
+    private LocalDate productCreatedAt;
+
+    @Column(nullable = true)
+    private LocalDate productUpdatedAt;
 
     @ManyToOne
     @JoinColumn(name = "shop_id", nullable = false)
@@ -60,5 +70,11 @@ public class ProductEntity {
 
     @OneToMany(mappedBy = "product")
     private List<CartItemEntity> cartItemList;
+
+//    @PrePersist
+//    protected void onCreate() {
+//        productCreatedAt = LocalDate.now();
+//        productUpdatedAt = LocalDate.now();
+//    }
 
 }

@@ -1,7 +1,9 @@
 package com.example.carespawbe.dto.response;
 
+import jakarta.persistence.Column;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -13,6 +15,7 @@ public class ProductResponse {
     private String productName;
     private String productDescribe;
     private Double productPrice;
+    private Double productPriceSale;
     private Integer productAmount;
     private Integer productStatus;
     private String productUsing;
@@ -23,5 +26,9 @@ public class ProductResponse {
     private List<String> imageUrls;
 //    private List<ImageProductResponse> imageUrls;
     private String productVideoUrl;
+    private LocalDate productUpdatedAt;
+    private LocalDate productCreatedAt;
+
+
 }
 
