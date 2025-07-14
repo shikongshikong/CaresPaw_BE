@@ -8,33 +8,30 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "expert")
+@Entity()
 @Data
+@Table(name = "post_history")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Expert {
+public class ForumPostHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "expert_id")
+    @Column(name = "history_id")
     private Long id;
+    private LocalDate createdAt;
 
-    private String introduction;
-    private String experience;
-    private String address;
-    private String status;
-    private float rating;
-    private LocalDate createAt;
-
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private ForumPost post;
 
     @PrePersist
     protected void onCreate() {
-        status = "active";
-        rating = 0.0f;
+        createdAt = LocalDate.now();
     }
 }
