@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public class ForumPostRequest {
     private String title;
     private String content;
-    private String status;
+    private String state;
     private String type;
+    private Long userId;
 }
