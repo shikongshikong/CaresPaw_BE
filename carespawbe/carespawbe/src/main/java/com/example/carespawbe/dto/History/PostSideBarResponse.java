@@ -16,4 +16,5 @@ public class PostSideBarResponse {
     private String avatar;
     private Long userId;
     private String fullname;
+    private boolean saved;
 }

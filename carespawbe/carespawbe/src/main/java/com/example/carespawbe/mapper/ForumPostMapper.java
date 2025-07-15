@@ -11,5 +11,10 @@ public interface ForumPostMapper {
     @Mapping(source = "userId", target = "user.id")
     ForumPost toPostEntity(ForumPostRequest forumPostRequest);
 
+//    @Mapping(target = "saved", expression = "java(forumPostSave != null)")
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "user.fullname", target = "fullname")
+    @Mapping(source = "user.avatar", target = "avatar")
+    @Mapping(target = "saved", expression = "java(post.getForumPostSave() != null)")
     PostResponse toPostResponse(ForumPost post);
 }

@@ -19,6 +19,7 @@ public class PostResponse {
     private Long userId;
     private String fullname;
     private String avatar;
+    private boolean saved;
 
 //    lack of updateAt
 }

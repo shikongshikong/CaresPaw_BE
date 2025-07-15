@@ -14,4 +14,5 @@ public class ShortForumPost {
     private LocalDate createAt;
     private Long viewedAmount;
     private Long commentedAmount;
+    private boolean isSaved;
 }

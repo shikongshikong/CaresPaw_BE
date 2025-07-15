@@ -4,6 +4,7 @@ import com.example.carespawbe.dto.Forum.ShortForumPost;
 import com.example.carespawbe.entity.ForumPostSave;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,4 +20,12 @@ public interface PostSaveRepository extends JpaRepository<ForumPostSave, Long> {
 //    List<ShortForumPost> findShortSavedByUserId(@Param("userId") Long userId, Pageable pageable);
 
     List<ForumPostSave> findForumPostSavesByUserId(Long userId, Pageable pageable);
+
+//    @Modifying
+//    @Query("UPDATE ForumPostSave s SET s.")
+//    int updateUserSavePost(@Param("userId") userId, @Param("postId"));
+
+    boolean existsByUserIdAndPostId(Long userId, Long postId);
+
+    void deleteByUserIdAndPostId(Long userId, Long postId);
 }

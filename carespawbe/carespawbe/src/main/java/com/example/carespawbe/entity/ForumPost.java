@@ -39,6 +39,9 @@ public class ForumPost {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<ForumPostHistory> histories = new ArrayList<>();
 
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
+    private ForumPostSave forumPostSave;
+
     @PrePersist
     protected void onCreate() {
         createAt = LocalDate.now();
