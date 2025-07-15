@@ -108,27 +108,33 @@ public class ForumPostService {
     }
 
     public List<ShortForumPost> getPostListByType(String type, Long userId) {
-        int typeId = 0;
+//        int typeId = 0;
+        String typeId = "All";
         switch (type) {
             case "Dog":
-                typeId = 1;
+//                typeId = 1;
+                typeId ="Dog";
                 break;
             case "Cat":
-                typeId = 2;
+//                typeId = 2;
+                typeId ="Cat";
                 break;
             case "Bird":
-                typeId = 3;
+//                typeId = 3;
+                typeId = "Bird";
                 break;
             case "Fish":
-                typeId = 4;
+//                typeId = 4;
+                typeId = "Fish";
                 break;
             case "Reptiles":
-                typeId = 5;
+//                typeId = 5
+                typeId = "Reptiles";
                 break;
             default:
                 break;
         }
-        if (typeId == 0) forumPostRepository.findAllShortByCreateAt(userId);
+        if (typeId.equals("All")) forumPostRepository.findAllShortByCreateAt(userId);
         return forumPostRepository.findForumPostByType(typeId, userId);
     }
 

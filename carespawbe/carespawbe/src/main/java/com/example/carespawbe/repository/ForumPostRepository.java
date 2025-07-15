@@ -72,6 +72,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPost, Long> {
             "FROM ForumPost p " +
             "LEFT JOIN ForumPostSave s " +
             "ON s.post.id = p.id and s.user.id = :userId " +
+            "WHERE p.type = :typeId " +
             "ORDER BY p.viewedAmount DESC")
-    List<ShortForumPost> findForumPostByType(@Param("typeId") int typeId, @Param("userId") Long userId);
+    List<ShortForumPost> findForumPostByType(@Param("typeId") String typeId, @Param("userId") Long userId);
 }
