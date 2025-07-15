@@ -9,11 +9,17 @@ import com.example.carespawbe.mapper.ForumPostMapper;
 import com.example.carespawbe.mapper.PostHistoryMapper;
 import com.example.carespawbe.mapper.PostSaveMapper;
 import com.example.carespawbe.repository.ForumPostRepository;
+import com.example.carespawbe.security.JwtAuthenticationFilter;
+import com.example.carespawbe.security.JwtService;
 import com.example.carespawbe.utils.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -21,19 +27,10 @@ import java.util.List;
 public class ForumPostService {
 
     @Autowired
-    private ForumPostMapper  forumPostMapper;
-
-    @Autowired
-    private PostHistoryMapper postHistoryMapper;
-
-    @Autowired
-    private PostSaveMapper postSaveMapper;
+    private ForumPostMapper forumPostMapper;
 
     @Autowired
     private ForumPostRepository forumPostRepository;
-
-//    @Autowired
-//    private PostHistoryRepository postHistoryRepository;
 
     @Autowired
     private PostHistoryService postHistoryService;
@@ -41,8 +38,15 @@ public class ForumPostService {
     @Autowired
     private ViewLimiterService viewLimiterService;
 
-    public List<ShortForumPost> getForumPostByKeyword(String keyword) {
-        List<ShortForumPost> posts = forumPostRepository.findByTitleKey(keyword);
+    public List<ShortForumPost> getForumPostByKeyword(String keyword, Long userId) {
+//        String token = jwtFilter.getJwtFromRequest(request);
+//        Long userId = 0L;
+//        if (token != null) {
+//            userId = jwtService.extractUserId(token);
+//            System.out.println("User Id: " + userId);
+//            if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+//        }
+        List<ShortForumPost> posts = forumPostRepository.findByTitleKey(keyword, userId);
 
         if (posts.isEmpty()) return null;
         return posts;
@@ -58,11 +62,9 @@ public class ForumPostService {
         }
     }
 
-    public PostResponse getForumPostById(PostDetailRequest postDetailRequest, HttpServletRequest request) {
-        Long userId = postDetailRequest.getUserId();
-        Long postId = postDetailRequest.getPostId();
-
-        ForumPost post = forumPostRepository.findForumPostById(postDetailRequest.getPostId()).orElse(null);
+    public PostResponse getForumPostById(Long postId, Long userId, HttpServletRequest request) {
+        ForumPost post = forumPostRepository.findForumPostById(postId).orElse(null);
+        PostDetailRequest postDetailRequest = new PostDetailRequest(postId, userId);
 
         //      add view for logined user + add history
         if (userId != 0) {
@@ -82,8 +84,20 @@ public class ForumPostService {
         return forumPostMapper.toPostResponse(post);
     }
 
-    public List<ShortForumPost> getForumPostListReverse() {
-        List<ShortForumPost> posts = forumPostRepository.findAllShortByCreateAt();
+    public List<ShortForumPost> getForumPostListReverse(Long userId) {
+//        String token = jwtFilter.getJwtFromRequest(request);
+//        Long userId = 0L;
+//        if (token != null) {
+//            userId = jwtService.extractUserId(token);
+//        }
+        List<ShortForumPost> posts = forumPostRepository.findAllShortByCreateAt(userId);
+
+        if (posts.isEmpty()) return null;
+        return posts;
+    }
+
+    public List<ShortForumPost> get2TopPopularPost(Long userId) {
+        List<ShortForumPost> posts = forumPostRepository.findTop2ByViews(PageRequest.of(0, 2), userId);
 
         if (posts.isEmpty()) return null;
         return posts;
@@ -91,6 +105,31 @@ public class ForumPostService {
 
     public void increasePostViewCount(Long postId) {
         forumPostRepository.updateViewCount(postId);
+    }
+
+    public List<ShortForumPost> getPostListByType(String type, Long userId) {
+        int typeId = 0;
+        switch (type) {
+            case "Dog":
+                typeId = 1;
+                break;
+            case "Cat":
+                typeId = 2;
+                break;
+            case "Bird":
+                typeId = 3;
+                break;
+            case "Fish":
+                typeId = 4;
+                break;
+            case "Reptiles":
+                typeId = 5;
+                break;
+            default:
+                break;
+        }
+        if (typeId == 0) forumPostRepository.findAllShortByCreateAt(userId);
+        return forumPostRepository.findForumPostByType(typeId, userId);
     }
 
 }

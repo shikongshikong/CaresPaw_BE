@@ -29,7 +29,6 @@ public class AuthService {
         if (user.isEmpty()) return null;
 
         String dbPass = user.get().getPassword();
-
         boolean matched = passwordEncoder.matches(password, dbPass);
 
         if (matched)

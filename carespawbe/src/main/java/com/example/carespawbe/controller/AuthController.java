@@ -5,12 +5,14 @@ import com.example.carespawbe.dto.Auth.LoginResponse;
 import com.example.carespawbe.dto.Auth.RegisterRequest;
 import com.example.carespawbe.entity.User;
 import com.example.carespawbe.mapper.UserMapper;
+import com.example.carespawbe.security.JwtService;
 import com.example.carespawbe.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -25,12 +27,26 @@ public class AuthController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    JwtService jwtService;
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public Map<String, String> login(@RequestBody LoginRequest request) {
         User user = authService.login(request.getEmail(), request.getPassword());
-        if (user == null) return ResponseEntity.status(401).body("Invalid username or password");
-        LoginResponse response = userMapper.toResponse(user);
-        return ResponseEntity.ok(response);
+        System.out.println("ID receive: " + user.getId());
+//        if (user == null) {
+//            return null;
+//            return ResponseEntity.status(401).body("Invalid username or password");
+//        }
+//        LoginResponse response = userMapper.toResponse(user);
+        String token = jwtService.generateToken(user);
+        System.out.println("token in login: " + token);
+//        Map<String, String> map = new HashMap<>();
+//        map.put("token", token);
+//        map.put("id", user.getId().toString());
+//        return map;
+
+        return Map.of("token", token);
     }
 
     @PostMapping("/register")

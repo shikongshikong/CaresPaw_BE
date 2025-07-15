@@ -26,7 +26,7 @@ public class ForumPostSave {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "post_id", nullable = false)
     private ForumPost post;
 

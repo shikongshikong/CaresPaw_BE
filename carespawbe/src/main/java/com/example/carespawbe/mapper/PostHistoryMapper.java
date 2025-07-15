@@ -3,6 +3,7 @@ package com.example.carespawbe.mapper;
 import com.example.carespawbe.dto.Forum.PostDetailRequest;
 import com.example.carespawbe.dto.History.PostSideBarResponse;
 import com.example.carespawbe.entity.ForumPostHistory;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

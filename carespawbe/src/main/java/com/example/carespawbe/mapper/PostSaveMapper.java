@@ -21,6 +21,7 @@ public interface PostSaveMapper {
     @Mapping(source = "post.user.avatar", target = "avatar")
     @Mapping(source = "post.user.id", target = "userId")
     @Mapping(source = "post.user.fullname", target = "fullname")
+    @Mapping(target = "saved", expression = "java(forumPostSave != null)")
     PostSideBarResponse toSideBarResponse(ForumPostSave forumPostSave);
 
     List<PostSideBarResponse> toSaveResponseList(List<ForumPostSave> forumPostSaves);
