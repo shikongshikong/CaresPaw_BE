@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ShortForumPost {
     private Long id;
-    private String fullname;
     private String title;
     private String summary;
     private LocalDate createAt;
