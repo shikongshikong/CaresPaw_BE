@@ -11,6 +11,6 @@ public class PostCommentResponse {
     private Long userId;
     private String avatar;
     private String fullname;
-    private String createAt;
+    private LocalDate createAt;
     private String content;
 }

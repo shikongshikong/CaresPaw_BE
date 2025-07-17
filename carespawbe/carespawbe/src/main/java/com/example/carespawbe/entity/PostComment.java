@@ -28,7 +28,7 @@ public class PostComment {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private ForumPost post;
+    private Post post;
 
     @PrePersist
     protected void onCreate() {
