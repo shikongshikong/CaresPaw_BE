@@ -1,7 +1,5 @@
 package com.example.carespawbe.entity;
 
-import com.example.carespawbe.entity.shop.CartEntity;
-import com.example.carespawbe.entity.shop.ShopEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +23,7 @@ public class UserEntity {
     @Column(nullable = false)
     private String fullname;
 
-    private int gender;
+    private String gender;
 
     @Column(nullable = false)
     private String email;
@@ -36,25 +34,18 @@ public class UserEntity {
     private String password;
 
     private String avatar;
-    private int role;
-    private int status;
+    private String role;
+    private String status;
     private LocalDate birthday;
     private LocalDate createdAt;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private ShopEntity shop;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private CartEntity cart;
-
 
     @PrePersist
     protected void onCreate() {
 //        set current date + avatar + role + status
         createdAt = LocalDate.now();
         avatar = "no-avatar-img.png";
-        role = 1;
-        status = 1;
+        role = "normal";
+        status = "active";
     }
 
 }

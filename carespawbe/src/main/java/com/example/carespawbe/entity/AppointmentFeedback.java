@@ -9,32 +9,28 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 //@Entity
-//@Table(name = "expert")
+//@Table(name = "appointment_feedback")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Expert {
-
+public class AppointmentFeedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "expert_id")
+    @Column(name = "app_feedback_id")
     private Long id;
 
-    private String introduction;
-    private String experience;
-    private String address;
-    private String status;
-    private float rating;
+    private int rating;
+    private String content;
     private LocalDate createAt;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @PrePersist
-    protected void onCreate() {
-        status = "active";
-        rating = 0.0f;
-    }
+    @ManyToOne
+    @JoinColumn(name = "expert_id")
+    private Expert expert;
+
+
 }
