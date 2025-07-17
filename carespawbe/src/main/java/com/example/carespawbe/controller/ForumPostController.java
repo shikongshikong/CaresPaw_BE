@@ -117,4 +117,17 @@ public class ForumPostController {
         return ResponseEntity.ok("Save successful");
     }
 
+    @PostMapping("/add-cm")
+    public ResponseEntity<?> addCm(@RequestBody PostCommentRequest postCommentRequest, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        System.out.println("User id in add-cm: " + postCommentRequest.getContent());
+        if (!userId.equals(0L)) {
+            postCommentRequest.setUserId(userId);
+            PostCommentResponse cm = postCommentService.addPostComment(postCommentRequest);
+            System.out.println("Cm response is : " + cm);
+            return ResponseEntity.ok(cm);
+        }
+        return ResponseEntity.ok("Post comment successful");
+    }
+
 }
