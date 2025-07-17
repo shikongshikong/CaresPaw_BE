@@ -1,7 +1,6 @@
 package com.example.carespawbe.entity;
 
-import com.example.carespawbe.entity.shop.CartEntity;
-import com.example.carespawbe.entity.shop.ShopEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -16,16 +17,17 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false)
     private String fullname;
 
-    private int gender;
+    private String gender;
 
     @Column(nullable = false)
     private String email;
@@ -36,25 +38,25 @@ public class UserEntity {
     private String password;
 
     private String avatar;
-    private int role;
-    private int status;
+    private String role;
+    private String state;
     private LocalDate birthday;
     private LocalDate createdAt;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private ShopEntity shop;
+//    optional, but useful when user.getPosts();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ForumPost> posts = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private CartEntity cart;
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ForumPostHistory> histories = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
 //        set current date + avatar + role + status
         createdAt = LocalDate.now();
         avatar = "no-avatar-img.png";
-        role = 1;
-        status = 1;
+        role = "normal";
+        state = "active";
     }
 
 }

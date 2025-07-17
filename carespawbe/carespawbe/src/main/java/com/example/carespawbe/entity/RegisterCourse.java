@@ -1,4 +1,4 @@
 package com.example.carespawbe.entity;
 
-public class SavedPost {
+public class RegisterCourse {
 }

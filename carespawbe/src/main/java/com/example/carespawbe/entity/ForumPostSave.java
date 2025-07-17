@@ -9,28 +9,29 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "appointment_feedback")
+@Table(name = "user_save_post")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AppointmentFeedback {
+public class ForumPostSave {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "app_feedback_id")
     private Long id;
 
-    private int rating;
-    private String content;
-    private LocalDate createAt;
+    private LocalDate savedAt;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "expert_id")
-    private Expert expert;
+    @OneToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private ForumPost post;
 
-
+    @PrePersist
+    protected void onCreate() {
+        savedAt = LocalDate.now();
+    }
 }

@@ -1,4 +1,4 @@
 package com.example.carespawbe.entity;
 
-public class History {
+public class Payment {
 }
