@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,17 +32,17 @@ public class ShopEntity {
     @Column(nullable = true)
     private String shopLogo;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private int shopAmountFollower;
 
     @Column(nullable = false)
-    private LocalDateTime created_at;
+    private LocalDate created_at;
 
     @Column(nullable = false)
     private int status;
 
     @Column(nullable = true)
-    private LocalDateTime update_at;
+    private LocalDate update_at;
 
     @Column(nullable = true)
     private String shopLogoPublicId;
@@ -55,4 +56,10 @@ public class ShopEntity {
 
     @OneToMany(mappedBy = "shop")
     private List<VoucherEntity> voucherEntityList;
+
+    @PrePersist
+    protected void onCreate() {
+        this.update_at = LocalDate.now();
+        this.created_at = LocalDate.now(); // nếu chưa có
+    }
 }

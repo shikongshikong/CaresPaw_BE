@@ -29,6 +29,7 @@ public class ShopController {
             @RequestParam("shopAddress") String shopAddress,
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("userId") Long userId,
+            @RequestParam("status") int status,
             @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo
     ){
         try {
@@ -37,6 +38,7 @@ public class ShopController {
             shopRequest.setShopAddress(shopAddress);
             shopRequest.setShopPhone(phoneNumber);
             shopRequest.setUserId(userId);
+            shopRequest.setStatus(1);
 
             ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo);
             return ResponseEntity.ok(shopResponse);
