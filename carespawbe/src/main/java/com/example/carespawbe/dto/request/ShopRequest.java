@@ -15,4 +15,5 @@ public class ShopRequest {
     private String shopLogo;
     private String shopPhone;
     private Long userId;
+    private int status;
 }

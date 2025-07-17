@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class ShopServiceImp implements ShopService {
         shopEntity.setShopName(request.getShopName());
         shopEntity.setShopAddress(request.getShopAddress());
         shopEntity.setUser(user);
-        shopEntity.setCreated_at(LocalDateTime.now());
+        shopEntity.setCreated_at(LocalDate.now());
         shopEntity.setShopAmountFollower(0);
 
         if (shopLogo != null && !shopLogo.isEmpty()) {
@@ -64,7 +65,7 @@ public class ShopServiceImp implements ShopService {
 
         existingShop.setShopName(request.getShopName());
         existingShop.setShopAddress(request.getShopAddress());
-        existingShop.setUpdate_at(LocalDateTime.now());
+        existingShop.setUpdate_at(LocalDate.now());
 
         if (newShopLogo != null && !newShopLogo.isEmpty()) {
             // Xóa logo cũ
