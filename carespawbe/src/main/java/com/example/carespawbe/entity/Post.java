@@ -1,6 +1,5 @@
 package com.example.carespawbe.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ForumPost {
+public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +23,10 @@ public class ForumPost {
     private Long id;
 
     private String title;
+
+    @Column(columnDefinition = "VARCHAR(MAX)")
     private String content;
+
     private LocalDate createAt;
     private LocalDate updateAt;
     private String state;
@@ -37,10 +39,10 @@ public class ForumPost {
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<ForumPostHistory> histories = new ArrayList<>();
+    private List<PostHistory> histories = new ArrayList<>();
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
-    private ForumPostSave forumPostSave;
+    private PostSave postSave;
 
     @PrePersist
     protected void onCreate() {

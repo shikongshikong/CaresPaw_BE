@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "appointment_feedback")
+//@Entity
+//@Table(name = "appointment_feedback")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

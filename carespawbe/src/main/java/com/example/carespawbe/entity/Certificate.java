@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "certificate")
+//@Entity
+//@Table(name = "certificate")
 public class Certificate {
 
     @Id

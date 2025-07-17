@@ -1,18 +1,12 @@
 package com.example.carespawbe.service;
 
 import com.example.carespawbe.dto.Forum.ForumPageResponse;
-import com.example.carespawbe.dto.Forum.ShortForumPost;
 import com.example.carespawbe.dto.History.PostSideBarResponse;
-import com.example.carespawbe.repository.ForumPostRepository;
 import com.example.carespawbe.security.JwtAuthenticationFilter;
 import com.example.carespawbe.security.JwtService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -21,10 +15,10 @@ import java.util.List;
 public class ForumService {
 
 //    @Autowired
-//    private ForumPostRepository forumPostRepository;
+//    private PostRepository forumPostRepository;
 
     @Autowired
-    private ForumPostService forumPostService;
+    private PostService postService;
 
     @Autowired
     private PostHistoryService  postHistoryService;
@@ -51,16 +45,21 @@ public class ForumService {
         if (userId != 0L) {
 //      history
             List<PostSideBarResponse> posts = postHistoryService.get5PostHistoryByUserId(userId);
-            System.out.println("Save state of 1: " + posts.get(1).isSaved());
-            response.setHistoryPosts(posts);
+//            System.out.println("Save state of 1: " + posts.get(1).isSaved());
+            if (posts != null) {
+                response.setHistoryPosts(posts);
+            } else {
+                System.out.println("NUll in history");
+                response.setHistoryPosts(null);
+            }
 //      following
 //      save
             response.setSavePosts(postSaveService.get5SavedByUserId(userId));
         }
         //      popular post
-        response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
+        response.setPopularPosts(postService.get2TopPopularPost(userId));
         //      list post reverse
-        response.setPostList(forumPostService.getForumPostListReverse(userId));
+        response.setPostList(postService.getForumPostListReverse(userId));
 
         return response;
     }

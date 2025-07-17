@@ -1,69 +1,80 @@
 package com.example.carespawbe.service;
 
-import com.example.carespawbe.dto.Forum.ForumPostRequest;
-import com.example.carespawbe.dto.Forum.PostDetailRequest;
-import com.example.carespawbe.dto.Forum.PostResponse;
-import com.example.carespawbe.dto.Forum.ShortForumPost;
-import com.example.carespawbe.entity.ForumPost;
-import com.example.carespawbe.mapper.ForumPostMapper;
-import com.example.carespawbe.mapper.PostHistoryMapper;
-import com.example.carespawbe.mapper.PostSaveMapper;
-import com.example.carespawbe.repository.ForumPostRepository;
-import com.example.carespawbe.security.JwtAuthenticationFilter;
-import com.example.carespawbe.security.JwtService;
+import com.example.carespawbe.dto.Forum.*;
+import com.example.carespawbe.entity.Post;
+import com.example.carespawbe.mapper.PostMapper;
+import com.example.carespawbe.repository.PostRepository;
 import com.example.carespawbe.utils.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ForumPostService {
+public class PostService {
 
     @Autowired
-    private ForumPostMapper forumPostMapper;
+    private PostMapper postMapper;
 
     @Autowired
-    private ForumPostRepository forumPostRepository;
+    private PostRepository postRepository;
 
     @Autowired
     private PostHistoryService postHistoryService;
 
     @Autowired
+    private PostCategoryService postCategoryService;
+
+    @Autowired
     private ViewLimiterService viewLimiterService;
 
     public List<ShortForumPost> getForumPostByKeyword(String keyword, Long userId) {
-//        String token = jwtFilter.getJwtFromRequest(request);
-//        Long userId = 0L;
-//        if (token != null) {
-//            userId = jwtService.extractUserId(token);
-//            System.out.println("User Id: " + userId);
-//            if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-//        }
-        List<ShortForumPost> posts = forumPostRepository.findByTitleKey(keyword, userId);
+
+        List<ShortForumPost> posts = postRepository.findByTitleKey(keyword, userId);
 
         if (posts.isEmpty()) return null;
         return posts;
     }
 
-    public PostResponse addForumPost(ForumPostRequest forumPostRequest) {
-        ForumPost post = forumPostMapper.toPostEntity(forumPostRequest);
+    public PostResponse addForumPost(PostRequest postRequest) {
+        Post post = postMapper.toPostEntity(postRequest);
         try {
-            forumPostRepository.save(post);
-            return forumPostMapper.toPostResponse(post);
+            postRepository.save(post);
+//            control category
+            List<Integer> arr = postRequest.getSelectedCategories();
+            Long postId = post.getId();
+
+            System.out.println("List of Category Id: " + arr);
+
+            List<PostCategoryRequest> postCategoryRequestList = new ArrayList<>();
+
+            for (Integer caId : arr) {
+                PostCategoryRequest categoryRequest = PostCategoryRequest
+                        .builder()
+                        .postId(postId)
+                        .categoryId(caId)
+                        .build();
+                System.out.println("Each Category Id: " + caId);
+                postCategoryRequestList.add(categoryRequest);
+            }
+
+            postCategoryService.addCategoryList(postCategoryRequestList);
+
+
+            return postMapper.toPostResponse(post);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public PostResponse getForumPostById(Long postId, Long userId, HttpServletRequest request) {
-        ForumPost post = forumPostRepository.findForumPostById(postId).orElse(null);
+        Post post = postRepository.findForumPostById(postId).orElse(null);
         PostDetailRequest postDetailRequest = new PostDetailRequest(postId, userId);
 
         //      add view for logined user + add history
@@ -81,7 +92,7 @@ public class ForumPostService {
                 increasePostViewCount(postId);
             } else System.out.println("View Exist!");
         }
-        return forumPostMapper.toPostResponse(post);
+        return postMapper.toPostResponse(post);
     }
 
     public List<ShortForumPost> getForumPostListReverse(Long userId) {
@@ -90,21 +101,21 @@ public class ForumPostService {
 //        if (token != null) {
 //            userId = jwtService.extractUserId(token);
 //        }
-        List<ShortForumPost> posts = forumPostRepository.findAllShortByCreateAt(userId);
+        List<ShortForumPost> posts = postRepository.findAllShortByCreateAt(userId);
 
         if (posts.isEmpty()) return null;
         return posts;
     }
 
     public List<ShortForumPost> get2TopPopularPost(Long userId) {
-        List<ShortForumPost> posts = forumPostRepository.findTop2ByViews(PageRequest.of(0, 2), userId);
+        List<ShortForumPost> posts = postRepository.findTop2ByViews(PageRequest.of(0, 2), userId);
 
         if (posts.isEmpty()) return null;
         return posts;
     }
 
     public void increasePostViewCount(Long postId) {
-        forumPostRepository.updateViewCount(postId);
+        postRepository.updateViewCount(postId);
     }
 
     public List<ShortForumPost> getPostListByType(String type, Long userId) {
@@ -134,8 +145,14 @@ public class ForumPostService {
             default:
                 break;
         }
-        if (typeId.equals("All")) forumPostRepository.findAllShortByCreateAt(userId);
-        return forumPostRepository.findForumPostByType(typeId, userId);
+        if (typeId.equals("All")) postRepository.findAllShortByCreateAt(userId);
+        return postRepository.findForumPostByType(typeId, userId);
+    }
+
+    public List<ShortForumPost> getForumPostByCategory(List<Integer> category, Long userId, String type) {
+        if (category.isEmpty()) return null;
+        if (type.equals("All")) return postRepository.findPostsByCategory(userId, category);
+        return postRepository.findPostsByTypeAndCategory(userId, type, category);
     }
 
 }

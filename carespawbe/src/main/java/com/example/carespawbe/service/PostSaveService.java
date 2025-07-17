@@ -2,11 +2,11 @@ package com.example.carespawbe.service;
 
 import com.example.carespawbe.dto.History.PostSideBarResponse;
 import com.example.carespawbe.dto.Save.SaveStatusUpdateRequest;
-import com.example.carespawbe.entity.ForumPost;
-import com.example.carespawbe.entity.ForumPostSave;
+import com.example.carespawbe.entity.Post;
+import com.example.carespawbe.entity.PostSave;
 import com.example.carespawbe.entity.User;
 import com.example.carespawbe.mapper.PostSaveMapper;
-import com.example.carespawbe.repository.ForumPostRepository;
+import com.example.carespawbe.repository.PostRepository;
 import com.example.carespawbe.repository.PostSaveRepository;
 import com.example.carespawbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class PostSaveService {
     private PostSaveRepository postSaveRepository;
 
     @Autowired
-    private ForumPostRepository forumPostRepository;
+    private PostRepository postRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -40,7 +40,7 @@ public class PostSaveService {
 //    public void addPostSave()
     public List<PostSideBarResponse> get5SavedByUserId(Long userId) {
         Pageable pageable = PageRequest.of(0, 5, Sort.by("savedAt").descending());
-        List<ForumPostSave> saves = postSaveRepository.findForumPostSavesByUserId(userId, pageable);
+        List<PostSave> saves = postSaveRepository.findForumPostSavesByUserId(userId, pageable);
         if (saves.isEmpty()) {
             return null;
         }
@@ -61,12 +61,12 @@ public class PostSaveService {
             }
             if (request.getIsSaved() == true) {
                 User user = userRepository.findById(userId).get();
-                ForumPost post = forumPostRepository.findForumPostById(postId).get();
-                ForumPostSave forumPostSave = ForumPostSave.builder()
+                Post post = postRepository.findForumPostById(postId).get();
+                PostSave postSave = PostSave.builder()
                         .user(user)
                         .post(post)
                         .build();
-                postSaveRepository.save(forumPostSave);
+                postSaveRepository.save(postSave);
             }
         }
     }
@@ -79,12 +79,12 @@ public class PostSaveService {
             }
             else {
                 User user = userRepository.findById(userId).get();
-                ForumPost post = forumPostRepository.findForumPostById(postId).get();
-                ForumPostSave forumPostSave = ForumPostSave.builder()
+                Post post = postRepository.findForumPostById(postId).get();
+                PostSave postSave = PostSave.builder()
                         .user(user)
                         .post(post)
                         .build();
-                postSaveRepository.save(forumPostSave);
+                postSaveRepository.save(postSave);
             }
     }
 }
