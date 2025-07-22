@@ -2,10 +2,10 @@ package com.example.carespawbe.controller;
 
 import com.example.carespawbe.dto.Forum.*;
 import com.example.carespawbe.dto.Save.SaveStatusUpdateRequest;
-import com.example.carespawbe.service.PostService;
+import com.example.carespawbe.service.ForumPostService;
 import com.example.carespawbe.service.ForumService;
-import com.example.carespawbe.service.PostCommentService;
-import com.example.carespawbe.service.PostSaveService;
+import com.example.carespawbe.service.ForumPostCommentService;
+import com.example.carespawbe.service.ForumPostSaveService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +19,16 @@ import java.util.List;
 public class ForumPostController {
 
     @Autowired
-    private PostService postService;
+    private ForumPostService forumPostService;
 
     @Autowired
     private ForumService forumService;
 
     @Autowired
-    private PostSaveService postSaveService;
+    private ForumPostSaveService forumPostSaveService;
 
     @Autowired
-    private PostCommentService postCommentService;
+    private ForumPostCommentService forumPostCommentService;
 
     @GetMapping("")
     public ResponseEntity<?> getForumData(HttpServletRequest request) {
@@ -37,7 +37,7 @@ public class ForumPostController {
 //        Long userId = 0L;
 //        if (token != null) {
 //            userId = jwtService.extractUserId(token);
-//            System.out.println("User Id: " + userId);
+//            System.out.println("UserEntity Id: " + userId);
 //            if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 //        }
 //        Long use
@@ -51,26 +51,26 @@ public class ForumPostController {
         System.out.println("Search key: " + key);
         Long userId = (Long) request.getAttribute("userId");
 
-        List<ShortForumPost> posts = postService.getForumPostByKeyword(key, userId);
+        List<ShortForumPostResponse> posts = forumPostService.getForumPostByKeyword(key, userId);
         return ResponseEntity.ok(posts);
     }
 
     @PostMapping("/add-post")
-    public ResponseEntity<?> addPost(@RequestBody PostRequest postRequest, HttpServletRequest request) {
+    public ResponseEntity<?> addPost(@RequestBody ForumPostRequest forumPostRequest, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        System.out.println("User id in add-post: " + userId);
-        postRequest.setUserId(userId);
-        PostResponse post = postService.addForumPost(postRequest);
+        System.out.println("UserEntity id in add-forumPostEntity: " + userId);
+        forumPostRequest.setUserId(userId);
+        ForumPostResponse post = forumPostService.addForumPost(forumPostRequest);
         return ResponseEntity.ok(post);
     }
 
     @GetMapping("/post-detail/{postId}")
     public ResponseEntity<?> getForumDetail(@PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        System.out.println("User id in post detail: " + userId);
-        PostDetailResponse response = PostDetailResponse.builder()
-                .post(postService.getForumPostById(postId, userId, request))
-                .comments(postCommentService.getPostCommentsByPostId(postId))
+        System.out.println("UserEntity id in forumPostEntity detail: " + userId);
+        ForumPostDetailResponse response = ForumPostDetailResponse.builder()
+                .post(forumPostService.getForumPostById(postId, userId, request))
+                .comments(forumPostCommentService.getPostCommentsByPostId(postId))
                 .build();
 
         return ResponseEntity.ok(response);
@@ -79,7 +79,7 @@ public class ForumPostController {
     @GetMapping("/post-list")
     public ResponseEntity<?> getPostList(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        List<ShortForumPost> posts = postService.getForumPostListReverse(userId);
+        List<ShortForumPostResponse> posts = forumPostService.getForumPostListReverse(userId);
         return ResponseEntity.ok(posts);
     }
 
@@ -87,7 +87,7 @@ public class ForumPostController {
     public ResponseEntity<String> saveForumPosts(@RequestBody List<SaveStatusUpdateRequest> requests, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId != 0L) {
-            postSaveService.updateSaveStatuses(requests, userId);
+            forumPostSaveService.updateSaveStatuses(requests, userId);
         }
         return ResponseEntity.ok("Save successful");
     }
@@ -96,7 +96,7 @@ public class ForumPostController {
     public ResponseEntity<?> getPostListByType(@PathVariable String type, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId != 0L) {
-            return ResponseEntity.ok(postService.getPostListByType(type, userId));
+            return ResponseEntity.ok(forumPostService.getPostListByType(type, userId));
         }
         return ResponseEntity.ok(getPostList(request));
     }
@@ -104,24 +104,24 @@ public class ForumPostController {
     @PatchMapping("/save-post-detail/{postId}")
     public ResponseEntity<String> saveForumPostDetail(@PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        System.out.println("Save post detail: " + userId);
+        System.out.println("Save forumPostEntity detail: " + userId);
         if (!userId.equals(0L)) {
-            postSaveService.updateDetailSaveStatus(postId, userId);
+            forumPostSaveService.updateDetailSaveStatus(postId, userId);
         }
         return ResponseEntity.ok("Save successful");
     }
 
     @PostMapping("/add-cm")
-    public ResponseEntity<?> addCm(@RequestBody PostCommentRequest postCommentRequest, HttpServletRequest request) {
+    public ResponseEntity<?> addCm(@RequestBody ForumPostCommentRequest forumPostCommentRequest, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        System.out.println("User id in add-cm: " + postCommentRequest.getContent());
+        System.out.println("UserEntity id in add-cm: " + forumPostCommentRequest.getContent());
         if (!userId.equals(0L)) {
-            postCommentRequest.setUserId(userId);
-            PostCommentResponse cm = postCommentService.addPostComment(postCommentRequest);
+            forumPostCommentRequest.setUserId(userId);
+            ForumPostCommentResponse cm = forumPostCommentService.addPostComment(forumPostCommentRequest);
             System.out.println("Cm response is : " + cm);
             return ResponseEntity.ok(cm);
         }
-        return ResponseEntity.ok("Post comment successful");
+        return ResponseEntity.ok("ForumPostEntity comment successful");
     }
 
 }

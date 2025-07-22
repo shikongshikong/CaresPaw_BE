@@ -1,7 +1,7 @@
 package com.example.carespawbe.service;
 
 import com.example.carespawbe.dto.Auth.CustomUserDetails;
-import com.example.carespawbe.entity.User;
+import com.example.carespawbe.entity.UserEntity;
 import com.example.carespawbe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public UserDetails loadUserByUserId(Long id) throws UsernameNotFoundException {
-        User user = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return new CustomUserDetails(user);
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("UserEntity not found"));
+        return new CustomUserDetails(userEntity);
     }
 }

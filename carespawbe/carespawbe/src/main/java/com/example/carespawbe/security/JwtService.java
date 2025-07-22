@@ -1,16 +1,14 @@
 package com.example.carespawbe.security;
 
-import com.example.carespawbe.entity.User;
+import com.example.carespawbe.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,15 +26,15 @@ public class JwtService {
     SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 //    String base64Key = Encoders.BASE64.encode(key.getEncoded());
 
-    public String generateToken(User user) {
+    public String generateToken(UserEntity userEntity) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", user.getId());
-        claims.put("userRole", user.getRole());
-        claims.put("userState", user.getState());
+        claims.put("userId", userEntity.getId());
+        claims.put("userRole", userEntity.getRole());
+        claims.put("userState", userEntity.getState());
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(String.valueOf(user.getId()))
+                .setSubject(String.valueOf(userEntity.getId()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -71,7 +69,7 @@ public class JwtService {
 
 
 
-//    public boolean isTokenValid(String token, User user) {
+//    public boolean isTokenValid(String token, UserEntity userEntity) {
 //        final Long id = extractUserIdFromToken(token);
 //    }
 

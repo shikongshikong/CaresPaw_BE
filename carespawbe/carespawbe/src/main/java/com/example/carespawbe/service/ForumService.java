@@ -1,7 +1,7 @@
 package com.example.carespawbe.service;
 
 import com.example.carespawbe.dto.Forum.ForumPageResponse;
-import com.example.carespawbe.dto.History.PostSideBarResponse;
+import com.example.carespawbe.dto.History.ForumPostSideBarResponse;
 import com.example.carespawbe.security.JwtAuthenticationFilter;
 import com.example.carespawbe.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -15,16 +15,16 @@ import java.util.List;
 public class ForumService {
 
 //    @Autowired
-//    private PostRepository forumPostRepository;
+//    private ForumPostRepository forumPostRepository;
 
     @Autowired
-    private PostService postService;
+    private ForumPostService forumPostService;
 
     @Autowired
-    private PostHistoryService  postHistoryService;
+    private ForumPostHistoryService forumPostHistoryService;
 
     @Autowired
-    private PostSaveService  postSaveService;
+    private ForumPostSaveService forumPostSaveService;
 
     @Autowired
     JwtService jwtService;
@@ -39,13 +39,13 @@ public class ForumService {
 //        Long userId = 0L;
 //        if (token != null) {
 //            userId = jwtService.extractUserId(token);
-//            System.out.println("User Id: " + userId);
+//            System.out.println("UserEntity Id: " + userId);
 //            if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 //        }
         if (userId != 0L) {
 //      history
-            List<PostSideBarResponse> posts = postHistoryService.get5PostHistoryByUserId(userId);
-//            System.out.println("Save state of 1: " + posts.get(1).isSaved());
+            List<ForumPostSideBarResponse> posts = forumPostHistoryService.get5PostHistoryByUserId(userId);
+//            System.out.println("Save state of 1: " + forumPostEntities.get(1).isSaved());
             if (posts != null) {
                 response.setHistoryPosts(posts);
             } else {
@@ -54,12 +54,12 @@ public class ForumService {
             }
 //      following
 //      save
-            response.setSavePosts(postSaveService.get5SavedByUserId(userId));
+            response.setSavePosts(forumPostSaveService.get5SavedByUserId(userId));
         }
-        //      popular post
-        response.setPopularPosts(postService.get2TopPopularPost(userId));
-        //      list post reverse
-        response.setPostList(postService.getForumPostListReverse(userId));
+        //      popular forumPostEntity
+        response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
+        //      list forumPostEntity reverse
+        response.setPostList(forumPostService.getForumPostListReverse(userId));
 
         return response;
     }
