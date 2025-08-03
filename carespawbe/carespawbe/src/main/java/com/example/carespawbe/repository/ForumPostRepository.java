@@ -116,4 +116,11 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
                    @Param("status") String state);
 
     int removePostById(Long id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ForumPostEntity p " +
+            "SET p.commentedAmount = p.commentedAmount + 1 " +
+            "WHERE p.id = :postId")
+    void updateCmCount(@Param("postId") Long postId);
 }

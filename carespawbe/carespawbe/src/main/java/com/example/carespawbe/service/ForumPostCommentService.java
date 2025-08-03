@@ -19,13 +19,13 @@ public class ForumPostCommentService {
     private ForumPostCommentRepository forumPostCommentRepository;
 
     @Autowired
-    private ForumPostRepository forumPostRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private ForumPostCommentMapper forumPostCommentMapper;
+
+    @Autowired
+    private ForumPostService forumPostService;
 
     public ForumPostCommentResponse addPostComment(ForumPostCommentRequest forumPostCommentRequest) {
 //        ForumPostEntity forumPostEntity = forumPostRepository.findById(forumPostCommentRequest.getPostId()).orElse(null);
@@ -34,6 +34,7 @@ public class ForumPostCommentService {
 //        cm.setForumPostEntity(forumPostEntity);
 //        cm.setUserEntity(userEntity);
         forumPostCommentRepository.save(cm);
+        forumPostService.increaseCommentCount(forumPostCommentRequest.getPostId());
         return forumPostCommentMapper.toCommentResponse(cm);
     }
 

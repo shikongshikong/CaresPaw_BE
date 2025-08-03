@@ -170,4 +170,8 @@ public class ForumPostService {
         return forumPostRepository.removePostById(postId);
     }
 
+    public void increaseCommentCount(Long postId) {
+        forumPostRepository.updateCmCount(postId);
+    }
+
 }
