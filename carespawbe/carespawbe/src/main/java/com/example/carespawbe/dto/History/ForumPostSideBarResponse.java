@@ -16,5 +16,6 @@ public class ForumPostSideBarResponse {
     private String avatar;
     private Long userId;
     private String fullname;
-    private boolean saved;
+//    private boolean saved;
+    private int followed;
 }

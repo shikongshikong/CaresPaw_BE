@@ -1,8 +1,12 @@
 package com.example.carespawbe.repository;
 
+import com.example.carespawbe.dto.Forum.ShortForumPostResponse;
+import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
 import com.example.carespawbe.entity.ForumPostHistoryEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,9 +26,20 @@ public interface ForumPostHistoryRepository extends JpaRepository<ForumPostHisto
 //            "WHERE h.userEntity.id = :userId " +
 //            "ORDER BY h.createdAt DESC")
 //    List<ShortForumPostResponse> find5ShortHistoryByUserId(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT new com.example.carespawbe.dto.History.ForumPostHistoryTagResponse(p.id, p.user.id, p.user.fullname, p.title, p.createAt, p.viewedAmount, p.commentedAmount, " +
+            "CASE " +
+            "WHEN p.user.id = :userId THEN 0 " +
+            "WHEN f.follower.id = :userId AND f.followee.id = p.user.id THEN 1 " +
+            "ELSE 2 END ) " +
+            "FROM ForumPostEntity p " +
+            "LEFT JOIN ForumPostHistoryEntity h " +
+            "ON h.forumPostEntity.id = p.id and h.user.id = :userId " +
+            "LEFT JOIN FollowingEntity f " +
+            "ON f.follower.id = :userId and p.user.id = f.followee.id " +
+            "ORDER BY h.createdAt DESC")
+    List<ForumPostHistoryTagResponse> findForumPostHistoryEntityByUserIdHasFollow(@Param("userId") Long userId, Pageable pageable);
 
-//    List<ForumPostHistoryEntity> findForumPostHistoryEntityByUserId(Long userId, Pageable pageable);
-    List<ForumPostHistoryEntity> findForumPostHistoryEntitiesByUserId(Long userId, Pageable pageable);
+//    List<ForumPostHistoryEntity> findForumPostHistoryEntitiesByUserId(Long userId, Pageable pageable);
 
 //    List<ForumPostHistoryEntity> findByUserIdAndPostIdAndCreatedAt(Long userId, Long postId, LocalDate createdAt);
     List<ForumPostHistoryEntity> findByUserIdAndForumPostEntityIdAndCreatedAt(Long userId, Long postId, LocalDate createdAt);

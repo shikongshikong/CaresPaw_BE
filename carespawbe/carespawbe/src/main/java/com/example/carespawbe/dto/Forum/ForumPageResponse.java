@@ -1,5 +1,6 @@
 package com.example.carespawbe.dto.Forum;
 
+import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
 import com.example.carespawbe.dto.History.ForumPostSideBarResponse;
 import lombok.Data;
 
@@ -9,7 +10,7 @@ import java.util.List;
 public class ForumPageResponse {
     private List<ShortForumPostResponse> popularPosts;
     private List<ShortForumPostResponse> postList;
-    private List<ForumPostSideBarResponse> historyPosts;
+    private List<ForumPostHistoryTagResponse> historyPosts;
 //     + following
     private List<ForumPostSideBarResponse> savePosts;
 }

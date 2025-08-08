@@ -1,6 +1,7 @@
 package com.example.carespawbe.service;
 
 import com.example.carespawbe.dto.Forum.ForumPageResponse;
+import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
 import com.example.carespawbe.dto.History.ForumPostSideBarResponse;
 import com.example.carespawbe.security.JwtAuthenticationFilter;
 import com.example.carespawbe.security.JwtService;
@@ -25,27 +26,19 @@ public class ForumService {
 
     @Autowired
     private ForumPostSaveService forumPostSaveService;
-
-    @Autowired
-    JwtService jwtService;
-
-    @Autowired
-    JwtAuthenticationFilter jwtFilter;
+//
+//    @Autowired
+//    JwtService jwtService;
+//
+//    @Autowired
+//    JwtAuthenticationFilter jwtFilter;
 
     public ForumPageResponse getForumData(Long userId) {
         ForumPageResponse response = new ForumPageResponse();
 
-//        String token = jwtFilter.getJwtFromRequest(request);
-//        Long userId = 0L;
-//        if (token != null) {
-//            userId = jwtService.extractUserId(token);
-//            System.out.println("UserEntity Id: " + userId);
-//            if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-//        }
         if (userId != 0L) {
 //      history
-            List<ForumPostSideBarResponse> posts = forumPostHistoryService.get5PostHistoryByUserId(userId);
-//            System.out.println("Save state of 1: " + forumPostEntities.get(1).isSaved());
+            List<ForumPostHistoryTagResponse> posts = forumPostHistoryService.get5PostHistoryByUserId(userId);
             if (posts != null) {
                 response.setHistoryPosts(posts);
             } else {
@@ -54,7 +47,7 @@ public class ForumService {
             }
 //      following
 //      save
-            response.setSavePosts(forumPostSaveService.get5SavedByUserId(userId));
+//            response.setSavePosts(forumPostSaveService.get5SavedByUserId(userId));
         }
         //      popular forumPostEntity
         response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
@@ -64,3 +57,11 @@ public class ForumService {
         return response;
     }
 }
+
+//        String token = jwtFilter.getJwtFromRequest(request);
+//        Long userId = 0L;
+//        if (token != null) {
+//            userId = jwtService.extractUserId(token);
+//            System.out.println("UserEntity Id: " + userId);
+//            if (userId == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+//        }

@@ -38,18 +38,18 @@ public class ForumPostSaveService {
 //    private PostS
 
 //    public void addPostSave()
-    public List<ForumPostSideBarResponse> get5SavedByUserId(Long userId) {
-        Pageable pageable = PageRequest.of(0, 5, Sort.by("savedAt").descending());
-        List<ForumPostSaveEntity> saves = forumPostSaveRepository.findForumPostSavesByUserId(userId, pageable);
-        if (saves.isEmpty()) {
-            return null;
-        }
-        List<ForumPostSideBarResponse> saveResponses = forumPostSaveMapper.toSaveResponseList(saves);
-        for (ForumPostSideBarResponse save : saveResponses) {
-            save.setSaved(true);
-        }
-        return saveResponses;
-    }
+//    public List<ForumPostSideBarResponse> get5SavedByUserId(Long userId) {
+//        Pageable pageable = PageRequest.of(0, 5, Sort.by("savedAt").descending());
+//        List<ForumPostSaveEntity> saves = forumPostSaveRepository.findForumPostSavesByUserId(userId, pageable);
+//        if (saves.isEmpty()) {
+//            return null;
+//        }
+//        List<ForumPostSideBarResponse> saveResponses = forumPostSaveMapper.toSaveResponseList(saves);
+//        for (ForumPostSideBarResponse save : saveResponses) {
+//            save.setSaved(true);
+//        }
+//        return saveResponses;
+//    }
 
     public void updateSaveStatuses(List<SaveStatusUpdateRequest> requests, Long userId) {
         for (SaveStatusUpdateRequest request : requests) {

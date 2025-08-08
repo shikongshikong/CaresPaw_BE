@@ -1,7 +1,7 @@
 package com.example.carespawbe.service;
 
-//import com.example.carespawbe.dto.Forum.ForumPostDetailRequest;
 import com.example.carespawbe.dto.Forum.ForumPostDetailRequest;
+import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
 import com.example.carespawbe.dto.History.ForumPostSideBarResponse;
 import com.example.carespawbe.entity.ForumPostHistoryEntity;
 import com.example.carespawbe.mapper.ForumPostHistoryMapper;
@@ -37,15 +37,14 @@ public class ForumPostHistoryService {
         return !history.isEmpty();
     }
 
-    public List<ForumPostSideBarResponse> get5PostHistoryByUserId(Long userId) {
-        Pageable pageable = PageRequest.of(0, 5, Sort.by("createdAt").descending());
-//        List<ForumPostHistoryEntity> histories = forumPostHistoryRepository.findForumPostHistoriesByUserId(userId, pageable);
-        List<ForumPostHistoryEntity> histories = forumPostHistoryRepository.findForumPostHistoryEntitiesByUserId(userId, pageable);
-//        System.out.println("History 1 id: " + histories.get(1).getForumPostEntity().getId());
-        if (histories.size() > 0) {
-            return forumPostHistoryMapper.toHistoryResponseList(histories);
-        }
-//        System.out.println("In ServiceEntity ho");
+    public List<ForumPostHistoryTagResponse> get5PostHistoryByUserId(Long userId) {
+        Pageable pageable = PageRequest.of(0, 5);
+//        List<ForumPostHistoryEntity> histories = forumPostHistoryRepository.findForumPostHistoryEntitiesByUserId(userId, pageable);
+//        if (histories.size() > 0) {
+//            return forumPostHistoryMapper.toHistoryResponseList(histories);
+//        }
+        List<ForumPostHistoryTagResponse> histories = forumPostHistoryRepository.findForumPostHistoryEntityByUserIdHasFollow(userId, pageable);
+        if (histories != null) return histories;
         return null;
     }
 
