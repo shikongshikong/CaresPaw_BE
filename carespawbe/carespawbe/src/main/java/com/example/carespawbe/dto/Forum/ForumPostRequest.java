@@ -13,5 +13,5 @@ public class ForumPostRequest {
     private String state;
     private String type;
     private Long userId;
-    private List<Integer> selectedCategories;
+    private List<Integer> selectedCategoryList;
 }

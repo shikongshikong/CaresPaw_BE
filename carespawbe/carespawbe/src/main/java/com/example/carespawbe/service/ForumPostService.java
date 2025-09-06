@@ -8,6 +8,7 @@ import com.example.carespawbe.utils.UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -47,25 +48,25 @@ public class ForumPostService {
         try {
             forumPostRepository.save(forumPostEntity);
 //            control category
-            List<Integer> arr = forumPostRequest.getSelectedCategories();
+            List<Integer> arr = forumPostRequest.getSelectedCategoryList();
             Long postId = forumPostEntity.getId();
 
             System.out.println("List of Category Id: " + arr);
+            if (arr != null) {
+                List<ForumPostCategoryRequest> forumPostCategoryRequestList = new ArrayList<>();
 
-            List<ForumPostCategoryRequest> forumPostCategoryRequestList = new ArrayList<>();
+                for (Integer caId : arr) {
+                    ForumPostCategoryRequest categoryRequest = ForumPostCategoryRequest
+                            .builder()
+                            .postId(postId)
+                            .categoryId(caId)
+                            .build();
+                    System.out.println("Each Category Id: " + caId);
+                    forumPostCategoryRequestList.add(categoryRequest);
+                }
 
-            for (Integer caId : arr) {
-                ForumPostCategoryRequest categoryRequest = ForumPostCategoryRequest
-                        .builder()
-                        .postId(postId)
-                        .categoryId(caId)
-                        .build();
-                System.out.println("Each Category Id: " + caId);
-                forumPostCategoryRequestList.add(categoryRequest);
+                forumPostCategoryService.addCategoryList(forumPostCategoryRequestList);
             }
-
-            forumPostCategoryService.addCategoryList(forumPostCategoryRequestList);
-
 
             return postMapper.toPostResponse(forumPostEntity);
         } catch (Exception e) {
@@ -95,17 +96,29 @@ public class ForumPostService {
         return postMapper.toPostResponse(forumPostEntity);
     }
 
-    public List<ShortForumPostResponse> getForumPostListReverse(Long userId) {
-//        String token = jwtFilter.getJwtFromRequest(request);
-//        Long userId = 0L;
-//        if (token != null) {
-//            userId = jwtService.extractUserId(token);
-//        }
+//    public List<ShortForumPostResponse> getForumPostListReverse(Long userId) {
+////        String token = jwtFilter.getJwtFromRequest(request);
+////        Long userId = 0L;
+////        if (token != null) {
+////            userId = jwtService.extractUserId(token);
+////        }
+//        List<ShortForumPostResponse> posts = forumPostRepository.findAllShortByCreateAt(userId);
+//
+//        if (posts.isEmpty()) return null;
+//        return posts;
+//    }
+
+    public List<ShortForumPostResponse> getForumPostListByPage(Long userId, Long page, int size) {
         List<ShortForumPostResponse> posts = forumPostRepository.findAllShortByCreateAt(userId);
 
         if (posts.isEmpty()) return null;
         return posts;
     }
+
+//    public Page<ForumPostEntity> getForumPostByPage(int page, int size) {
+//        return forumPostRepository.findAll(PageRequest.of(page - 1, size));
+//    }
+
 
     public List<ShortForumPostResponse> get2TopPopularPost(Long userId) {
         List<ShortForumPostResponse> posts = forumPostRepository.findTop2ByViews(PageRequest.of(0, 2), userId);
@@ -118,34 +131,33 @@ public class ForumPostService {
         forumPostRepository.updateViewCount(postId);
     }
 
-    public List<ShortForumPostResponse> getPostListByType(String type, Long userId) {
+    public List<ShortForumPostResponse> getPostListByType(int typeId, Long userId) {
 //        int typeId = 0;
-        String typeId = "All";
-        switch (type) {
-            case "Dog":
+//        switch (type) {
+//            case "Dog":
 //                typeId = 1;
-                typeId ="Dog";
-                break;
-            case "Cat":
-//                typeId = 2;
-                typeId ="Cat";
-                break;
-            case "Bird":
-//                typeId = 3;
-                typeId = "Bird";
-                break;
-            case "Fish":
-//                typeId = 4;
-                typeId = "Fish";
-                break;
-            case "Reptiles":
-//                typeId = 5
-                typeId = "Reptiles";
-                break;
-            default:
-                break;
-        }
-        if (typeId.equals("All")) forumPostRepository.findAllShortByCreateAt(userId);
+////                typeId ="Dog";
+//                break;
+//            case "Cat":
+////                typeId = 2;
+//                typeId ="Cat";
+//                break;
+//            case "Bird":
+////                typeId = 3;
+//                typeId = "Bird";
+//                break;
+//            case "Fish":
+////                typeId = 4;
+//                typeId = "Fish";
+//                break;
+//            case "Reptiles":
+////                typeId = 5
+//                typeId = "Reptiles";
+//                break;
+//            default:
+//                break;
+//        }
+        if (typeId == 0) forumPostRepository.findAllShortByCreateAt(userId);
         return forumPostRepository.findForumPostByType(typeId, userId);
     }
 
@@ -172,6 +184,10 @@ public class ForumPostService {
 
     public void increaseCommentCount(Long postId) {
         forumPostRepository.updateCmCount(postId);
+    }
+
+    public Page<ForumPostEntity> getForumPostByPage(int page, int size) {
+        return forumPostRepository.findAll(PageRequest.of(page - 1, size));
     }
 
 }

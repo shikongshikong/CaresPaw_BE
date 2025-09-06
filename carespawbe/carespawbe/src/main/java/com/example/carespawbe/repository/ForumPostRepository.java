@@ -131,7 +131,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "ON f.follower.id = :userId and p.user.id = f.followee.id " +
             "WHERE p.type = :typeId " +
             "ORDER BY p.viewedAmount DESC")
-    List<ShortForumPostResponse> findForumPostByType(@Param("typeId") String typeId, @Param("userId") Long userId);
+    List<ShortForumPostResponse> findForumPostByType(@Param("typeId") int typeId, @Param("userId") Long userId);
 
 //    userEntity profile
     List<ForumPostEntity> findByUserId(Long userId);
@@ -159,4 +159,18 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "SET p.commentedAmount = p.commentedAmount + 1 " +
             "WHERE p.id = :postId")
     void updateCmCount(@Param("postId") Long postId);
+
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 400), p.createAt, p.viewedAmount, p.commentedAmount, " +
+            "CASE WHEN s.id IS NOT NULL THEN true ELSE false END, " +
+            "CASE " +
+            "WHEN p.user.id = :userId THEN 0 " +
+            "WHEN f.follower.id = :userId AND f.followee.id = p.user.id THEN 1 " +
+            "ELSE 2 END ) " +
+            "FROM ForumPostEntity p " +
+            "LEFT JOIN ForumPostSaveEntity s " +
+            "ON s.forumPostEntity.id = p.id and s.user.id = :userId " +
+            "LEFT JOIN FollowingEntity f " +
+            "ON f.follower.id = :userId and p.user.id = f.followee.id " +
+            "ORDER BY p.createAt DESC")
+    List<ShortForumPostResponse> findPageShortByCreateAt(@Param("userId") Long userId);
 }

@@ -1,26 +1,25 @@
 package com.example.carespawbe.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ForumPostCategoryEntity {
-
+public class ForumPostTypeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
+    private String image;
 
-    @OneToMany(mappedBy = "forumPostCategoryEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ForumPostToCategoryEntity> toCategories;
 }

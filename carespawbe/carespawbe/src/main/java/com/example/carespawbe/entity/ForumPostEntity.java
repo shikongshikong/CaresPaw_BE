@@ -49,6 +49,9 @@ public class ForumPostEntity {
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostToCategoryEntity> toCategories;
 
+    @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ForumPostLikeEntity> forumPostLikeEntity;
+
     @PrePersist
     protected void onCreate() {
         createAt = LocalDate.now();

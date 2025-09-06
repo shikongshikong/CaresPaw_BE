@@ -41,4 +41,21 @@ public class UserProfileController {
         }
         return ResponseEntity.ok("Delete ForumPostEntity Success!");
     }
+
+    @PostMapping("/check-login")
+    public ResponseEntity<String> loginState(HttpServletRequest request) {
+//        try {
+        Long userId = (Long) request.getAttribute("userId");
+        System.out.println("is Login....");
+        if (userId != null) {
+            System.out.println("Login-ok");
+            return ResponseEntity.ok("Login-ok");
+        }
+        System.out.println("Login-not");
+        return ResponseEntity.ok("Login-not");
+
+//        } catch (Exception e) {
+//            return ResponseEntity.ok("Login-not");
+//        }
+    }
 }

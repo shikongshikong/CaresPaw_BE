@@ -33,11 +33,35 @@ public class ForumService {
 //    @Autowired
 //    JwtAuthenticationFilter jwtFilter;
 
-    public ForumPageResponse getForumData(Long userId) {
-        ForumPageResponse response = new ForumPageResponse();
+//    public ForumPageResponse getForumData(Long userId) {
+//        ForumPageResponse response = new ForumPageResponse();
+//
+//        if (userId != 0L) {
+////      history
+//            List<ForumPostHistoryTagResponse> posts = forumPostHistoryService.get5PostHistoryByUserId(userId);
+//            if (posts != null) {
+//                response.setHistoryPosts(posts);
+//            } else {
+//                System.out.println("NUll in history");
+//                response.setHistoryPosts(null);
+//            }
+////      following
+////      save
+////            response.setSavePosts(forumPostSaveService.get5SavedByUserId(userId));
+//        }
+//        //      popular forumPostEntity
+//        response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
+//        //      list forumPostEntity reverse
+//        response.setPostList(forumPostService.getForumPostListReverse(userId));
+//
+//        return response;
+//    }
+public ForumPageResponse getForumData(Long userId, boolean includePopular, boolean includeHistory, int page) {
+    ForumPageResponse response = new ForumPageResponse();
 
-        if (userId != 0L) {
-//      history
+    //  history
+    if (userId != 0L) {
+        if (includeHistory) {
             List<ForumPostHistoryTagResponse> posts = forumPostHistoryService.get5PostHistoryByUserId(userId);
             if (posts != null) {
                 response.setHistoryPosts(posts);
@@ -45,17 +69,20 @@ public class ForumService {
                 System.out.println("NUll in history");
                 response.setHistoryPosts(null);
             }
-//      following
-//      save
-//            response.setSavePosts(forumPostSaveService.get5SavedByUserId(userId));
         }
-        //      popular forumPostEntity
-        response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
-        //      list forumPostEntity reverse
-        response.setPostList(forumPostService.getForumPostListReverse(userId));
-
-        return response;
     }
+
+    //  popular forumPostEntity
+    if (includePopular) {
+        response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
+    }
+
+    //  list forumPostEntity by page
+    int size = 5;
+    response.setPostList(forumPostService.getForumPostByPage(page, size));
+
+    return response;
+}
 }
 
 //        String token = jwtFilter.getJwtFromRequest(request);
