@@ -2,7 +2,7 @@ package com.example.carespawbe.serviceImp;
 
 import com.example.carespawbe.dto.request.ShopRequest;
 import com.example.carespawbe.dto.response.ShopResponse;
-import com.example.carespawbe.entity.UserEntity;
+import com.example.carespawbe.entity.User;
 import com.example.carespawbe.entity.shop.ShopEntity;
 import com.example.carespawbe.mapper.ShopMapper;
 import com.example.carespawbe.repository.UserRepository;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -28,7 +27,7 @@ public class ShopServiceImp implements ShopService {
 
     @Override
     public ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo) {
-        UserEntity user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (shopRepository.findByUserId(request.getUserId()).isPresent()) {

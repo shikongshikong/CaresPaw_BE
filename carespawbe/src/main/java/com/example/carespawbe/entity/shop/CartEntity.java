@@ -1,6 +1,6 @@
 package com.example.carespawbe.entity.shop;
 
-import com.example.carespawbe.entity.UserEntity;
+import com.example.carespawbe.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,7 +39,7 @@ public class CartEntity {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private UserEntity user;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "voucher_id")
