@@ -1,6 +1,5 @@
 package com.example.carespawbe.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -17,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +24,7 @@ public class User {
     @Column(nullable = false)
     private String fullname;
 
-    private String gender;
+    private int gender;
 
     @Column(nullable = false)
     private String email;
@@ -38,25 +35,25 @@ public class User {
     private String password;
 
     private String avatar;
-    private String role;
-    private String state;
+    private int role;
+    private int state;
     private LocalDate birthday;
     private LocalDate createdAt;
 
 //    optional, but useful when user.getPosts();
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<ForumPost> posts = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<ForumPostHistory> histories = new ArrayList<>();
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    private List<Post> posts = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    private List<PostHistory> histories = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
 //        set current date + avatar + role + status
         createdAt = LocalDate.now();
         avatar = "no-avatar-img.png";
-        role = "normal";
-        state = "active";
+        role = 1;
+        state = 1;
     }
 
 }
