@@ -26,20 +26,20 @@ public class ForumPostLikeService {
     @Autowired
     private UserRepository userRepository;
 
-    public void updateLikeStatuses(Long userId, Long postId, Long statusId) {
-        Optional<ForumPostLikeEntity> isLikeReacted = forumPostLikeRepository.findForumPostLikeEntityByUserIdAndForumPostId(userId, postId);
+    public void updateLikeStatuses(Long userId, Long postId, int statusId) {
+        Optional<ForumPostLikeEntity> isLikeReacted = forumPostLikeRepository.findForumPostLikeEntityByUserIdAndForumPostEntityId(userId, postId);
 
         if (isLikeReacted.isEmpty()) {
             UserEntity userEntity = userRepository.findUserById(userId);
             ForumPostEntity forumPostEntity = forumPostRepository.findForumPostById(postId).get();
             ForumPostLikeEntity forumPostLikeEntity = ForumPostLikeEntity.builder()
                     .user(userEntity)
-                    .forumPost(forumPostEntity)
+                    .forumPostEntity(forumPostEntity)
                     .status(statusId)
                     .build();
             forumPostLikeRepository.save(forumPostLikeEntity);
         } else {
-            Long currentStatus = isLikeReacted.get().getStatus();
+            int currentStatus = isLikeReacted.get().getStatus();
             if (!Objects.equals(currentStatus, statusId)) {
                 ForumPostLikeEntity forumPostLikeEntity = isLikeReacted.get();
                 forumPostLikeEntity.setStatus(statusId);

@@ -5,6 +5,7 @@ import com.example.carespawbe.dto.Save.SaveStatusUpdateRequest;
 import com.example.carespawbe.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,16 +46,6 @@ public class ForumPostController {
 //
 //        return ResponseEntity.ok(forumService.getForumData(userId));
 //    }
-    @GetMapping("")
-    public ResponseEntity<?> getForumData(HttpServletRequest request,
-                                          @RequestParam(defaultValue = "0") int page,
-                                          @RequestParam(defaultValue = "false") boolean includePopular,
-                                          @RequestParam(defaultValue = "0") boolean includeHistory
-                                          ) {
-        Long userId = (Long) request.getAttribute("userId");
-
-        return ResponseEntity.ok(forumService.getForumData(userId, includePopular, includeHistory));
-    }
 
     @GetMapping("/search/{key}")
     public ResponseEntity<?> searchPost(@PathVariable String key, HttpServletRequest request) {
@@ -86,12 +77,12 @@ public class ForumPostController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/post-list")
-    public ResponseEntity<?> getPostList(HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
-        List<ShortForumPostResponse> posts = forumPostService.getForumPostListReverse(userId);
-        return ResponseEntity.ok(posts);
-    }
+//    @GetMapping("/post-list")
+//    public ResponseEntity<?> getPostList(HttpServletRequest request) {
+//        Long userId = (Long) request.getAttribute("userId");
+//        List<ShortForumPostResponse> posts = forumPostService.getForumPostListReverse(userId);
+//        return ResponseEntity.ok(posts);
+//    }
 
     @PatchMapping("/save-post")
     public ResponseEntity<String> saveForumPosts(@RequestBody List<SaveStatusUpdateRequest> requests, HttpServletRequest request) {
@@ -102,14 +93,14 @@ public class ForumPostController {
         return ResponseEntity.ok("Save successful");
     }
 
-    @GetMapping("/post-list/type/{typeId}")
-    public ResponseEntity<?> getPostListByType(@PathVariable int typeId, HttpServletRequest request) {
-        Long userId = (Long) request.getAttribute("userId");
-        if (userId != 0L) {
-            return ResponseEntity.ok(forumPostService.getPostListByType(typeId, userId));
-        }
-        return ResponseEntity.ok(getPostList(request));
-    }
+//    @GetMapping("/post-list/type/{typeId}")
+//    public ResponseEntity<?> getPostListByType(@PathVariable int typeId, HttpServletRequest request) {
+//        Long userId = (Long) request.getAttribute("userId");
+//        if (userId != 0L) {
+//            return ResponseEntity.ok(forumPostService.getPostListByType(typeId, userId));
+//        }
+//        return ResponseEntity.ok(getPostList(request));
+//    }
 
     @PatchMapping("/save-post-detail/{postId}")
     public ResponseEntity<String> saveForumPostDetail(@PathVariable Long postId, HttpServletRequest request) {
@@ -135,11 +126,53 @@ public class ForumPostController {
     }
 
     @PatchMapping("/like/{statusId}/{postId}")
-    public ResponseEntity<String> likePost(@PathVariable Long statusId, @PathVariable Long postId, HttpServletRequest request) {
+    public ResponseEntity<String> likePost(@PathVariable int statusId, @PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
 
         forumPostLikeService.updateLikeStatuses(userId, postId, statusId);
         return ResponseEntity.ok("Change like status successful");
     }
 
+
+    @GetMapping("")
+    public ResponseEntity<?> getForumData(HttpServletRequest request,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "false") boolean includePopular,
+                                          @RequestParam(defaultValue = "false") boolean includeHistory
+    ) {
+        Long userId = (Long) request.getAttribute("userId");
+
+        return ResponseEntity.ok(forumService.getForumData(userId, includePopular, includeHistory, page));
+    }
+
+//    @GetMapping("/post-list")
+//    public ResponseEntity<?> getPostList(HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
+//        Long userId = (Long) request.getAttribute("userId");
+//        List<ShortForumPostResponse> posts = forumPostService.getForumPostListByPage(userId, page);
+//        return ResponseEntity.ok(posts);
+//    }
+
+    @GetMapping("/post-list")
+    public ResponseEntity<?> getPostList(HttpServletRequest request, int page) {
+        Long userId = (Long) request.getAttribute("userId");
+        Page<ShortForumPostResponse> posts = forumPostService.getForumPostListByPage(userId, page);
+        return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/post-list/type/{typeId}")
+    public ResponseEntity<?> getPostListByType(@PathVariable int typeId, HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
+        Long userId = (Long) request.getAttribute("userId");
+        if (userId != 0L) {
+            return ResponseEntity.ok(forumPostService.getPostListByType(typeId, userId, page));
+        }
+        return ResponseEntity.ok(getPostList(request, page));
+    }
+
+    @PatchMapping("/update-post/{postId}")
+    public ResponseEntity<String> likePost(@PathVariable Long postId, @RequestBody ForumPostUpdateRequest forumPostRequest) {
+//        Long userId = (Long) request.getAttribute("userId");
+
+        forumPostService.updateForumPost(postId, forumPostRequest.getTitle(), forumPostRequest.getContent(), forumPostRequest.getStatus());
+        return ResponseEntity.ok("Change like status successful");
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.carespawbe.mapper;
 
-import com.example.carespawbe.dto.Common.FollowingResponse;
+import com.example.carespawbe.dto.Follow.FollowingResponse;
 import com.example.carespawbe.entity.FollowingEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

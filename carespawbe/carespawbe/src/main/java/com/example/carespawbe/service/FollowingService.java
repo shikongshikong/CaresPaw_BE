@@ -1,6 +1,6 @@
 package com.example.carespawbe.service;
 
-import com.example.carespawbe.dto.Common.FollowingResponse;
+import com.example.carespawbe.dto.Follow.FollowingResponse;
 import com.example.carespawbe.entity.FollowingEntity;
 import com.example.carespawbe.mapper.FollowingMapper;
 import com.example.carespawbe.repository.FollowingRepository;

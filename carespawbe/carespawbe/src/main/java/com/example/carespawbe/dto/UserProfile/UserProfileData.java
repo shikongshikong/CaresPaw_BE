@@ -1,6 +1,6 @@
 package com.example.carespawbe.dto.UserProfile;
 
-import com.example.carespawbe.entity.UserEntity;
+import com.example.carespawbe.dto.Follow.FollowingResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,4 +13,5 @@ import java.util.List;
 public class UserProfileData {
     private UserInfoResponse user;
     private List<UserPostResponse> posts;
+    private List<FollowingResponse>  followings;
 }

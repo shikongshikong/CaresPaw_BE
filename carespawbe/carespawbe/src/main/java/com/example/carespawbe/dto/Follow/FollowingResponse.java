@@ -1,4 +1,4 @@
-package com.example.carespawbe.dto.Common;
+package com.example.carespawbe.dto.Follow;
 
 import lombok.Data;
 

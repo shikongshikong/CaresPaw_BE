@@ -11,8 +11,10 @@ import java.util.List;
 public class ForumPageResponse {
     private List<ShortForumPostResponse> popularPosts;
 //    private List<ShortForumPostResponse> postList;
-    Page<ShortForumPostResponse> forumPosts;
+
     private List<ForumPostHistoryTagResponse> historyPosts;
 //     + following
     private List<ForumPostSideBarResponse> savePosts;
+
+    Page<ShortForumPostResponse> postList;
 }

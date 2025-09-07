@@ -24,8 +24,8 @@ public class ForumPostLikeEntity {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private ForumPostEntity forumPost;
+    private ForumPostEntity forumPostEntity;
 
-    private Long status;
+    private int status;
 
 }

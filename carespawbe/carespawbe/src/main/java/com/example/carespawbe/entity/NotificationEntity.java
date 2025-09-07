@@ -21,9 +21,9 @@ public class NotificationEntity {
 
     private String title;
     private String content;
-    private String status;
+    private int status;
     private LocalDate createAt;
-    private String type;
+    private int type;
     private Long source_id;
 
     @ManyToOne
@@ -32,7 +32,7 @@ public class NotificationEntity {
 
     @PrePersist
     protected void onCreate() {
-        status = "unread";
+        status = 0;
         createAt = LocalDate.now();
     }
 }

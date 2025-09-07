@@ -2,6 +2,7 @@ package com.example.carespawbe.controller;
 
 import com.example.carespawbe.dto.Forum.ForumPostRequest;
 import com.example.carespawbe.dto.UserProfile.UserProfileData;
+import com.example.carespawbe.dto.UserProfile.UserUpdateRequest;
 import com.example.carespawbe.service.UserProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +25,14 @@ public class UserProfileController {
         return ResponseEntity.ok(data);
     }
 
-    @PatchMapping("/update-post")
-    public ResponseEntity<?> updatePost(@RequestBody ForumPostRequest forumPostRequest, Long postId, HttpServletRequest request) {
-        int updateRow = userProfileService.updateUserPost(postId, forumPostRequest);
-        if (postId == null || updateRow == 0) {
-            return ResponseEntity.ok("Update ForumPostEntity Failed!");
-        }
-        return ResponseEntity.ok("Update ForumPostEntity Success!");
-    }
+//    @PatchMapping("/update-post")
+//    public ResponseEntity<?> updatePost(@RequestBody ForumPostRequest forumPostRequest, Long postId, HttpServletRequest request) {
+//        int updateRow = userProfileService.updateUserPost(postId, forumPostRequest);
+//        if (postId == null || updateRow == 0) {
+//            return ResponseEntity.ok("Update ForumPostEntity Failed!");
+//        }
+//        return ResponseEntity.ok("Update ForumPostEntity Success!");
+//    }
 
     @DeleteMapping("/delete-post/{postId}")
     public ResponseEntity<?> deletePost(@PathVariable Long postId, HttpServletRequest request) {
@@ -57,5 +58,11 @@ public class UserProfileController {
 //        } catch (Exception e) {
 //            return ResponseEntity.ok("Login-not");
 //        }
+    }
+
+    @PatchMapping("/update")
+    public void updateUserProfile(@RequestBody UserUpdateRequest userRequest, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        userProfileService.updateUserProfileData(userRequest, userId);
     }
 }

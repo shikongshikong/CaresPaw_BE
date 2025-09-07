@@ -79,7 +79,7 @@ public ForumPageResponse getForumData(Long userId, boolean includePopular, boole
 
     //  list forumPostEntity by page
     int size = 5;
-    response.setPostList(forumPostService.getForumPostByPage(page, size));
+    response.setPostList(forumPostService.getForumPostByPage(userId, page, size));
 
     return response;
 }

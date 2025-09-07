@@ -28,8 +28,8 @@ public class ForumPostEntity {
 
     private LocalDate createAt;
     private LocalDate updateAt;
-    private String state;
-    private String type; // new field
+    private int state;
+    private int type; // new field
     private Long viewedAmount;
     private Long commentedAmount;
 

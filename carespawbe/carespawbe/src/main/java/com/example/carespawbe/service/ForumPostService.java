@@ -108,8 +108,9 @@ public class ForumPostService {
 //        return posts;
 //    }
 
-    public List<ShortForumPostResponse> getForumPostListByPage(Long userId, Long page, int size) {
-        List<ShortForumPostResponse> posts = forumPostRepository.findAllShortByCreateAt(userId);
+    public Page<ShortForumPostResponse> getForumPostListByPage(Long userId, int page) {
+        int size = 5;
+        Page<ShortForumPostResponse> posts = forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
 
         if (posts.isEmpty()) return null;
         return posts;
@@ -131,35 +132,35 @@ public class ForumPostService {
         forumPostRepository.updateViewCount(postId);
     }
 
-    public List<ShortForumPostResponse> getPostListByType(int typeId, Long userId) {
-//        int typeId = 0;
-//        switch (type) {
-//            case "Dog":
-//                typeId = 1;
-////                typeId ="Dog";
-//                break;
-//            case "Cat":
-////                typeId = 2;
-//                typeId ="Cat";
-//                break;
-//            case "Bird":
-////                typeId = 3;
-//                typeId = "Bird";
-//                break;
-//            case "Fish":
-////                typeId = 4;
-//                typeId = "Fish";
-//                break;
-//            case "Reptiles":
-////                typeId = 5
-//                typeId = "Reptiles";
-//                break;
-//            default:
-//                break;
-//        }
-        if (typeId == 0) forumPostRepository.findAllShortByCreateAt(userId);
-        return forumPostRepository.findForumPostByType(typeId, userId);
-    }
+//    public List<ShortForumPostResponse> getPostListByType(int typeId, Long userId) {
+////        int typeId = 0;
+////        switch (type) {
+////            case "Dog":
+////                typeId = 1;
+//////                typeId ="Dog";
+////                break;
+////            case "Cat":
+//////                typeId = 2;
+////                typeId ="Cat";
+////                break;
+////            case "Bird":
+//////                typeId = 3;
+////                typeId = "Bird";
+////                break;
+////            case "Fish":
+//////                typeId = 4;
+////                typeId = "Fish";
+////                break;
+////            case "Reptiles":
+//////                typeId = 5
+////                typeId = "Reptiles";
+////                break;
+////            default:
+////                break;
+////        }
+//        if (typeId == 0) forumPostRepository.findAllShortByCreateAt(userId);
+//        return forumPostRepository.findForumPostByType(typeId, userId);
+//    }
 
     public List<ShortForumPostResponse> getForumPostByCategory(List<Integer> category, Long userId, String type) {
         if (category.isEmpty()) return null;
@@ -173,10 +174,10 @@ public class ForumPostService {
         return forumPostEntities;
     }
 
-    public int updatePostInfo(Long postId, ForumPostRequest forumPostRequest) {
-        return forumPostRepository.updatePost(postId, forumPostRequest.getTitle(), forumPostRequest.getContent()
-                ,LocalDate.now(), forumPostRequest.getState());
-    }
+//    public int updatePostInfo(Long postId, ForumPostRequest forumPostRequest) {
+//        return forumPostRepository.updatePost(postId, forumPostRequest.getTitle(), forumPostRequest.getContent()
+//                ,LocalDate.now(), forumPostRequest.getState());
+//    }
 
     public int deletePost(Long postId) {
         return forumPostRepository.removePostById(postId);
@@ -186,8 +187,29 @@ public class ForumPostService {
         forumPostRepository.updateCmCount(postId);
     }
 
-    public Page<ForumPostEntity> getForumPostByPage(int page, int size) {
-        return forumPostRepository.findAll(PageRequest.of(page - 1, size));
+    public Page<ShortForumPostResponse> getForumPostByPage(Long userId, int page, int size) {
+//        return forumPostRepository.findAll(PageRequest.of(page - 1, size));
+        return forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
     }
+
+    public Page<ShortForumPostResponse> getPostListByType(int typeId, Long userId, int page) {
+        int size = 5;
+
+        if (typeId == 0) forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
+        return forumPostRepository.findForumPostByType(typeId, userId, PageRequest.of(page - 1, size));
+    }
+
+    public void updateForumPost(Long postId, String title, String content, int status) {
+        ForumPostEntity forumPostEntity = forumPostRepository.findForumPostById(postId).orElse(null);
+        if (forumPostEntity == null) return;
+
+        forumPostEntity.setTitle(title);
+        forumPostEntity.setContent(content);
+        forumPostEntity.setState(status);
+        forumPostEntity.setUpdateAt(LocalDate.now());
+
+        forumPostRepository.save(forumPostEntity);
+    }
+
 
 }
