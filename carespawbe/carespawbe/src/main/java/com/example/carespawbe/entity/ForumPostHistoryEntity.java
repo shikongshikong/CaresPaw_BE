@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @Entity()
 @Data
-@Table(name = "post_history")
+@Table(name = "forum_post_history")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

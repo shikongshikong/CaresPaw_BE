@@ -14,5 +14,4 @@ public class RegisterRequest {
     private String confirmPassword;
     private int gender;
     private LocalDate birthday;
-
 }

@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ForumPostCategoryRequest {
     private Long postId;
-    private Integer categoryId;
+    private int categoryId;
 }

@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "forum_post_category")
 public class ForumPostCategoryEntity {
 
     @Id

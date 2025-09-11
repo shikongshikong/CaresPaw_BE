@@ -18,7 +18,7 @@ import java.util.Optional;
 @Repository
 public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long> {
 
-    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 400), p.createAt, p.viewedAmount, p.commentedAmount," +
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 240), p.createAt, p.viewedAmount, p.commentedAmount," +
             "CASE WHEN s.id IS NOT NULL THEN true ELSE false END, " +
             "CASE " +
             "WHEN p.user.id = :userId THEN 0 " +
@@ -34,7 +34,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "ORDER BY p.createAt DESC")
     List<ShortForumPostResponse> findByTitleKey(@Param("keyword") String keyword, @Param("userId") Long userId);
 
-    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 400), p.createAt, p.viewedAmount, p.commentedAmount," +
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 240), p.createAt, p.viewedAmount, p.commentedAmount," +
             "CASE WHEN s.id IS NOT NULL THEN true ELSE false END, " +
             "CASE " +
             "WHEN p.user.id = :userId THEN 0 " +
@@ -71,7 +71,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
 //            "ORDER BY c.forumPostEntity.createAt DESC")
 //    List<ShortForumPostResponse> findPostByTypeAndCategory(@Param("userId") Long userId, @Param("type") String type, @Param("categoryIdList") List<Integer> categoryIdList);
 
-    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(c.forumPostEntity.id, c.forumPostEntity.user.id, c.forumPostEntity.user.fullname, c.forumPostEntity.title, SUBSTRING(c.forumPostEntity.content, 1, 400), c.forumPostEntity.createAt, c.forumPostEntity.viewedAmount, c.forumPostEntity.commentedAmount, " +
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(c.forumPostEntity.id, c.forumPostEntity.user.id, c.forumPostEntity.user.fullname, c.forumPostEntity.title, SUBSTRING(c.forumPostEntity.content, 1, 240), c.forumPostEntity.createAt, c.forumPostEntity.viewedAmount, c.forumPostEntity.commentedAmount, " +
             "CASE WHEN s.id IS NOT NULL THEN true ELSE false END, " +
             "CASE " +
             "WHEN c.forumPostEntity.user.id = :userId THEN 0 " +
@@ -86,7 +86,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "ORDER BY c.forumPostEntity.createAt DESC")
     List<ShortForumPostResponse> findPostsByCategory(@Param("userId") Long userId, @Param("categoryIdList") List<Integer> categoryIdList);
 
-    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(c.forumPostEntity.id, c.forumPostEntity.user.id, c.forumPostEntity.user.fullname, c.forumPostEntity.title, SUBSTRING(c.forumPostEntity.content, 1, 400), c.forumPostEntity.createAt, c.forumPostEntity.viewedAmount, c.forumPostEntity.commentedAmount, " +
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(c.forumPostEntity.id, c.forumPostEntity.user.id, c.forumPostEntity.user.fullname, c.forumPostEntity.title, SUBSTRING(c.forumPostEntity.content, 1, 240), c.forumPostEntity.createAt, c.forumPostEntity.viewedAmount, c.forumPostEntity.commentedAmount, " +
             "CASE WHEN s.id IS NOT NULL THEN true ELSE false END," +
             "CASE " +
             "WHEN c.forumPostEntity.user.id = :userId THEN 0 " +
@@ -161,7 +161,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "WHERE p.id = :postId")
     void updateCmCount(@Param("postId") Long postId);
 
-    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 400), p.createAt, p.viewedAmount, p.commentedAmount, " +
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 240), p.createAt, p.viewedAmount, p.commentedAmount, " +
             "CASE WHEN s.id IS NOT NULL THEN true ELSE false END, " +
             "CASE " +
             "WHEN p.user.id = :userId THEN 0 " +
@@ -175,12 +175,12 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "ORDER BY p.createAt DESC")
     Page<ShortForumPostResponse> findPageShortByCreateAt(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 400), p.createAt, p.viewedAmount, p.commentedAmount," +
-            "CASE WHEN s.id IS NOT NULL THEN true ELSE false END," +
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 240), p.createAt, p.viewedAmount, p.commentedAmount," +
+            "CASE WHEN s.id IS NOT NULL THEN true ELSE false END, " +
             "CASE " +
             "WHEN p.user.id = :userId THEN 0 " +
             "WHEN f.follower.id = :userId AND f.followee.id = p.user.id THEN 1 " +
-            "ELSE 2 END ) " +
+            "ELSE 2 END) " +
             "FROM ForumPostEntity p " +
             "LEFT JOIN ForumPostSaveEntity s " +
             "ON s.forumPostEntity.id = p.id and s.user.id = :userId " +

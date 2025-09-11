@@ -3,13 +3,15 @@ package com.example.carespawbe.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "post_to_category")
+@Table(name = "forum_post_to_category")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Data
 public class ForumPostToCategoryEntity {
 
     @Id

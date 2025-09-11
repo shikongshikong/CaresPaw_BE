@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "forum_post_comment")
 public class ForumPostCommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

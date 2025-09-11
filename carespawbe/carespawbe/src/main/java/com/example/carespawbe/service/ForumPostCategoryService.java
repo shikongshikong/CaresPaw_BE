@@ -19,8 +19,12 @@ public class ForumPostCategoryService {
     private ForumPostCategoryMapper forumPostCategoryMapper;
 
     public void addCategoryList(List<ForumPostCategoryRequest> forumPostCategoryRequestList) {
-        List<ForumPostToCategoryEntity> postCategoryList = forumPostCategoryMapper.toPocategoryList(forumPostCategoryRequestList);
+        List<ForumPostToCategoryEntity> postCategoryList = forumPostCategoryMapper.toPostcategoryList(forumPostCategoryRequestList);
+        for (ForumPostToCategoryEntity post : postCategoryList) {
+            System.out.println("CategoryId of post: " +  post.getForumPostCategoryEntity().getId());
+            forumPostToCategoryRepository.save(post);
+        }
         System.out.println("List of ForumPostEntity Category after change: " + postCategoryList);
-        forumPostToCategoryRepository.saveAll(postCategoryList);
+//        forumPostToCategoryRepository.saveAll(postCategoryList);
     }
 }

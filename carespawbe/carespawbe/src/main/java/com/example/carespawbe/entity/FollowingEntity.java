@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "followee_id"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "followee_id"}), name = "following")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -10,8 +10,8 @@ import java.util.List;
 public class ForumPostRequest {
     private String title;
     private String content;
-    private String state;
-    private String type;
+    private int state;
+    private int typeId;
     private Long userId;
     private List<Integer> selectedCategoryList;
 }

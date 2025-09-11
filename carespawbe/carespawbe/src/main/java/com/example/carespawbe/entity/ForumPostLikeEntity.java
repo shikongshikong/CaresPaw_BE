@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "user_like_post")
+@Table(name = "user_like_forum_post")
 public class ForumPostLikeEntity {
 
     @Id

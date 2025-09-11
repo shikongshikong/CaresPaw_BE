@@ -57,11 +57,16 @@ public class ForumPostController {
     }
 
     @PostMapping("/add-post")
-    public ResponseEntity<?> addPost(@RequestBody ForumPostRequest forumPostRequest, HttpServletRequest request) {
+    public ResponseEntity<?> addPost(@RequestBody ForumPostRequest postData, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         System.out.println("UserEntity id in add-forumPostEntity: " + userId);
-        forumPostRequest.setUserId(userId);
-        ForumPostResponse post = forumPostService.addForumPost(forumPostRequest);
+        postData.setUserId(userId);
+
+        System.out.println("Content of new post: " + postData.getContent());
+        System.out.println("Title of new post: " + postData.getTitle());
+        System.out.println("Categories of new post: " + postData.getSelectedCategoryList());
+        ForumPostResponse post = forumPostService.addForumPost(postData);
+//        ForumPostResponse post = null;
         return ResponseEntity.ok(post);
     }
 
@@ -140,7 +145,8 @@ public class ForumPostController {
                                           @RequestParam(defaultValue = "false") boolean includePopular,
                                           @RequestParam(defaultValue = "false") boolean includeHistory
     ) {
-        Long userId = (Long) request.getAttribute("userId");
+//        Long userId = (Long) request.getAttribute("userId");
+        Long userId = 0L;
 
         return ResponseEntity.ok(forumService.getForumData(userId, includePopular, includeHistory, page));
     }

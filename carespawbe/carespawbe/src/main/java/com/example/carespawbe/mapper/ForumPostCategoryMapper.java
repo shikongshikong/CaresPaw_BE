@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ForumPostCategoryMapper {
 
-    List<ForumPostToCategoryEntity> toPocategoryList(List<ForumPostCategoryRequest> forumPostCategoryRequestList);
+    List<ForumPostToCategoryEntity> toPostcategoryList(List<ForumPostCategoryRequest> forumPostCategoryRequestList);
 
     @Mapping(source = "postId", target = "forumPostEntity.id")
     @Mapping(source = "categoryId", target = "forumPostCategoryEntity.id")

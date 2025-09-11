@@ -45,6 +45,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .gender(request.getGender())
                 .password(encodedPassword)
+                .birthday(request.getBirthday())
                 .build();
         return userRepository.save(userEntity);
     }

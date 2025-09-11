@@ -47,7 +47,7 @@ public class ForumPostService {
         ForumPostEntity forumPostEntity = postMapper.toPostEntity(forumPostRequest);
         try {
             forumPostRepository.save(forumPostEntity);
-//            control category
+//          control category
             List<Integer> arr = forumPostRequest.getSelectedCategoryList();
             Long postId = forumPostEntity.getId();
 
@@ -55,7 +55,7 @@ public class ForumPostService {
             if (arr != null) {
                 List<ForumPostCategoryRequest> forumPostCategoryRequestList = new ArrayList<>();
 
-                for (Integer caId : arr) {
+                for (int caId : arr) {
                     ForumPostCategoryRequest categoryRequest = ForumPostCategoryRequest
                             .builder()
                             .postId(postId)
@@ -188,7 +188,7 @@ public class ForumPostService {
     }
 
     public Page<ShortForumPostResponse> getForumPostByPage(Long userId, int page, int size) {
-//        return forumPostRepository.findAll(PageRequest.of(page - 1, size));
+        System.out.println("User id in psot service: " + userId);
         return forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
     }
 
