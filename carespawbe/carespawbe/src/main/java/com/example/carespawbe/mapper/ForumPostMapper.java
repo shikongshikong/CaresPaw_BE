@@ -11,11 +11,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ForumPostMapper {
+    /*@Mapping(source = "typeId", target = "typeId")*/
     @Mapping(source = "userId", target = "user.id")
-    @Mapping(source = "typeId", target = "type")
     ForumPostEntity toPostEntity(ForumPostRequest forumPostRequest);
 
-//    @Mapping(target = "saved", expression = "java(forumPostSaveEntity != null)")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.fullname", target = "fullname")
     @Mapping(source = "user.avatar", target = "avatar")

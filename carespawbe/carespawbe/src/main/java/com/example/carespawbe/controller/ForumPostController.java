@@ -73,7 +73,7 @@ public class ForumPostController {
     @GetMapping("/post-detail/{postId}")
     public ResponseEntity<?> getForumDetail(@PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        System.out.println("UserEntity id in forumPostEntity detail: " + userId);
+        System.out.println("UserEntity id in get forumdetail: " + userId);
         ForumPostDetailResponse response = ForumPostDetailResponse.builder()
                 .post(forumPostService.getForumPostById(postId, userId, request))
                 .comments(forumPostCommentService.getPostCommentsByPostId(postId))
@@ -145,8 +145,9 @@ public class ForumPostController {
                                           @RequestParam(defaultValue = "false") boolean includePopular,
                                           @RequestParam(defaultValue = "false") boolean includeHistory
     ) {
-//        Long userId = (Long) request.getAttribute("userId");
-        Long userId = 0L;
+        Long userId = (Long) request.getAttribute("userId");
+        //Long userId = 0L;
+        System.out.println("UserEntity id in getForumData: " + userId);
 
         return ResponseEntity.ok(forumService.getForumData(userId, includePopular, includeHistory, page));
     }

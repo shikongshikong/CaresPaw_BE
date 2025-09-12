@@ -4,11 +4,13 @@ import com.example.carespawbe.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,19 +24,19 @@ public class JwtService {
     private static final String SECRET_KEY = "U1eR9sdU8HdJ3qLkp09sN8vX0Az17Egk";
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 
-//    Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+    //    Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 //    String base64Key = Encoders.BASE64.encode(key.getEncoded());
 
-    public String generateToken(UserEntity userEntity) {
+    public String generateToken(UserEntity user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userEntity.getId());
-        claims.put("userRole", userEntity.getRole());
-        claims.put("userState", userEntity.getState());
+        claims.put("userId", user.getId());
+        claims.put("userRole", user.getRole());
+        claims.put("userState", user.getState());
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(String.valueOf(userEntity.getId()))
+                .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -69,7 +71,7 @@ public class JwtService {
 
 
 
-//    public boolean isTokenValid(String token, UserEntity userEntity) {
+//    public boolean isTokenValid(String token, User user) {
 //        final Long id = extractUserIdFromToken(token);
 //    }
 

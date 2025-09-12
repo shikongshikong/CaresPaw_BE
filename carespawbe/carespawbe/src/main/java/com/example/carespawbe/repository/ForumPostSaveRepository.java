@@ -24,4 +24,6 @@ public interface ForumPostSaveRepository extends JpaRepository<ForumPostSaveEnti
     boolean existsByUserIdAndForumPostEntityId(Long userId, Long postId);
 
     void deleteByUserIdAndForumPostEntityId(Long userId, Long postId);
+
+    ForumPostSaveEntity findByUserIdAndForumPostEntityId(Long userId, Long postId);
 }

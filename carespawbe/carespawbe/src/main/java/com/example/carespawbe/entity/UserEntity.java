@@ -49,6 +49,10 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ForumPostHistoryEntity> histories = new ArrayList<>();
 
+    //
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ForumPostSaveEntity> forumPostSaveEntity;
+
     @PrePersist
     protected void onCreate() {
 //        set current date + avatar + role + status

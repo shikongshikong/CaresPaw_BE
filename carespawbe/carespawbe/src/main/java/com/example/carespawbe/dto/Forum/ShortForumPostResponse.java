@@ -16,6 +16,7 @@ public class ShortForumPostResponse {
     private LocalDate createAt;
     private Long viewedAmount;
     private Long commentedAmount;
-    private boolean isSaved;
-    private int isFollowed;
+    private boolean saved;
+    private int followState;
 }
+

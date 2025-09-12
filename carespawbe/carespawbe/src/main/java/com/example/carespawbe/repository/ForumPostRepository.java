@@ -97,7 +97,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "ON s.forumPostEntity.id = c.forumPostEntity.id and s.user.id = :userId " +
             "LEFT JOIN FollowingEntity f " +
             "ON f.follower.id = :userId and c.forumPostEntity.user.id = f.followee.id " +
-            "WHERE c.forumPostEntity.type = :type " +
+            "WHERE c.forumPostEntity.typeId = :type " +
             "AND c.forumPostCategoryEntity.id IN :categoryIdList "+
             "ORDER BY c.forumPostEntity.createAt DESC")
     List<ShortForumPostResponse> findPostsByTypeAndCategory(@Param("userId") Long userId, @Param("type") String type, @Param("categoryIdList") List<Integer> categoryIdList);
@@ -161,12 +161,14 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "WHERE p.id = :postId")
     void updateCmCount(@Param("postId") Long postId);
 
-    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 240), p.createAt, p.viewedAmount, p.commentedAmount, " +
-            "CASE WHEN s.id IS NOT NULL THEN true ELSE false END, " +
+    @Query("SELECT new com.example.carespawbe.dto.Forum.ShortForumPostResponse(p.id, p.user.id, p.user.fullname, p.title, SUBSTRING(p.content, 1, 240), " +
+            "p.createAt, " +
+            "p.viewedAmount, p.commentedAmount, " +
+            "CASE WHEN s IS NOT NULL THEN true ELSE false END, " +
             "CASE " +
             "WHEN p.user.id = :userId THEN 0 " +
             "WHEN f.follower.id = :userId AND f.followee.id = p.user.id THEN 1 " +
-            "ELSE 2 END ) " +
+            "ELSE 2 END) " +
             "FROM ForumPostEntity p " +
             "LEFT JOIN ForumPostSaveEntity s " +
             "ON s.forumPostEntity.id = p.id and s.user.id = :userId " +
@@ -186,7 +188,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "ON s.forumPostEntity.id = p.id and s.user.id = :userId " +
             "LEFT JOIN FollowingEntity f " +
             "ON f.follower.id = :userId and p.user.id = f.followee.id " +
-            "WHERE p.type = :typeId " +
+            "WHERE p.typeId = :typeId " +
             "ORDER BY p.viewedAmount DESC")
     Page<ShortForumPostResponse> findForumPostByType(@Param("typeId") int typeId, @Param("userId") Long userId, Pageable pageable);
 }

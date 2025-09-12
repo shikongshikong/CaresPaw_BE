@@ -29,7 +29,7 @@ public class ForumPostEntity {
     private LocalDate createAt;
     private LocalDate updateAt;
     private int state;
-    private int type; // new field
+    private int typeId; // new field
     private Long viewedAmount;
     private Long commentedAmount;
 
@@ -40,8 +40,9 @@ public class ForumPostEntity {
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostHistoryEntity> histories;
 
-    @OneToOne(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ForumPostSaveEntity forumPostSaveEntity;
+    //
+    @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ForumPostSaveEntity> forumPostSaveEntity;
 
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostCommentEntity> comments;

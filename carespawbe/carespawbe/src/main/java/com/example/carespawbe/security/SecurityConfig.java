@@ -22,7 +22,7 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .csrf(csrf -> csrf.disable())
-                .cors(Customizer.withDefaults()); // ✅ Cách dùng mới không deprecated
+                .cors(Customizer.withDefaults());
 
         return http.build();
     }
@@ -40,5 +40,4 @@ public class SecurityConfig {
         return source;
     }
 }
-
 

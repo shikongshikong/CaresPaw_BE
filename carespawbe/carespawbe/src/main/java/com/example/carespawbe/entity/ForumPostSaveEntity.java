@@ -26,7 +26,7 @@ public class ForumPostSaveEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     private ForumPostEntity forumPostEntity;
 
