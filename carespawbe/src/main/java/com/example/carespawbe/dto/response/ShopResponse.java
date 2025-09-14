@@ -2,6 +2,8 @@ package com.example.carespawbe.dto.response;
 
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,4 +15,6 @@ public class ShopResponse {
     private String shopLogo;
     private String email;
     private String phoneNumber;
+    private LocalDate created_at;
+    private LocalDate updated_at;
 }

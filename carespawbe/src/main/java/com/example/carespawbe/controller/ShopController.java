@@ -2,6 +2,8 @@ package com.example.carespawbe.controller;
 
 import com.example.carespawbe.dto.request.ShopRequest;
 import com.example.carespawbe.dto.response.ShopResponse;
+import com.example.carespawbe.entity.UserEntity;
+import com.example.carespawbe.repository.UserRepository;
 import com.example.carespawbe.service.ShopService;
 import jakarta.servlet.annotation.MultipartConfig;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,9 @@ public class ShopController {
     @Autowired
     private ShopService shopService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registerShop(
             @RequestParam("shopName") String shopName,
@@ -31,8 +36,23 @@ public class ShopController {
             @RequestParam("userId") Long userId,
             @RequestParam("status") int status,
             @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo
-    ){
+    ) {
         try {
+            // 🔹 Tìm user trong DB
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // 🔹 Nếu user đã là chủ shop thì chặn
+            if (user.getRole() == 2) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "User already registered a shop"));
+            }
+
+            // 🔹 Cập nhật role user thành 2 (chủ shop)
+            user.setRole(2);
+            userRepository.save(user);
+
+            // 🔹 Tạo ShopRequest để truyền xuống service
             ShopRequest shopRequest = new ShopRequest();
             shopRequest.setShopName(shopName);
             shopRequest.setShopAddress(shopAddress);
@@ -41,6 +61,7 @@ public class ShopController {
             shopRequest.setStatus(1);
 
             ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo);
+
             return ResponseEntity.ok(shopResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -76,4 +97,9 @@ public class ShopController {
         return ResponseEntity.ok(shopService.getShopByUserId(userId));
     }
 
+    @GetMapping("/{shopId}")
+    public ResponseEntity<ShopResponse> getShopById(@PathVariable Long shopId) {
+        ShopResponse shop = shopService.getShopById(shopId);
+        return ResponseEntity.ok(shop);
+    }
 }

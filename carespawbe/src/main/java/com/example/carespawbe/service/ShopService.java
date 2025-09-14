@@ -8,5 +8,6 @@ public interface ShopService {
     ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo);
     ShopResponse updateShopInfo(Long userId, ShopRequest request, MultipartFile shopLogo);
     ShopResponse getShopByUserId(Long userId);
+    ShopResponse getShopById(Long shopId);
 
 }

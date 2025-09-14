@@ -2,7 +2,7 @@ package com.example.carespawbe.serviceImp;
 
 import com.example.carespawbe.dto.request.ShopRequest;
 import com.example.carespawbe.dto.response.ShopResponse;
-import com.example.carespawbe.entity.User;
+import com.example.carespawbe.entity.UserEntity;
 import com.example.carespawbe.entity.shop.ShopEntity;
 import com.example.carespawbe.mapper.ShopMapper;
 import com.example.carespawbe.repository.UserRepository;
@@ -27,21 +27,21 @@ public class ShopServiceImp implements ShopService {
 
     @Override
     public ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo) {
-        User user = userRepository.findById(request.getUserId())
+        UserEntity userEntity = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (shopRepository.findByUserId(request.getUserId()).isPresent()) {
             throw new RuntimeException("User has already registered a shop");
         }
 
-        user.setPhoneNumber(request.getShopPhone());
-        user.setRole(2);
-        userRepository.save(user);
+        userEntity.setPhoneNumber(request.getShopPhone());
+        userEntity.setRole(2);
+        userRepository.save(userEntity);
 
         ShopEntity shopEntity = new ShopEntity();
         shopEntity.setShopName(request.getShopName());
         shopEntity.setShopAddress(request.getShopAddress());
-        shopEntity.setUser(user);
+        shopEntity.setUser(userEntity);
         shopEntity.setCreated_at(LocalDate.now());
         shopEntity.setShopAmountFollower(0);
 
@@ -84,6 +84,14 @@ public class ShopServiceImp implements ShopService {
     public ShopResponse getShopByUserId(Long userId) {
         ShopEntity shop = shopRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Shop not found for user ID: " + userId));
+
+        return shopMapper.toResponse(shop);
+    }
+
+    @Override
+    public ShopResponse getShopById(Long shopId) {
+        ShopEntity shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found with id " + shopId));
 
         return shopMapper.toResponse(shop);
     }
