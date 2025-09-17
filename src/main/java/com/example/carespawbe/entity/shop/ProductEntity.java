@@ -68,8 +68,8 @@ public class ProductEntity {
     @OneToMany(mappedBy = "imageProduct")
     private List<ImageProductEntity> imageProductList;
 
-    @OneToMany(mappedBy = "product")
-    private List<CartItemEntity> cartItemList;
+//    @OneToMany(mappedBy = "product")
+//    private List<CartItemEntity> cartItemList;
 
 //    @PrePersist
 //    protected void onCreate() {

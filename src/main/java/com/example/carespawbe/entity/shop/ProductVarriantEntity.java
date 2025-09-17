@@ -30,4 +30,7 @@ public class ProductVarriantEntity {
     @OneToMany(mappedBy = "productVarriant")
     private List<CartItemEntity> cartItemEntityList;
 
+    @OneToMany(mappedBy = "productVarriantEntity")
+    private List<OrderItemEntity> orderItemEntityList;
+
 }

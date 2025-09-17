@@ -20,16 +20,16 @@ public class CartEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long CartId;
+    private Long cartId;
 
     @Column(updatable = false)
-    private Double CartTotalPrice;
+    private Double cartTotalPrice;
 
     @Column(updatable = false)
-    private Double CartShippingFee;
+    private Double cartShippingFee;
 
     @Column(updatable = true)
-    private int CartTotalCoinEarned;
+    private int cartTotalCoinEarned;
 
     @Column(updatable = false)
     private LocalDate createdAt;

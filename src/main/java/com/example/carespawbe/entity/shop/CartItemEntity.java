@@ -30,16 +30,16 @@ public class CartItemEntity {
     @Column(updatable = false)
     private Double cartItemTotalPrice;
 
-    @Column(updatable = true)
-    private boolean isFlashSale;
+    @Column(updatable = false)
+    private boolean flashSale;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private CartEntity cart;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private ProductEntity product;
+//    @ManyToOne
+//    @JoinColumn(name = "product_id")
+//    private ProductEntity product;
 
     @ManyToOne
     @JoinColumn(name = "product_varriant_id")
