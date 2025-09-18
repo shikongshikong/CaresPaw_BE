@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CartItemRequest {
+    private Long cartItemId;
     private Long cartId;
     private Double cartItemPrice;
     private Double cartItemOriginalPrice;

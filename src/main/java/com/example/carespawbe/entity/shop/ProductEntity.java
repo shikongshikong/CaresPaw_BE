@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -62,11 +63,11 @@ public class ProductEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
-    @OneToMany(mappedBy = "productVarriants")
-    private List<ProductVarriantEntity> productVarriantList;
+    @OneToMany(mappedBy = "productVarriants",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ProductVarriantEntity> productVarriantList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "imageProduct")
-    private List<ImageProductEntity> imageProductList;
+    @OneToMany(mappedBy = "imageProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ImageProductEntity> imageProductList = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
     private List<CartItemEntity> cartItemList;

@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     List<ProductEntity> findTop6ByOrderByProductCreatedAtDesc();
+    ProductEntity findProductEntityByProductId(Long productId);
 
 }

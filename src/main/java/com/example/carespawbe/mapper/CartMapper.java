@@ -10,16 +10,17 @@ import java.util.List;
 @Mapper(componentModel = "spring", nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
 public interface CartMapper {
 
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userId", source = "userEntity.id")
 //    @Mapping(target = "userFullName", source = "user.fullname")
     @Mapping(target = "voucherId", source = "voucher.voucherId")
     @Mapping(target = "voucherName", source = "voucher.voucherName")
+    @Mapping(target = "cartItems", source = "cartItemEntityList")
     CartResponse toCartResponse(CartEntity entity);
 
 //    @Mapping(target = "user.userId", source = "userId")
 //    @Mapping(target = "voucher.voucherId", source = "voucherId")
 //    @Mapping(target = "cartItemEntityList", source = "cartItems")
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userId", source = "userEntity.id")
     //    @Mapping(target = "userFullName", source = "user.fullname")
     @Mapping(target = "voucherId", source = "voucher.voucherId")
     @Mapping(target = "voucherName", source = "voucher.voucherName")

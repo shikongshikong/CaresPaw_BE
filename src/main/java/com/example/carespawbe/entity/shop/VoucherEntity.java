@@ -51,4 +51,8 @@ public class VoucherEntity {
 
     @OneToMany(mappedBy = "voucher")
     private List<CartEntity> cartEntityList;
+
+
+    @OneToMany(mappedBy = "voucherEntity")
+    private List<OrderEntity> orderEntities;
 }
