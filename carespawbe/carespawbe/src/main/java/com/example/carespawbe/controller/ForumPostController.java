@@ -1,7 +1,9 @@
 package com.example.carespawbe.controller;
 
 import com.example.carespawbe.dto.Forum.*;
+import com.example.carespawbe.dto.Like.LikeStateUpdateRequest;
 import com.example.carespawbe.dto.Save.SaveStatusUpdateRequest;
+import com.example.carespawbe.entity.ForumPostEntity;
 import com.example.carespawbe.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/forum")
@@ -47,12 +52,12 @@ public class ForumPostController {
 //        return ResponseEntity.ok(forumService.getForumData(userId));
 //    }
 
-    @GetMapping("/search/{key}")
-    public ResponseEntity<?> searchPost(@PathVariable String key, HttpServletRequest request) {
-        System.out.println("Search key: " + key);
+    @GetMapping("/search")
+    public ResponseEntity<?> searchPost(@RequestParam(defaultValue = "") String keyword, HttpServletRequest request) {
+        System.out.println("Search key: " + keyword);
         Long userId = (Long) request.getAttribute("userId");
 
-        List<ShortForumPostResponse> posts = forumPostService.getForumPostByKeyword(key, userId);
+        List<ShortForumPostResponse> posts = forumPostService.getForumPostByKeyword(keyword, userId);
         return ResponseEntity.ok(posts);
     }
 
@@ -73,12 +78,13 @@ public class ForumPostController {
     @GetMapping("/post-detail/{postId}")
     public ResponseEntity<?> getForumDetail(@PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        System.out.println("UserEntity id in get forumdetail: " + userId);
+//        System.out.println("UserEntity id in get forum detail: " + userId);
         ForumPostDetailResponse response = ForumPostDetailResponse.builder()
                 .post(forumPostService.getForumPostById(postId, userId, request))
                 .comments(forumPostCommentService.getPostCommentsByPostId(postId))
+                .statusId(forumPostLikeService.getLikeStatusByPostIdAndUserId(postId, userId))
                 .build();
-
+        System.out.println("save of forum detail: " + response.getPost().isSaved());
         return ResponseEntity.ok(response);
     }
 
@@ -123,18 +129,18 @@ public class ForumPostController {
         System.out.println("UserEntity id in add-cm: " + forumPostCommentRequest.getContent());
         if (!userId.equals(0L)) {
             forumPostCommentRequest.setUserId(userId);
-            ForumPostCommentResponse cm = forumPostCommentService.addPostComment(forumPostCommentRequest);
+            ForumPostCommentResponse cm = forumPostCommentService.addPostComment(forumPostCommentRequest, userId);
             System.out.println("Cm response is : " + cm);
             return ResponseEntity.ok(cm);
         }
         return ResponseEntity.ok("ForumPostEntity comment successful");
     }
 
-    @PatchMapping("/like/{statusId}/{postId}")
-    public ResponseEntity<String> likePost(@PathVariable int statusId, @PathVariable Long postId, HttpServletRequest request) {
+    @PatchMapping("/like/{postId}")
+    public ResponseEntity<String> likePost(@RequestBody LikeStateUpdateRequest stateUpdateRequest, @PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
 
-        forumPostLikeService.updateLikeStatuses(userId, postId, statusId);
+        forumPostLikeService.updateLikeStatuses(userId, postId,stateUpdateRequest.getStatusId());
         return ResponseEntity.ok("Change like status successful");
     }
 
@@ -147,7 +153,7 @@ public class ForumPostController {
     ) {
         Long userId = (Long) request.getAttribute("userId");
         //Long userId = 0L;
-        System.out.println("UserEntity id in getForumData: " + userId);
+//        System.out.println("UserEntity id in getForumData: " + userId);
 
         return ResponseEntity.ok(forumService.getForumData(userId, includePopular, includeHistory, page));
     }
@@ -166,20 +172,37 @@ public class ForumPostController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("/post-list/type/{typeId}")
-    public ResponseEntity<?> getPostListByType(@PathVariable int typeId, HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
-        Long userId = (Long) request.getAttribute("userId");
-        if (userId != 0L) {
-            return ResponseEntity.ok(forumPostService.getPostListByType(typeId, userId, page));
-        }
-        return ResponseEntity.ok(getPostList(request, page));
-    }
+//    @GetMapping("/post-list/type/{typeId}")
+//    public ResponseEntity<?> getPostListByType(@PathVariable int typeId, HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
+//        Long userId = (Long) request.getAttribute("userId");
+//        if (userId != 0L) {
+//            return ResponseEntity.ok(forumPostService.getPostListByType(typeId, userId, page));
+//        }
+//        return ResponseEntity.ok(getPostList(request, page));
+//    }
 
     @PatchMapping("/update-post/{postId}")
-    public ResponseEntity<String> likePost(@PathVariable Long postId, @RequestBody ForumPostUpdateRequest forumPostRequest) {
+    public ResponseEntity<String> updatePostContent(@PathVariable Long postId, @RequestBody ForumPostUpdateRequest postData) {
 //        Long userId = (Long) request.getAttribute("userId");
+        System.out.println("ForumPostId in update: " + postId);
 
-        forumPostService.updateForumPost(postId, forumPostRequest.getTitle(), forumPostRequest.getContent(), forumPostRequest.getStatus());
-        return ResponseEntity.ok("Change like status successful");
+        ForumPostEntity post = forumPostService.updateForumPost(postId, postData);
+        return ResponseEntity.ok("Successful");
+    }
+
+    @GetMapping("/post-list/filter")
+    public ResponseEntity<?> getPostListByTypeAndCategories(@RequestParam int page, @RequestParam int typeId, @RequestParam String categoryList, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+
+        List<Integer> categoryIds = (categoryList != null && !categoryList.isBlank() && !Objects.equals(categoryList, "All"))
+                ? Arrays.stream(categoryList.split(","))
+                .map(Integer::parseInt)
+                .toList()
+                : Collections.emptyList();
+
+        System.out.println("typeId in getPostListByTypeAndCategories: " + typeId);
+        System.out.println("Categories in getPostListByTypeAndCategories: " + categoryList);
+
+        return ResponseEntity.ok(forumPostService.getPostListByTypeAndCategories(userId, page, typeId, categoryIds));
     }
 }

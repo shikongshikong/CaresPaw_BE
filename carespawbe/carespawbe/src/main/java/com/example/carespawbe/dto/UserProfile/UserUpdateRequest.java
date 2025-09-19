@@ -13,8 +13,8 @@ public class UserUpdateRequest {
 
     private String fullname;
     private int gender;
-    private String phoneName;
-    private String avatar;
-    private LocalDate dateOfBirth;
+    private String phoneNum;
+//    private String avatar;
+    private LocalDate birthday;
 
 }

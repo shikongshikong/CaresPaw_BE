@@ -10,4 +10,5 @@ import java.util.List;
 public class ForumPostDetailResponse {
     private ForumPostResponse post;
     private List<ForumPostCommentResponse> comments;
+    private int statusId;
 }

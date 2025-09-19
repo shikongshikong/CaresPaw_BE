@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class ForumPostUpdateRequest {
     private String title;
     private String content;
-    private int status;
+    private int state;
+    private int typeId;
 }

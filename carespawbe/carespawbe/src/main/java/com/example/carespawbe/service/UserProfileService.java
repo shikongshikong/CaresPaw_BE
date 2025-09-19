@@ -1,12 +1,8 @@
 package com.example.carespawbe.service;
 
 import com.example.carespawbe.dto.Follow.FollowingResponse;
-import com.example.carespawbe.dto.Forum.ForumPostRequest;
-import com.example.carespawbe.dto.UserProfile.UserInfoResponse;
-import com.example.carespawbe.dto.UserProfile.UserPostResponse;
-import com.example.carespawbe.dto.UserProfile.UserProfileData;
-import com.example.carespawbe.dto.UserProfile.UserUpdateRequest;
-import com.example.carespawbe.entity.FollowingEntity;
+import com.example.carespawbe.dto.Forum.ShortForumPostResponse;
+import com.example.carespawbe.dto.UserProfile.*;
 import com.example.carespawbe.entity.ForumPostEntity;
 import com.example.carespawbe.entity.UserEntity;
 import com.example.carespawbe.mapper.ForumPostMapper;
@@ -16,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,20 +38,46 @@ public class UserProfileService {
     @Autowired
     private FollowingService followingService;
 
+    @Autowired
+    private ForumPostSaveService forumPostSaveService;
+
+    @Autowired
+    private ForumPostCategoryService forumPostCategoryService;
+
+    @Autowired
+    private ForumPostHistoryService forumPostHistoryService;
+
     public UserProfileData getUserProfileData(Long userId){
+    //  User
         UserInfoResponse userResponse = userMapper.toUserInfoResponse(userService.getUserById(userId));
+    // Post
         List<ForumPostEntity> forumPostEntities = forumPostService.getPostListByUserId(userId);
 
         List<UserPostResponse> userPostResponseList = new ArrayList<>();
         userPostResponseList = postMapper.toUserPostResponseList(forumPostEntities);
 
+        if (userPostResponseList != null) {
+            for (UserPostResponse userPostResponse : userPostResponseList) {
+                List<Integer> categoryIds = forumPostCategoryService.getCategoryListByForumPostId(userPostResponse.getId());
+                userPostResponse.setCategoryList(categoryIds);
+            }
+        }
+    // Follow
         List<FollowingResponse> followingResponseList = new ArrayList<>();
         followingResponseList = followingService.getFollowingListByFollowerId(userId);
+    // Save
+        List<ShortForumPostResponse> userSaveResponseList = new ArrayList<>();
+        userSaveResponseList = forumPostSaveService.getSavedByUserId(userId);
+    // History
+        List<UserHistoryResponse> userHistoryResponseList = new ArrayList<>();
+        userHistoryResponseList = forumPostHistoryService.getUserHistoryByUserId(userId);
 
         return UserProfileData.builder()
                 .user(userResponse)
                 .posts(userPostResponseList)
+                .saves(userSaveResponseList)
                 .followings(followingResponseList)
+                .histories(userHistoryResponseList)
                 .build();
     }
 
@@ -74,9 +95,9 @@ public class UserProfileService {
 
         userEntity.setFullname(userRequest.getFullname());
         userEntity.setGender(userRequest.getGender());
-        userEntity.setPhoneNumber(userRequest.getPhoneName());
-        userEntity.setAvatar(userRequest.getAvatar());
-        userEntity.setBirthday(userRequest.getDateOfBirth());
+        userEntity.setPhoneNumber(userRequest.getPhoneNum());
+//        userEntity.setAvatar(userRequest.getAvatar());
+        userEntity.setBirthday(userRequest.getBirthday());
 
         userRepository.save(userEntity);
     }

@@ -1,5 +1,6 @@
 package com.example.carespawbe.service;
 
+import com.example.carespawbe.dto.Forum.ShortForumPostResponse;
 import com.example.carespawbe.dto.History.ForumPostSideBarResponse;
 import com.example.carespawbe.dto.Save.SaveStatusUpdateRequest;
 import com.example.carespawbe.entity.ForumPostEntity;
@@ -39,9 +40,9 @@ public class ForumPostSaveService {
 //    private PostS
 
 //    public void addPostSave()
-//    public List<ForumPostSideBarResponse> get5SavedByUserId(Long userId) {
+    public List<ShortForumPostResponse> getSavedByUserId(Long userId) {
 //        Pageable pageable = PageRequest.of(0, 5, Sort.by("savedAt").descending());
-//        List<ForumPostSaveEntity> saves = forumPostSaveRepository.findForumPostSavesByUserId(userId, pageable);
+//        List<ForumPostSaveEntity> saves = forumPostSaveRepository.findForumPostSavesByUserId(userId);
 //        if (saves.isEmpty()) {
 //            return null;
 //        }
@@ -49,8 +50,8 @@ public class ForumPostSaveService {
 //        for (ForumPostSideBarResponse save : saveResponses) {
 //            save.setSaved(true);
 //        }
-//        return saveResponses;
-//    }
+        return forumPostRepository.findSaveShortsByUserId(userId);
+    }
 
     public void updateSaveStatuses(List<SaveStatusUpdateRequest> requests, Long userId) {
         for (SaveStatusUpdateRequest request : requests) {

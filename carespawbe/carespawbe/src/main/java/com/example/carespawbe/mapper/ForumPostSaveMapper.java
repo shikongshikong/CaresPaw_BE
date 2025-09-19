@@ -23,6 +23,6 @@ public interface ForumPostSaveMapper {
 //    @Mapping(source = "forumPostEntity.user.fullname", target = "fullname")
 //    @Mapping(target = "saved", expression = "java(forumPostSaveEntity != null)")
 //    ForumPostSideBarResponse toSideBarResponse(ForumPostSaveEntity forumPostSaveEntity);
-//
+////
 //    List<ForumPostSideBarResponse> toSaveResponseList(List<ForumPostSaveEntity> forumPostSaveEntities);
 }

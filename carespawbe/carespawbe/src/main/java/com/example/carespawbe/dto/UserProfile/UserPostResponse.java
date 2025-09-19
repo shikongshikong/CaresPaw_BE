@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -13,8 +14,9 @@ public class UserPostResponse {
     private String content;
     private LocalDate createAt;
     private LocalDate updateAt;
-    private String state;
-    private String type;
+    private int state;
+    private int typeId;
     private Long viewedAmount;
     private Long commentedAmount;
+    private List<Integer> categoryList;
 }

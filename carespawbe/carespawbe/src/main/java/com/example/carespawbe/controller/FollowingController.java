@@ -30,8 +30,8 @@ public class FollowingController {
         }
     }
 
-    @DeleteMapping("/remove")
-    public ResponseEntity<String> deleteFollowing(@RequestBody Long followeeId, HttpServletRequest httpServletRequest) {
+    @DeleteMapping("/remove/{followeeId}")
+    public ResponseEntity<String> deleteFollowing(@PathVariable Long followeeId, HttpServletRequest httpServletRequest) {
         Long userid = (Long) httpServletRequest.getAttribute("userId");
         try {
             followingService.unFollowing(userid, followeeId);

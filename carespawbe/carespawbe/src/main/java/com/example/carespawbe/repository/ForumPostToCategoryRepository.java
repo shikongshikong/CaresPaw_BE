@@ -8,4 +8,6 @@ import java.util.List;
 public interface ForumPostToCategoryRepository extends JpaRepository<ForumPostToCategoryEntity, Long> {
 //    @Override
 //    List<ForumPostToCategoryEntity> saveAll(Iterable<S> entities);
+
+    List<ForumPostToCategoryEntity> findAllByForumPostEntityId(Long forumPostEntityId);
 }

@@ -3,6 +3,7 @@ package com.example.carespawbe.service;
 import com.example.carespawbe.dto.Forum.ForumPostDetailRequest;
 import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
 import com.example.carespawbe.dto.History.ForumPostSideBarResponse;
+import com.example.carespawbe.dto.UserProfile.UserHistoryResponse;
 import com.example.carespawbe.entity.ForumPostHistoryEntity;
 import com.example.carespawbe.mapper.ForumPostHistoryMapper;
 import com.example.carespawbe.repository.ForumPostHistoryRepository;
@@ -46,6 +47,10 @@ public class ForumPostHistoryService {
         List<ForumPostHistoryTagResponse> histories = forumPostHistoryRepository.findForumPostHistoryEntityByUserIdHasFollow(userId, pageable);
         if (histories != null) return histories;
         return null;
+    }
+
+    public List<UserHistoryResponse> getUserHistoryByUserId(Long userId) {
+        return forumPostHistoryRepository.findHistoryEntityByUserId(userId);
     }
 
 }

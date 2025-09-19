@@ -21,7 +21,7 @@ public class UserProfileController {
     public ResponseEntity<?> getUserProfileData(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         UserProfileData data = userProfileService.getUserProfileData(userId);
-        System.out.println("User Profile Data: " + data.getUser().getEmail());
+        System.out.println("User Profile Data: " + data.getUser().getBirthday());
         return ResponseEntity.ok(data);
     }
 
@@ -61,8 +61,9 @@ public class UserProfileController {
     }
 
     @PatchMapping("/update")
-    public void updateUserProfile(@RequestBody UserUpdateRequest userRequest, HttpServletRequest request) {
+    public ResponseEntity<String> updateUserProfile(@RequestBody UserUpdateRequest updateData, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        userProfileService.updateUserProfileData(userRequest, userId);
+        userProfileService.updateUserProfileData(updateData, userId);
+        return ResponseEntity.ok("success");
     }
 }

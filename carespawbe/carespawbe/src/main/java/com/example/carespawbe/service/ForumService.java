@@ -56,34 +56,34 @@ public class ForumService {
 //
 //        return response;
 //    }
-public ForumPageResponse getForumData(Long userId, boolean includePopular, boolean includeHistory, int page) {
-    ForumPageResponse response = new ForumPageResponse();
+    public ForumPageResponse getForumData(Long userId, boolean includePopular, boolean includeHistory, int page) {
+        ForumPageResponse response = new ForumPageResponse();
 
-    //  history
-    if (userId != 0L) {
-        if (includeHistory) {
-            List<ForumPostHistoryTagResponse> posts = forumPostHistoryService.get5PostHistoryByUserId(userId);
-            if (posts != null) {
-                response.setHistoryPosts(posts);
-            } else {
-                System.out.println("NUll in history");
-                response.setHistoryPosts(null);
+        //  history
+        if (userId != 0L) {
+            if (includeHistory) {
+                List<ForumPostHistoryTagResponse> posts = forumPostHistoryService.get5PostHistoryByUserId(userId);
+                if (posts != null) {
+                    response.setHistoryPosts(posts);
+                } else {
+                    System.out.println("NUll in history");
+                    response.setHistoryPosts(null);
+                }
             }
         }
+
+        //  popular forumPostEntity
+        if (includePopular) {
+            response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
+        }
+
+        //  list forumPostEntity by page
+        int size = 5;
+        response.setPostList(forumPostService.getForumPostByPage(userId, page, size));
+
+        return response;
+        }
     }
-
-    //  popular forumPostEntity
-    if (includePopular) {
-        response.setPopularPosts(forumPostService.get2TopPopularPost(userId));
-    }
-
-    //  list forumPostEntity by page
-    int size = 5;
-    response.setPostList(forumPostService.getForumPostByPage(userId, page, size));
-
-    return response;
-}
-}
 
 //        String token = jwtFilter.getJwtFromRequest(request);
 //        Long userId = 0L;

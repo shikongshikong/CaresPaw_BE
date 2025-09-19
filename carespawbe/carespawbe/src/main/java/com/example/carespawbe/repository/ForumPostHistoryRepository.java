@@ -2,6 +2,7 @@ package com.example.carespawbe.repository;
 
 import com.example.carespawbe.dto.Forum.ShortForumPostResponse;
 import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
+import com.example.carespawbe.dto.UserProfile.UserHistoryResponse;
 import com.example.carespawbe.entity.ForumPostHistoryEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,6 +37,7 @@ public interface ForumPostHistoryRepository extends JpaRepository<ForumPostHisto
             "ON h.forumPostEntity.id = p.id and h.user.id = :userId " +
             "LEFT JOIN FollowingEntity f " +
             "ON f.follower.id = :userId and p.user.id = f.followee.id " +
+            "WHERE h.user.id = :userId " +
             "ORDER BY h.createdAt DESC")
     List<ForumPostHistoryTagResponse> findForumPostHistoryEntityByUserIdHasFollow(@Param("userId") Long userId, Pageable pageable);
 
@@ -43,4 +45,12 @@ public interface ForumPostHistoryRepository extends JpaRepository<ForumPostHisto
 
 //    List<ForumPostHistoryEntity> findByUserIdAndPostIdAndCreatedAt(Long userId, Long postId, LocalDate createdAt);
     List<ForumPostHistoryEntity> findByUserIdAndForumPostEntityIdAndCreatedAt(Long userId, Long postId, LocalDate createdAt);
+
+    @Query("SELECT new com.example.carespawbe.dto.UserProfile.UserHistoryResponse(h.id, p.user.id, p.user.avatar, p.id, p.title, h.createdAt) " +
+            "FROM ForumPostEntity p " +
+            "LEFT JOIN ForumPostHistoryEntity h " +
+            "ON h.forumPostEntity.id = p.id and h.user.id = :userId " +
+            "WHERE h.user.id = :userId " +
+            "ORDER BY h.createdAt DESC")
+    List<UserHistoryResponse> findHistoryEntityByUserId(@Param("userId") Long userId);
 }

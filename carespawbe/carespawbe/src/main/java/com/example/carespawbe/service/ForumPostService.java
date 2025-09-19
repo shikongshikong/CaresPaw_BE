@@ -36,7 +36,7 @@ public class ForumPostService {
     private ViewLimiterService viewLimiterService;
 
     public List<ShortForumPostResponse> getForumPostByKeyword(String keyword, Long userId) {
-
+//        int size = 5;
         List<ShortForumPostResponse> posts = forumPostRepository.findByTitleKey(keyword, userId);
 
         if (posts.isEmpty()) return null;
@@ -75,7 +75,8 @@ public class ForumPostService {
     }
 
     public ForumPostResponse getForumPostById(Long postId, Long userId, HttpServletRequest request) {
-        ForumPostEntity forumPostEntity = forumPostRepository.findForumPostById(postId).orElse(null);
+//        ForumPostEntity forumPostEntity = forumPostRepository.findForumPostById(postId).orElse(null);
+        ForumPostResponse forumPostResponse = forumPostRepository.findForumPostDetailById(userId, postId).orElse(null);
         ForumPostDetailRequest forumPostDetailRequest = new ForumPostDetailRequest(postId, userId);
 
         //      add view for logined userEntity + add history
@@ -93,7 +94,8 @@ public class ForumPostService {
                 increasePostViewCount(postId);
             } else System.out.println("View Exist!");
         }
-        return postMapper.toPostResponse(forumPostEntity);
+//        return postMapper.toPostResponse(forumPostEntity);
+        return forumPostResponse;
     }
 
 //    public List<ShortForumPostResponse> getForumPostListReverse(Long userId) {
@@ -162,11 +164,11 @@ public class ForumPostService {
 //        return forumPostRepository.findForumPostByType(typeId, userId);
 //    }
 
-    public List<ShortForumPostResponse> getForumPostByCategory(List<Integer> category, Long userId, String type) {
-        if (category.isEmpty()) return null;
-        if (type.equals("All")) return forumPostRepository.findPostsByCategory(userId, category);
-        return forumPostRepository.findPostsByTypeAndCategory(userId, type, category);
-    }
+//    public List<ShortForumPostResponse> getForumPostByCategory(List<Integer> category, Long userId, String type) {
+//        if (category.isEmpty()) return null;
+//        if (type.equals("All")) return forumPostRepository.findPostsByCategory(userId, category);
+//        return forumPostRepository.findPostsByTypeAndCategory(userId, type, category);
+//    }
 
     public List<ForumPostEntity> getPostListByUserId(Long userId) {
         List<ForumPostEntity> forumPostEntities = forumPostRepository.findByUserId(userId);
@@ -192,23 +194,39 @@ public class ForumPostService {
         return forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
     }
 
-    public Page<ShortForumPostResponse> getPostListByType(int typeId, Long userId, int page) {
-        int size = 5;
+//    public Page<ShortForumPostResponse> getPostListByType(int typeId, Long userId, int page) {
+//        int size = 5;
+//
+//        if (typeId == 0) forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
+//        return forumPostRepository.findPageShortsByType(typeId, userId, PageRequest.of(page - 1, size));
+//    }
 
-        if (typeId == 0) forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
-        return forumPostRepository.findForumPostByType(typeId, userId, PageRequest.of(page - 1, size));
-    }
-
-    public void updateForumPost(Long postId, String title, String content, int status) {
+    public ForumPostEntity updateForumPost(Long postId, ForumPostUpdateRequest forumPostUpdateRequest) {
         ForumPostEntity forumPostEntity = forumPostRepository.findForumPostById(postId).orElse(null);
-        if (forumPostEntity == null) return;
+        if (forumPostEntity == null) return null;
 
-        forumPostEntity.setTitle(title);
-        forumPostEntity.setContent(content);
-        forumPostEntity.setState(status);
+        forumPostEntity.setTitle(forumPostUpdateRequest.getTitle());
+        forumPostEntity.setContent(forumPostUpdateRequest.getContent());
+        forumPostEntity.setState(forumPostUpdateRequest.getState());
+        forumPostEntity.setTypeId(forumPostUpdateRequest.getTypeId());
         forumPostEntity.setUpdateAt(LocalDate.now());
 
-        forumPostRepository.save(forumPostEntity);
+        return forumPostRepository.save(forumPostEntity);
+    }
+
+    public ForumPageFilterResponse getPostListByTypeAndCategories(Long userId, int page, int typeId, List<Integer> categoryList) {
+        int size = 5;
+        ForumPageFilterResponse response  = new ForumPageFilterResponse();
+
+        if (typeId == 0 && !categoryList.isEmpty())
+            response.setPostList(forumPostRepository.findPageShortsByCategory(userId, categoryList, PageRequest.of(page - 1, size)));
+        else if (typeId != 0 && categoryList.isEmpty())
+            response.setPostList(forumPostRepository.findPageShortsByType(userId, typeId, PageRequest.of(page - 1, size)));
+        else if (typeId == 0 && categoryList.isEmpty())
+            response.setPostList(forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size)));
+        else
+            response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, PageRequest.of(page - 1, size)));
+        return response;
     }
 
 

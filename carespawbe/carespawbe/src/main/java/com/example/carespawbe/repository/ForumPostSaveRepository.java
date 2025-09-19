@@ -15,7 +15,7 @@ public interface ForumPostSaveRepository extends JpaRepository<ForumPostSaveEnti
 //            "ORDER BY s.savedAt DESC")
 //    List<ShortForumPostResponse> findShortSavedByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    List<ForumPostSaveEntity> findForumPostSavesByUserId(Long userId, Pageable pageable);
+    List<ForumPostSaveEntity> findForumPostSavesByUserId(Long userId);
 
 //    @Modifying
 //    @Query("UPDATE ForumPostSaveEntity s SET s.")

@@ -13,4 +13,5 @@ public class ForumPostCommentResponse {
     private String fullname;
     private LocalDate createAt;
     private String content;
+    private int followState;
 }
