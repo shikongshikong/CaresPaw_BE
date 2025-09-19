@@ -2,17 +2,26 @@ package com.example.carespawbe.serviceImp;
 
 import com.example.carespawbe.dto.request.CartItemRequest;
 import com.example.carespawbe.dto.request.CartRequest;
+import com.example.carespawbe.dto.response.CartItemResponse;
 import com.example.carespawbe.dto.response.CartResponse;
+import com.example.carespawbe.dto.response.ImageProductResponse;
+import com.example.carespawbe.dto.response.ProductVarriantResponse;
 import com.example.carespawbe.entity.UserEntity;
 import com.example.carespawbe.entity.shop.*;
+import com.example.carespawbe.mapper.CartItemMapper;
 import com.example.carespawbe.mapper.CartMapper;
+import com.example.carespawbe.mapper.ImageProductMapper;
+import com.example.carespawbe.mapper.ProductVarriantMapper;
 import com.example.carespawbe.repository.UserRepository;
 import com.example.carespawbe.repository.shop.*;
 import com.example.carespawbe.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -31,19 +40,25 @@ public class CartServiceImp implements CartService {
     private ProductRepository productRepository;
     @Autowired
     private ProductVarriantRepository productVarriantRepository;
+    @Autowired
+    protected ProductVarriantMapper productVarriantMapper;
+    @Autowired
+    private ImageProductRepository imageProductRepository;
+    @Autowired
+    private ImageProductMapper imageProductMapper;
+    @Autowired
+    private CartItemMapper cartItemMapper;
+
     @Override
     public CartResponse createCart(CartRequest request) {
         try {
             UserEntity userEntity = userRepository.findById(request.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
-
             VoucherEntity voucherEntity = request.getVoucherId() != null
                     ? voucherRepository.findVoucherEntitiesByVoucherId(request.getVoucherId())
                     : null;
-
             // tìm cart của user
             CartEntity cartEntity = cartRepository.findCartEntityByUserEntity_Id(request.getUserId());
-
             // nếu chưa có thì tạo mới
             if (cartEntity == null) {
                 cartEntity = new CartEntity();
@@ -51,31 +66,24 @@ public class CartServiceImp implements CartService {
                 cartEntity.setCreatedAt(request.getCreatedAt());
                 cartEntity.setCartItemEntityList(new ArrayList<>());
             }
-
             cartEntity.setCartTotalPrice(request.getCartTotalPrice());
             cartEntity.setCartShippingFee(request.getCartShippingFee());
             cartEntity.setCartTotalCoinEarned(request.getCartTotalCoinEarned());
             cartEntity.setVoucher(voucherEntity);
-
             if (request.getCartItems() != null && !request.getCartItems().isEmpty()) {
                 for (CartItemRequest itemReq : request.getCartItems()) {
                     ProductEntity product = productRepository.findProductEntityByProductId(itemReq.getProductId());
-
                     // tìm xem product này đã có trong cart chưa
-                    Optional<CartItemEntity> existingItemOpt = cartEntity.getCartItemEntityList().stream()
-                            .filter(ci -> ci.getProduct().getProductId().equals(product.getProductId()))
-                            .findFirst();
+                    CartItemEntity existingItemOpt = cartEntity.getCartItemEntityList().stream()
+                            .filter(item -> item.getProduct().getProductId().equals(product.getProductId()))
+                            .findFirst()
+                            .orElse(null);
 
-                    if (existingItemOpt.isPresent()) {
-                        // nếu đã có thì tăng số lượng
-                        CartItemEntity existingItem = existingItemOpt.get();
-                        existingItem.setCartItemQuantity(existingItem.getCartItemQuantity() + itemReq.getCartItemQuantity());
-                        existingItem.setCartItemTotalPrice(
-                                existingItem.getCartItemTotalPrice() + itemReq.getCartItemTotalPrice()
-                        );
-                        existingItem.setCartItemPrice(itemReq.getCartItemPrice()); // giá có thể update theo lần add mới
+                    if (existingItemOpt != null) {
+                        existingItemOpt.setCartItemQuantity(existingItemOpt.getCartItemQuantity() + itemReq.getCartItemQuantity());
+                        existingItemOpt.setCartItemTotalPrice(existingItemOpt.getCartItemTotalPrice() + itemReq.getCartItemTotalPrice());
+                        existingItemOpt.setCartItemPrice(itemReq.getCartItemPrice());
                     } else {
-                        // nếu chưa có thì tạo mới cartItem
                         CartItemEntity cartItemEntity = new CartItemEntity();
                         cartItemEntity.setCart(cartEntity);
                         cartItemEntity.setCartItemPrice(itemReq.getCartItemPrice());
@@ -88,10 +96,8 @@ public class CartServiceImp implements CartService {
                     }
                 }
             }
-
-            CartEntity savedCart = cartRepository.save(cartEntity);
+            CartEntity savedCart = cartRepository.saveAndFlush(cartEntity);
             return cartMapper.toCartResponse(savedCart);
-
         } catch (Exception e) {
             throw new RuntimeException("Error creating cart", e);
         }
@@ -148,6 +154,25 @@ public class CartServiceImp implements CartService {
     }
 
     @Override
+    public CartItemResponse updateCartItem(Long cartId, Long cartItemId, CartItemRequest request) {
+        CartEntity cartEntity = cartRepository.findCartEntityByCartId(cartId);
+        ProductEntity productEntity = productRepository.findProductEntityByProductId(request.getProductId());
+        CartItemEntity cartItemEntity = cartItemRepository.findByCartAndProductAndCartItemId(
+                cartEntity, productEntity, cartItemId
+        );
+        if (cartItemEntity != null) {
+            cartItemEntity.setCartItemQuantity(request.getCartItemQuantity());
+            cartItemEntity.setCartItemPrice(request.getCartItemPrice());
+            cartItemEntity.setCartItemTotalPrice(request.getCartItemPrice() * request.getCartItemQuantity());
+            cartItemEntity.setProduct(productEntity); // nếu cho phép đổi sản phẩm
+            cartItemEntity.setCart(cartEntity); // nhớ gán lại cart để tránh mất liên kết
+            return cartItemMapper.toCartItemResponse(cartItemRepository.save(cartItemEntity));
+        }
+        return null;
+    }
+
+
+    @Override
     public void deleteCart(Long cartItemId) {
         CartItemEntity cartItemEntity = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new RuntimeException("cartItemId not found"));
@@ -162,4 +187,26 @@ public class CartServiceImp implements CartService {
         }
         return null;
     }
+
+    @Override
+    public List<ProductVarriantResponse> getCartProductsVariantsByProductId(Long productId) {
+        ProductEntity productEntity = productRepository.findProductEntityByProductId(productId);
+        if (productEntity != null) {
+            List<ProductVarriantEntity> productVarriantEntities = productVarriantRepository.findProductVarriantEntitiesByProductVarriants(productEntity);
+            return productVarriantMapper.toResponseList(productVarriantEntities);
+        }
+        return null;
+
+    }
+
+    @Override
+    public List<ImageProductResponse> getImageProduct(Long productId) {
+        ProductEntity productEntity = productRepository.findProductEntityByProductId(productId);
+        if (productEntity != null) {
+            List<ImageProductEntity> image = imageProductRepository.findByImageProduct(productEntity);
+            return imageProductMapper.toResponseList(image); // ✅ trùng kiểu
+        }
+        return null;
+    }
+
 }

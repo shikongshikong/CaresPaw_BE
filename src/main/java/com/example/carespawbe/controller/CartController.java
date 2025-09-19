@@ -1,11 +1,17 @@
 package com.example.carespawbe.controller;
 
+import com.example.carespawbe.dto.request.CartItemRequest;
 import com.example.carespawbe.dto.request.CartRequest;
+import com.example.carespawbe.dto.response.CartItemResponse;
 import com.example.carespawbe.dto.response.CartResponse;
+import com.example.carespawbe.dto.response.ImageProductResponse;
+import com.example.carespawbe.dto.response.ProductVarriantResponse;
 import com.example.carespawbe.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -51,4 +57,29 @@ public class CartController {
     public ResponseEntity<CartResponse> getCartByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(cartService.getCartByUserId(userId));
     }
+    // Lấy danh sách ảnh sản phẩm
+    @GetMapping("/product/{productId}/images")
+    public ResponseEntity<List<ImageProductResponse>> getImageProduct(@PathVariable Long productId) {
+        return ResponseEntity.ok(cartService.getImageProduct(productId));
+    }
+
+    // Lấy danh sách biến thể sản phẩm
+    @GetMapping("/product/{productId}/variants")
+    public ResponseEntity<List<ProductVarriantResponse>> getProductVariants(@PathVariable Long productId) {
+        return ResponseEntity.ok(cartService.getCartProductsVariantsByProductId(productId));
+    }
+    // Cập nhật sản phẩm trong giỏ hàng
+    @PutMapping("/{cartId}/item/{cartItemId}")
+    public ResponseEntity<CartItemResponse> updateCartItem(
+            @PathVariable Long cartId,
+            @PathVariable Long cartItemId,
+            @RequestBody CartItemRequest request) {
+        try {
+             CartItemResponse response = cartService.updateCartItem(cartId, cartItemId, request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

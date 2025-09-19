@@ -21,7 +21,8 @@ public class CartEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long CartId;
+    @Column(name = "cart_id")
+    private Long cartId;
 
     @Column(updatable = false)
     private Double CartTotalPrice;
@@ -46,7 +47,7 @@ public class CartEntity {
     @JoinColumn(name = "voucher_id")
     private VoucherEntity voucher;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CartItemEntity> cartItemEntityList = new ArrayList<>();
 
 

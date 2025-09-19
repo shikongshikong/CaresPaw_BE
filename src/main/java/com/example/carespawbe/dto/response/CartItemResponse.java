@@ -17,7 +17,7 @@ public class CartItemResponse {
     private Double cartItemTotalPrice;
     private boolean isFlashSale;
     private ProductResponse product;
-    private String productVarriantValue;
+//    private String productVarriantValue;
     private String imageProductUrl;
 //    private String productName;
 //    private Long productVarriantId;
