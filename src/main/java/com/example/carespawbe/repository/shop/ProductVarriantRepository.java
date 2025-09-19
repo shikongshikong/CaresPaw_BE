@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductVarriantRepository extends JpaRepository<ProductVarriantEntity, Long> {
     void deleteByProductVarriants(ProductEntity product);
+    ProductVarriantEntity findByProductVarriantId(Long productVarriantId);
 
 }

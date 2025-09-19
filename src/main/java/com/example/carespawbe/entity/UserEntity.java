@@ -1,6 +1,5 @@
 package com.example.carespawbe.entity;
 
-import com.example.carespawbe.entity.shop.CartItemEntity;
 import com.example.carespawbe.entity.shop.OrderEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,14 +36,14 @@ public class UserEntity {
     @Column(name = "pass_word", nullable = false)
     private String password;
 
+    @OneToMany(mappedBy = "userEntity")
+    private List<OrderEntity> orderEntities;
+
     private String avatar;
     private int role;
     private int state;
     private LocalDate birthday;
     private LocalDate createdAt;
-
-    @OneToMany(mappedBy = "userEntity")
-    private List<OrderEntity> orderEntities;
 
 //    optional, but useful when user.getPosts();
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

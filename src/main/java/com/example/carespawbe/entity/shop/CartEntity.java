@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -45,7 +46,8 @@ public class CartEntity {
     @JoinColumn(name = "voucher_id")
     private VoucherEntity voucher;
 
-    @OneToMany(mappedBy = "cart")
-    private List<CartItemEntity> cartItemEntityList;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItemEntity> cartItemEntityList = new ArrayList<>();
+
 
 }
