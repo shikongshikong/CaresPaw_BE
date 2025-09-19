@@ -14,7 +14,7 @@ public class CartItemRequest {
     private Long cartId;
     private Double cartItemPrice;
     private Double cartItemOriginalPrice;
-    private int cartItemQuantity;
+    private Integer cartItemQuantity;
     private Double cartItemTotalPrice;
     private boolean isFlashSale;
     private Long productId;

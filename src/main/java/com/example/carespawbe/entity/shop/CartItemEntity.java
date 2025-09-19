@@ -21,19 +21,19 @@ public class CartItemEntity {
     @Column(updatable = true)
     private Double cartItemPrice;
 
-    @Column(updatable = false)
+    @Column(updatable = true)
     private Double cartItemOriginalPrice;
 
-    @Column(updatable = false)
+    @Column(updatable = true)
     private int cartItemQuantity;
 
-    @Column(updatable = false)
+    @Column(updatable = true)
     private Double cartItemTotalPrice;
 
     @Column(updatable = true)
     private boolean isFlashSale;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")
     private CartEntity cart;
 

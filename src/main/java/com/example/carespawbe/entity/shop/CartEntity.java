@@ -21,16 +21,17 @@ public class CartEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cart_id")
     private Long cartId;
 
     @Column(updatable = false)
-    private Double cartTotalPrice;
+    private Double CartTotalPrice;
 
     @Column(updatable = false)
-    private Double cartShippingFee;
+    private Double CartShippingFee;
 
     @Column(updatable = true)
-    private int cartTotalCoinEarned;
+    private int CartTotalCoinEarned;
 
     @Column(updatable = false)
     private LocalDate createdAt;
@@ -46,7 +47,7 @@ public class CartEntity {
     @JoinColumn(name = "voucher_id")
     private VoucherEntity voucher;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CartItemEntity> cartItemEntityList = new ArrayList<>();
 
 
