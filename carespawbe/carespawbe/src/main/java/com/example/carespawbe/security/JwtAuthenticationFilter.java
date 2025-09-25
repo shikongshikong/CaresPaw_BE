@@ -1,7 +1,6 @@
 package com.example.carespawbe.security;
 
-import com.example.carespawbe.service.CustomUserDetailsService;
-import com.example.carespawbe.service.UserService;
+import com.example.carespawbe.service.Auth.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
