@@ -1,7 +1,7 @@
-package com.example.carespawbe.service;
+package com.example.carespawbe.service.Auth;
 
-import com.example.carespawbe.entity.UserEntity;
-import com.example.carespawbe.repository.UserRepository;
+import com.example.carespawbe.entity.Auth.UserEntity;
+import com.example.carespawbe.repository.Auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/voucher")
+@RequestMapping("/voucher")
 @RequiredArgsConstructor
 @MultipartConfig
 @CrossOrigin(origins = "*")

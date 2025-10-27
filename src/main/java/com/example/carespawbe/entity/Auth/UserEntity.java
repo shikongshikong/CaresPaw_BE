@@ -1,6 +1,5 @@
-package com.example.carespawbe.entity;
+package com.example.carespawbe.entity.Auth;
 
-import com.example.carespawbe.entity.shop.CartItemEntity;
 import com.example.carespawbe.entity.shop.OrderEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

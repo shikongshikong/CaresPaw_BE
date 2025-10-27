@@ -2,11 +2,12 @@ package com.example.carespawbe.serviceImp;
 
 import com.example.carespawbe.dto.request.ShopRequest;
 import com.example.carespawbe.dto.response.ShopResponse;
-import com.example.carespawbe.entity.UserEntity;
+import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.shop.ShopEntity;
 import com.example.carespawbe.mapper.ShopMapper;
-import com.example.carespawbe.repository.UserRepository;
+import com.example.carespawbe.repository.Auth.UserRepository;
 import com.example.carespawbe.repository.shop.ShopRepository;
+import com.example.carespawbe.security.JwtService;
 import com.example.carespawbe.service.CloudinaryService;
 import com.example.carespawbe.service.ShopService;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +25,28 @@ public class ShopServiceImp implements ShopService {
     private final ShopRepository shopRepository;
     private final CloudinaryService cloudinaryService;
     private final ShopMapper shopMapper;
+    private final JwtService jwtService;
 
     @Override
-    public ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo) {
-        UserEntity userEntity = userRepository.findById(request.getUserId())
+    public ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo, String token) {
+        // Lấy token JWT (bỏ "Bearer ")
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        // Lấy userId từ token
+        Long userId = jwtService.extractUserId(token);
+
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (shopRepository.findByUserId(request.getUserId()).isPresent()) {
             throw new RuntimeException("User has already registered a shop");
+        }
+
+        // Kiểm tra role hiện tại
+        if (userEntity.getRole() != 1) { // ví dụ 1 = USER
+            throw new RuntimeException("User not allowed to register shop");
         }
 
         userEntity.setPhoneNumber(request.getShopPhone());

@@ -1,6 +1,6 @@
 package com.example.carespawbe.dto.Auth;
 
-import com.example.carespawbe.entity.UserEntity;
+import com.example.carespawbe.entity.Auth.UserEntity;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

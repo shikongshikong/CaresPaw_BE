@@ -2,8 +2,8 @@ package com.example.carespawbe.controller;
 
 import com.example.carespawbe.dto.request.ShopRequest;
 import com.example.carespawbe.dto.response.ShopResponse;
-import com.example.carespawbe.entity.UserEntity;
-import com.example.carespawbe.repository.UserRepository;
+import com.example.carespawbe.entity.Auth.UserEntity;
+import com.example.carespawbe.repository.Auth.UserRepository;
 import com.example.carespawbe.service.ShopService;
 import jakarta.servlet.annotation.MultipartConfig;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/shop")
+@RequestMapping("/shop")
 @RequiredArgsConstructor
 @MultipartConfig
 @CrossOrigin(origins = "*")
@@ -35,24 +35,21 @@ public class ShopController {
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("userId") Long userId,
             @RequestParam("status") int status,
-            @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo
+            @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo,
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
         try {
-            // 🔹 Tìm user trong DB
+            //Tìm user trong DB
             UserEntity user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // 🔹 Nếu user đã là chủ shop thì chặn
+            //Nếu user đã là chủ shop thì chặn
             if (user.getRole() == 2) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "User already registered a shop"));
             }
 
-            // 🔹 Cập nhật role user thành 2 (chủ shop)
-            user.setRole(2);
-            userRepository.save(user);
-
-            // 🔹 Tạo ShopRequest để truyền xuống service
+            //Tạo ShopRequest để truyền xuống service
             ShopRequest shopRequest = new ShopRequest();
             shopRequest.setShopName(shopName);
             shopRequest.setShopAddress(shopAddress);
@@ -60,7 +57,7 @@ public class ShopController {
             shopRequest.setUserId(userId);
             shopRequest.setStatus(1);
 
-            ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo);
+            ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo, authorizationHeader);
 
             return ResponseEntity.ok(shopResponse);
         } catch (Exception e) {

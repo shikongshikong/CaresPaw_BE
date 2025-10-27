@@ -1,6 +1,6 @@
-package com.example.carespawbe.repository;
+package com.example.carespawbe.repository.Auth;
 
-import com.example.carespawbe.entity.UserEntity;
+import com.example.carespawbe.entity.Auth.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

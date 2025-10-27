@@ -2,11 +2,11 @@
 //
 //import com.example.carespawbe.dto.request.CartRequest;
 //import com.example.carespawbe.dto.response.CartResponse;
-//import com.example.carespawbe.entity.UserEntity;
+//import com.example.carespawbe.entity.Auth.UserEntity;
 //import com.example.carespawbe.entity.shop.CartEntity;
 //import com.example.carespawbe.entity.shop.VoucherEntity;
 //import com.example.carespawbe.mapper.CartMapper;
-//import com.example.carespawbe.repository.UserRepository;
+//import com.example.carespawbe.repository.Auth.UserRepository;
 //import com.example.carespawbe.repository.shop.CartRepository;
 //import com.example.carespawbe.repository.shop.VoucherRepository;
 //import com.example.carespawbe.service.CartService;

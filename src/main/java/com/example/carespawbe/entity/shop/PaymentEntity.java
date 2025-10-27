@@ -1,5 +1,4 @@
 package com.example.carespawbe.entity.shop;
-import com.example.carespawbe.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
