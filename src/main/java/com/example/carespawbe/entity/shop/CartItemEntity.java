@@ -21,28 +21,32 @@ public class CartItemEntity {
     @Column(updatable = true)
     private Double cartItemPrice;
 
-    @Column(updatable = false)
+    @Column(updatable = true)
     private Double cartItemOriginalPrice;
 
-    @Column(updatable = false)
+    @Column(updatable = true)
     private int cartItemQuantity;
 
-    @Column(updatable = false)
+    @Column(updatable = true)
     private Double cartItemTotalPrice;
 
-    @Column(updatable = false)
-    private boolean flashSale;
+    @Column(updatable = true)
+    private boolean isFlashSale;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")
     private CartEntity cart;
 
-//    @ManyToOne
-//    @JoinColumn(name = "product_id")
-//    private ProductEntity product;
-
     @ManyToOne
-    @JoinColumn(name = "product_varriant_id")
-    private ProductVarriantEntity productVarriant;
+    @JoinColumn(name = "product_id", nullable = false)
+    private ProductEntity product;
+
+//    @ManyToOne
+//    @JoinColumn(name = "product_varriant_id")
+//    private ProductVarriantEntity productVarriant;
+
+//    @ManyToOne
+//    @JoinColumn(name = "product_varriant_id")
+//    private ProductVarriantEntity productVarriant;
 }
 

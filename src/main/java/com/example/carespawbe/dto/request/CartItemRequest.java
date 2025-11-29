@@ -10,12 +10,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CartItemRequest {
+    private Long cartItemId;
     private Long cartId;
     private Double cartItemPrice;
     private Double cartItemOriginalPrice;
-    private int cartItemQuantity;
+    private Integer cartItemQuantity;
     private Double cartItemTotalPrice;
     private boolean isFlashSale;
     private Long productId;
-    private Long productVariantId;
+//    private Long productVariantId;
 }

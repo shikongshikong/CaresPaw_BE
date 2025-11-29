@@ -9,5 +9,6 @@ import java.util.Optional;
 public interface VoucherRepository extends JpaRepository<VoucherEntity, Long> {
     Optional<VoucherEntity> findByVoucherName(String voucherName);
     List<VoucherEntity> findAllByShop_ShopId(Long shopId);
+    VoucherEntity findVoucherEntitiesByVoucherId(Long voucherId);
 
 }

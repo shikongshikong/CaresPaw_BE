@@ -25,7 +25,7 @@ public interface ProductMapper {
     @Mapping(target = "imageUrls", expression = "java(mapImages(productEntity.getImageProductList()))")
     @Mapping(target = "productVarriants", expression = "java(mapVarriants(productEntity.getProductVarriantList()))")
     ProductResponse toProductResponse(ProductEntity productEntity);
-
+    @Mapping(target = "productVarriants", expression = "java(mapVarriants(productEntity.getProductVarriantList()))")
     List<ProductResponse> toProductResponseList(List<ProductEntity> productEntityList);
 
     // Hàm thủ công map list ảnh

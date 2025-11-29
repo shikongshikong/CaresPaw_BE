@@ -13,6 +13,7 @@ public interface ProductVarriantMapper {
     @Mapping(target = "varriantId", source = "varriants.varriantId")
     @Mapping(target = "productVarriantValue", source = "productVarriantValue")
     ProductVarriantResponse toResponse(ProductVarriantEntity entity);
-
+    @Mapping(target = "varriantId", source = "varriants.varriantId")
+    @Mapping(target = "productVarriantValue", source = "productVarriantValue")
     List<ProductVarriantResponse> toResponseList(List<ProductVarriantEntity> entities);
 }

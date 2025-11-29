@@ -20,5 +20,6 @@ public class CartRequest {
     private LocalDate updatedAt;
     private Long userId;
     private Long voucherId;
+    private String voucherName;
     private List<CartItemRequest> cartItems;
 }
