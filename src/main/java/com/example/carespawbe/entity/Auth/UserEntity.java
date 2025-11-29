@@ -33,14 +33,20 @@ public class UserEntity {
 
     private String phoneNumber;
 
-    @Column(name = "pass_word", nullable = false)
+    @Column(name = "pass_word", nullable = true)
     private String password;
 
     private String avatar;
+
     private int role;
+
     private int state;
+
     private LocalDate birthday;
+
     private LocalDate createdAt;
+
+//    private String provider;
 
     @OneToMany(mappedBy = "userEntity")
     private List<OrderEntity> orderEntities;

@@ -40,7 +40,7 @@ public class ShopServiceImp implements ShopService {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (shopRepository.findByUserId(request.getUserId()).isPresent()) {
+        if (shopRepository.findByUser_Id(request.getUserId()).isPresent()) {
             throw new RuntimeException("User has already registered a shop");
         }
 
@@ -74,7 +74,7 @@ public class ShopServiceImp implements ShopService {
 
     @Override
     public ShopResponse updateShopInfo(Long userId, ShopRequest request, MultipartFile newShopLogo) {
-        ShopEntity existingShop = shopRepository.findByUserId(userId)
+        ShopEntity existingShop = shopRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
 
         existingShop.setShopName(request.getShopName());
@@ -97,7 +97,7 @@ public class ShopServiceImp implements ShopService {
 
     @Override
     public ShopResponse getShopByUserId(Long userId) {
-        ShopEntity shop = shopRepository.findByUserId(userId)
+        ShopEntity shop = shopRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new RuntimeException("Shop not found for user ID: " + userId));
 
         return shopMapper.toResponse(shop);

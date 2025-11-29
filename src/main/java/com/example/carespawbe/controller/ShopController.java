@@ -4,6 +4,7 @@ import com.example.carespawbe.dto.request.ShopRequest;
 import com.example.carespawbe.dto.response.ShopResponse;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.repository.Auth.UserRepository;
+import com.example.carespawbe.security.JwtService;
 import com.example.carespawbe.service.ShopService;
 import jakarta.servlet.annotation.MultipartConfig;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +29,14 @@ public class ShopController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registerShop(
             @RequestParam("shopName") String shopName,
             @RequestParam("shopAddress") String shopAddress,
-            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("shopPhoneNumber") String shopPhoneNumber,
             @RequestParam("userId") Long userId,
             @RequestParam("status") int status,
             @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo,
@@ -53,7 +57,7 @@ public class ShopController {
             ShopRequest shopRequest = new ShopRequest();
             shopRequest.setShopName(shopName);
             shopRequest.setShopAddress(shopAddress);
-            shopRequest.setShopPhone(phoneNumber);
+            shopRequest.setShopPhone(shopPhoneNumber);
             shopRequest.setUserId(userId);
             shopRequest.setStatus(1);
 
@@ -70,7 +74,7 @@ public class ShopController {
     public ResponseEntity<?> updateShop(
             @RequestParam("shopName") String shopName,
             @RequestParam("shopAddress") String shopAddress,
-            @RequestParam("phoneNumber") String phoneNumber,
+            @RequestParam("shopPhoneNumber") String shopPhoneNumber,
             @RequestParam("userId") Long userId,
             @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo
     ){
@@ -78,7 +82,7 @@ public class ShopController {
             ShopRequest shopRequest = new ShopRequest();
             shopRequest.setShopName(shopName);
             shopRequest.setShopAddress(shopAddress);
-            shopRequest.setShopPhone(phoneNumber);
+            shopRequest.setShopPhone(shopPhoneNumber);
             shopRequest.setUserId(userId);
 
             ShopResponse shopResponse = shopService.updateShopInfo(userId, shopRequest, shopLogo);
@@ -89,6 +93,7 @@ public class ShopController {
         }
     }
 
+//    show thông tin shop theo user
     @GetMapping("/user/{userId}")
     public ResponseEntity<ShopResponse> getShopByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(shopService.getShopByUserId(userId));
@@ -98,5 +103,40 @@ public class ShopController {
     public ResponseEntity<ShopResponse> getShopById(@PathVariable Long shopId) {
         ShopResponse shop = shopService.getShopById(shopId);
         return ResponseEntity.ok(shop);
+    }
+
+    @GetMapping("/myShop")
+    public ResponseEntity<?> getMyShop(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            String token = authorizationHeader.startsWith("Bearer ")
+                    ? authorizationHeader.substring(7)
+                    : authorizationHeader;
+
+            Long userId = jwtService.extractUserId(token);
+
+            // ✅ reuse hàm cũ, không cần viết thêm service
+            ShopResponse shop = shopService.getShopByUserId(userId);
+            return ResponseEntity.ok(shop);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/myShop/id")
+    public ResponseEntity<?> getMyShopId(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            String token = authorizationHeader.startsWith("Bearer ")
+                    ? authorizationHeader.substring(7)
+                    : authorizationHeader;
+
+            Long userId = jwtService.extractUserId(token);
+            ShopResponse shop = shopService.getShopByUserId(userId);
+
+            return ResponseEntity.ok(Map.of("shopId", shop.getShopId()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 }

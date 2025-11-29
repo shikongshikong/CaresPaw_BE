@@ -38,17 +38,19 @@ public class ProductController {
             @RequestParam("productStatus") Integer productStatus,
             @RequestParam("productUsing") String productUsing,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("shopId") Long shopId,
+
             @RequestParam(value = "productVarriants", required = false) String productVarriantsJson,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
-            @RequestParam(value = "video", required = false) MultipartFile video
+            @RequestParam(value = "video", required = false) MultipartFile video,
+
+            // THÊM Authorization header
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             List<ProductVarriantRequest> productVarriants = null;
 
             if (productVarriantsJson != null && !productVarriantsJson.isEmpty()) {
-                // Parse JSON string thành List<ProductVarriantRequest>
                 productVarriants = objectMapper.readValue(
                         productVarriantsJson,
                         new TypeReference<List<ProductVarriantRequest>>() {}
@@ -64,19 +66,22 @@ public class ProductController {
             request.setProductStatus(productStatus);
             request.setProductUsing(productUsing);
             request.setCategoryId(categoryId);
-            request.setShopId(shopId);
+
             request.setProductVarriants(productVarriants);
 
-            ProductResponse response = productService.createProduct(request, images, video);
+            // Gọi service có token
+            ProductResponse response = productService.createProduct(request, images, video, authorizationHeader);
+
             System.out.println("Received request: " + request);
             return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         }
     }
 
-    @PutMapping("/{productId}")
+    @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProduct(
             @PathVariable Long productId,
             @RequestParam("productName") String productName,
@@ -87,10 +92,13 @@ public class ProductController {
             @RequestParam("productStatus") Integer productStatus,
             @RequestParam("productUsing") String productUsing,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("shopId") Long shopId,
+
             @RequestParam(value = "productVarriants", required = false) String productVarriantsJson,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
-            @RequestParam(value = "video", required = false) MultipartFile video
+            @RequestParam(value = "video", required = false) MultipartFile video,
+
+            // THÊM Authorization header
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -112,11 +120,13 @@ public class ProductController {
             request.setProductStatus(productStatus);
             request.setProductUsing(productUsing);
             request.setCategoryId(categoryId);
-            request.setShopId(shopId);
+
             request.setProductVarriants(productVarriants);
 
-            ProductResponse response = productService.updateProduct(productId, request, images, video);
+            // Gọi service có token
+            ProductResponse response = productService.updateProduct(productId, request, images, video, authorizationHeader);
             return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
@@ -134,11 +144,13 @@ public class ProductController {
         }
     }
 
-
     @DeleteMapping("/{productId}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
+    public ResponseEntity<?> deleteProduct(
+            @PathVariable Long productId,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
         try {
-            productService.deleteProduct(productId);
+            productService.deleteProduct(productId, authorizationHeader);
             return ResponseEntity.ok(Map.of("message", "Product deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -162,6 +174,4 @@ public class ProductController {
         List<ProductResponse> newProducts = productService.getNewProducts();
         return ResponseEntity.ok(newProducts);
     }
-
-
 }
