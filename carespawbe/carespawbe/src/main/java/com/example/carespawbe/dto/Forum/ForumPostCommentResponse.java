@@ -11,7 +11,7 @@ public class ForumPostCommentResponse {
     private Long userId;
     private String avatar;
     private String fullname;
-    private LocalDate createAt;
+    private String createAt;
     private String content;
     private int followState;
 }
