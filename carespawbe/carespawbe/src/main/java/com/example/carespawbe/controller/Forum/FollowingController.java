@@ -17,26 +17,28 @@ public class FollowingController {
     private FollowingService followingService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addFollowing(@RequestBody Map<String, Long> request, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<String> addFollowing(@RequestBody Map<String, Long> request,
+            HttpServletRequest httpServletRequest) {
         System.out.println("FolloweeId: " + request);
         Long followeeIdLong = request.get("followeeId");
         Long userid = (Long) httpServletRequest.getAttribute("userId");
         try {
             followingService.addFollowing(userid, followeeIdLong);
-            System.out.println("Add FolloweeId: " +  followeeIdLong);
+            System.out.println("Add FolloweeId: " + followeeIdLong);
             return ResponseEntity.ok("success");
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.ok("fail");
         }
     }
 
     @DeleteMapping("/remove/{followeeId}")
-    public ResponseEntity<String> deleteFollowing(@PathVariable Long followeeId, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<String> deleteFollowing(@PathVariable Long followeeId,
+            HttpServletRequest httpServletRequest) {
         Long userid = (Long) httpServletRequest.getAttribute("userId");
         try {
             followingService.unFollowing(userid, followeeId);
             return ResponseEntity.ok("success");
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.ok("fail");
         }
     }

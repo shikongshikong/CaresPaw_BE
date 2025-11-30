@@ -36,8 +36,8 @@ public class UserProfileService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private FollowingService followingService;
+    // @Autowired
+    // private FollowingService followingService;
 
     @Autowired
     private ForumPostSaveService forumPostSaveService;
@@ -48,10 +48,10 @@ public class UserProfileService {
     @Autowired
     private ForumPostHistoryService forumPostHistoryService;
 
-    public UserProfileData getUserProfileData(Long userId){
-    //  User
+    public UserProfileData getUserProfileData(Long userId) {
+        // User
         UserInfoResponse userResponse = userMapper.toUserInfoResponse(userService.getUserById(userId));
-    // Post
+        // Post
         List<ForumPostEntity> forumPostEntities = forumPostService.getPostListByUserId(userId);
 
         List<UserPostResponse> userPostResponseList = new ArrayList<>();
@@ -59,17 +59,19 @@ public class UserProfileService {
 
         if (userPostResponseList != null) {
             for (UserPostResponse userPostResponse : userPostResponseList) {
-                List<Integer> categoryIds = forumPostCategoryService.getCategoryListByForumPostId(userPostResponse.getId());
+                List<Integer> categoryIds = forumPostCategoryService
+                        .getCategoryListByForumPostId(userPostResponse.getId());
                 userPostResponse.setCategoryList(categoryIds);
             }
         }
-    // Follow
+        // Follow
         List<FollowingResponse> followingResponseList = new ArrayList<>();
-        followingResponseList = followingService.getFollowingListByFollowerId(userId);
-    // Save
+        // followingResponseList =
+        // followingService.getFollowingListByFollowerId(userId);
+        // Save
         List<ShortForumPostResponse> userSaveResponseList = new ArrayList<>();
         userSaveResponseList = forumPostSaveService.getSavedByUserId(userId);
-    // History
+        // History
         List<UserHistoryResponse> userHistoryResponseList = new ArrayList<>();
         userHistoryResponseList = forumPostHistoryService.getUserHistoryByUserId(userId);
 
@@ -82,22 +84,22 @@ public class UserProfileService {
                 .build();
     }
 
-//    public int updateUserPost(Long postId, ForumPostRequest forumPostRequest){
-//        return forumPostService.updatePostInfo(postId, forumPostRequest);
-//    }
+    // public int updateUserPost(Long postId, ForumPostRequest forumPostRequest){
+    // return forumPostService.updatePostInfo(postId, forumPostRequest);
+    // }
 
     @Transactional
-    public int deleteUserPost(Long postId){
+    public int deleteUserPost(Long postId) {
         return forumPostService.deletePost(postId);
     }
 
-    public void updateUserProfileData(UserUpdateRequest userRequest, Long userId){
+    public void updateUserProfileData(UserUpdateRequest userRequest, Long userId) {
         UserEntity userEntity = userRepository.findUserById(userId);
 
         userEntity.setFullname(userRequest.getFullname());
         userEntity.setGender(userRequest.getGender());
         userEntity.setPhoneNumber(userRequest.getPhoneNum());
-//        userEntity.setAvatar(userRequest.getAvatar());
+        // userEntity.setAvatar(userRequest.getAvatar());
         userEntity.setBirthday(userRequest.getBirthday());
 
         userRepository.save(userEntity);
