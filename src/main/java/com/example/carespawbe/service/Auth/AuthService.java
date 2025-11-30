@@ -43,9 +43,9 @@ public class AuthService {
         UserEntity userEntity = UserEntity.builder()
                 .fullname(request.getFullname())
                 .email(request.getEmail())
-                .gender(Integer.parseInt(request.getGender()))
+                .gender(request.getGender())
                 .password(encodedPassword)
-                .role(1)
+                .birthday(request.getBirthday())
                 .build();
         return userRepository.save(userEntity);
     }

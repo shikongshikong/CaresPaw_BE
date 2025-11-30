@@ -17,10 +17,10 @@ public class AppSecurityConfig implements WebMvcConfigurer {
 //    @Bean
 //    public JwtAu
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 //    @Override
 //    protected void con

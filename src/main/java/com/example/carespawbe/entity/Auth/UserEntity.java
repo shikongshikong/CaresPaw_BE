@@ -1,5 +1,8 @@
 package com.example.carespawbe.entity.Auth;
 
+import com.example.carespawbe.entity.Forum.ForumPostEntity;
+import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
+import com.example.carespawbe.entity.Forum.ForumPostSaveEntity;
 import com.example.carespawbe.entity.shop.OrderEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -45,12 +49,16 @@ public class UserEntity {
     private LocalDate birthday;
     private LocalDate createdAt;
 
-//    optional, but useful when user.getPosts();
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    private List<Post> posts = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    private List<PostHistory> histories = new ArrayList<>();
+//    optional, but useful when userEntity.getForumPostEntities();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ForumPostEntity> forumPostEntities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ForumPostHistoryEntity> histories = new ArrayList<>();
+
+    //
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ForumPostSaveEntity> forumPostSaveEntity;
 
     @PrePersist
     protected void onCreate() {
