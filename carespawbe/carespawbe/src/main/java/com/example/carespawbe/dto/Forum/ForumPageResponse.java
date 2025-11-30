@@ -1,15 +1,20 @@
 package com.example.carespawbe.dto.Forum;
 
-import com.example.carespawbe.dto.History.PostSideBarResponse;
+import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
+import com.example.carespawbe.dto.History.ForumPostSideBarResponse;
 import lombok.Data;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Data
 public class ForumPageResponse {
-    private List<ShortForumPost> popularPosts;
-    private List<ShortForumPost> postList;
-    private List<PostSideBarResponse> historyPosts;
+    private List<ShortForumPostResponse> popularPosts;
+//    private List<ShortForumPostResponse> postList;
+
+    private List<ForumPostHistoryTagResponse> historyPosts;
 //     + following
-    private List<PostSideBarResponse> savePosts;
+    private List<ForumPostSideBarResponse> savePosts;
+
+    Page<ShortForumPostResponse> postList;
 }

@@ -1,7 +1,6 @@
 package com.example.carespawbe.security;
 
-import com.example.carespawbe.service.CustomUserDetailsService;
-import com.example.carespawbe.service.UserService;
+import com.example.carespawbe.service.Auth.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,9 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             request.setAttribute("userId", userId);
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("JWT authentication failed");
             request.setAttribute("userId", 0L);
+            e.printStackTrace();
         }
         filterChain.doFilter(request, response);
     }
@@ -69,9 +68,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //            return bearerToken.substring(7);
 //        }
 //        return bearerToken.substring(7);
-        if (bearerToken != null) {
-            if (bearerToken.length() > 7) {
-                return  bearerToken.substring(7);
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            if (bearerToken.length() > 9) {
+                return bearerToken.substring(7);
             }
         }
         return null;

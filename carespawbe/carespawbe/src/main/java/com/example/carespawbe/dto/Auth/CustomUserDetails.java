@@ -1,6 +1,6 @@
 package com.example.carespawbe.dto.Auth;
 
-import com.example.carespawbe.entity.User;
+import com.example.carespawbe.entity.Auth.UserEntity;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private final UserEntity userEntity;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

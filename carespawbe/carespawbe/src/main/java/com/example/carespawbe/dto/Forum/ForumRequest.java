@@ -1,4 +1,4 @@
-package com.example.carespawbe.dto.Forum;
+/*package com.example.carespawbe.dto.Forum;
 
 import lombok.Data;
 
@@ -6,3 +6,5 @@ import lombok.Data;
 public class ForumRequest {
     private Long userId;
 }
+
+ */
