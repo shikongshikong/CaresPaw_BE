@@ -1,4 +1,4 @@
-package com.example.carespawbe.entity;
+package com.example.carespawbe.entity.Auth;
 
 import com.example.carespawbe.entity.shop.OrderEntity;
 import jakarta.persistence.*;
