@@ -24,8 +24,8 @@ public class OrderEntity {
     @Column(nullable = false)
     private Double orderShippingFee;
 
-    @Column(nullable = false)
-    private int orderCoinUsed;
+//    @Column(nullable = false)
+//    private int orderCoinUsed;
 
     @Column(nullable = false)
     private Double orderTotalPrice;

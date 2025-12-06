@@ -67,8 +67,8 @@ public class CartServiceImp implements CartService {
                 cartEntity.setCartItemEntityList(new ArrayList<>());
             }
             cartEntity.setCartTotalPrice(request.getCartTotalPrice());
-            cartEntity.setCartShippingFee(request.getCartShippingFee());
-            cartEntity.setCartTotalCoinEarned(request.getCartTotalCoinEarned());
+//            cartEntity.setCartShippingFee(request.getCartShippingFee());
+//            cartEntity.setCartTotalCoinEarned(request.getCartTotalCoinEarned());
             cartEntity.setVoucher(voucherEntity);
             if (request.getCartItems() != null && !request.getCartItems().isEmpty()) {
                 for (CartItemRequest itemReq : request.getCartItems()) {
@@ -87,10 +87,10 @@ public class CartServiceImp implements CartService {
                         CartItemEntity cartItemEntity = new CartItemEntity();
                         cartItemEntity.setCart(cartEntity);
                         cartItemEntity.setCartItemPrice(itemReq.getCartItemPrice());
-                        cartItemEntity.setCartItemOriginalPrice(itemReq.getCartItemOriginalPrice());
+//                        cartItemEntity.setCartItemOriginalPrice(itemReq.getCartItemOriginalPrice());
                         cartItemEntity.setCartItemQuantity(itemReq.getCartItemQuantity());
                         cartItemEntity.setCartItemTotalPrice(itemReq.getCartItemTotalPrice());
-                        cartItemEntity.setFlashSale(itemReq.isFlashSale());
+//                        cartItemEntity.setFlashSale(itemReq.isFlashSale());
                         cartItemEntity.setProduct(product);
                         cartEntity.getCartItemEntityList().add(cartItemEntity);
                     }
@@ -120,8 +120,8 @@ public class CartServiceImp implements CartService {
             cartEntity.setUserEntity(userEntity);
             cartEntity.setCreatedAt(request.getCreatedAt());
             cartEntity.setCartTotalPrice(request.getCartTotalPrice());
-            cartEntity.setCartShippingFee(request.getCartShippingFee());
-            cartEntity.setCartTotalCoinEarned(request.getCartTotalCoinEarned());
+//            cartEntity.setCartShippingFee(request.getCartShippingFee());
+//            cartEntity.setCartTotalCoinEarned(request.getCartTotalCoinEarned());
             cartEntity.setVoucher(voucherEntity);
 
             if (request.getCartItems() != null && !request.getCartItems().isEmpty()) {
@@ -133,10 +133,10 @@ public class CartServiceImp implements CartService {
                         cartItemEntity.setCartItemId(itemReq.getCartItemId());
                     }
                     cartItemEntity.setCartItemPrice(itemReq.getCartItemPrice());
-                    cartItemEntity.setCartItemOriginalPrice(itemReq.getCartItemOriginalPrice());
+//                    cartItemEntity.setCartItemOriginalPrice(itemReq.getCartItemOriginalPrice());
                     cartItemEntity.setCartItemQuantity(itemReq.getCartItemQuantity());
                     cartItemEntity.setCartItemTotalPrice(itemReq.getCartItemTotalPrice());
-                    cartItemEntity.setFlashSale(itemReq.isFlashSale());
+//                    cartItemEntity.setFlashSale(itemReq.isFlashSale());
                     cartItemEntity.setProduct(pr);
 
 //                    cartItemEntity.setProduct(productEntity);

@@ -21,8 +21,8 @@ public class CartItemEntity {
     @Column(updatable = true)
     private Double cartItemPrice;
 
-    @Column(updatable = true)
-    private Double cartItemOriginalPrice;
+//    @Column(updatable = true)
+//    private Double cartItemOriginalPrice;
 
     @Column(updatable = true)
     private int cartItemQuantity;
@@ -30,8 +30,8 @@ public class CartItemEntity {
     @Column(updatable = true)
     private Double cartItemTotalPrice;
 
-    @Column(updatable = true)
-    private boolean isFlashSale;
+//    @Column(updatable = true)
+//    private boolean isFlashSale;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")

@@ -31,9 +31,7 @@ public class ProductController {
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @RequestParam("productName") String productName,
-            @RequestParam("productDescribe") String productDescribe,
             @RequestParam("productPrice") Double productPrice,
-            @RequestParam("productPriceSale") Double productPriceSale,
             @RequestParam("productAmount") Integer productAmount,
             @RequestParam("productStatus") Integer productStatus,
             @RequestParam("productUsing") String productUsing,
@@ -59,9 +57,7 @@ public class ProductController {
 
             ProductRequest request = new ProductRequest();
             request.setProductName(productName);
-            request.setProductDescribe(productDescribe);
             request.setProductPrice(productPrice);
-            request.setProductPriceSale(productPriceSale);
             request.setProductAmount(productAmount);
             request.setProductStatus(productStatus);
             request.setProductUsing(productUsing);
@@ -85,9 +81,9 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(
             @PathVariable Long productId,
             @RequestParam("productName") String productName,
-            @RequestParam("productDescribe") String productDescribe,
+//            @RequestParam("productDescribe") String productDescribe,
             @RequestParam("productPrice") Double productPrice,
-            @RequestParam("productPriceSale") Double productPriceSale,
+//            @RequestParam("productPriceSale") Double productPriceSale,
             @RequestParam("productAmount") Integer productAmount,
             @RequestParam("productStatus") Integer productStatus,
             @RequestParam("productUsing") String productUsing,
@@ -113,9 +109,9 @@ public class ProductController {
 
             ProductRequest request = new ProductRequest();
             request.setProductName(productName);
-            request.setProductDescribe(productDescribe);
+//            request.setProductDescribe(productDescribe);
             request.setProductPrice(productPrice);
-            request.setProductPriceSale(productPriceSale);
+//            request.setProductPriceSale(productPriceSale);
             request.setProductAmount(productAmount);
             request.setProductStatus(productStatus);
             request.setProductUsing(productUsing);

@@ -14,8 +14,8 @@ import java.util.List;
 @Builder
 public class CartRequest {
     private Double cartTotalPrice;
-    private Double cartShippingFee;
-    private int cartTotalCoinEarned;
+//    private Double cartShippingFee;
+//    private int cartTotalCoinEarned;
     private LocalDate createdAt;
     private LocalDate updatedAt;
     private Long userId;

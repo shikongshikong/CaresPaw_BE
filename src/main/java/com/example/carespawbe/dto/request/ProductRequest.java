@@ -12,9 +12,9 @@ import java.util.List;
 @Builder
 public class ProductRequest {
     private String productName;
-    private String productDescribe;
+//    private String productDescribe;
     private Double productPrice;
-    private Double productPriceSale;
+//    private Double productPriceSale;
     private Integer productAmount;
     private Integer productStatus;
     private String productUsing;

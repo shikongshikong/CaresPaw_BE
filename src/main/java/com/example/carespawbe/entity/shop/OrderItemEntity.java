@@ -26,8 +26,8 @@ public class OrderItemEntity {
     @Column(nullable = false)
     private Double orderItemTotalPrice;
 
-    @Column(updatable = false)
-    private boolean flashSale;
+//    @Column(updatable = false)
+//    private boolean flashSale;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

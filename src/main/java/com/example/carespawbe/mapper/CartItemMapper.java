@@ -6,11 +6,14 @@ import com.example.carespawbe.entity.shop.CartItemEntity;
 import org.mapstruct.*;
 
 import java.util.List;
-
-@Mapper(componentModel = "spring", nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
+@Mapper(
+        componentModel = "spring",
+        uses = { ProductMapper.class }, // ✅ để map ProductEntity -> ProductResponse theo mapper bạn viết
+        nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface CartItemMapper {
-
-    @Mapping(target = "product", source = "product")
+//    @Mapping(target = "productId", source = "product.productId")
     CartItemResponse toCartItemResponse(CartItemEntity entity);
 
     @Mapping(target = "productId", source = "product.productId")

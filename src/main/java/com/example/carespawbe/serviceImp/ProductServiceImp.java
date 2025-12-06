@@ -79,9 +79,9 @@ public class ProductServiceImp implements ProductService {
             productEntity.setCategory(category);
             productEntity.setShop(shop);
             productEntity.setProductName(request.getProductName());
-            productEntity.setProductDescribe(request.getProductDescribe());
+//            productEntity.setProductDescribe(request.getProductDescribe());
             productEntity.setProductPrice(request.getProductPrice());
-            productEntity.setProductPriceSale(request.getProductPriceSale());
+//            productEntity.setProductPriceSale(request.getProductPriceSale());
             productEntity.setProductAmount(request.getProductAmount());
             productEntity.setProductStatus(request.getProductStatus());
             productEntity.setProductUsing(request.getProductUsing());
@@ -163,9 +163,9 @@ public class ProductServiceImp implements ProductService {
             }
 
             existingProduct.setProductName(request.getProductName());
-            existingProduct.setProductDescribe(request.getProductDescribe());
+//            existingProduct.setProductDescribe(request.getProductDescribe());
             existingProduct.setProductPrice(request.getProductPrice());
-            existingProduct.setProductPriceSale(request.getProductPriceSale());
+//            existingProduct.setProductPriceSale(request.getProductPriceSale());
             existingProduct.setProductAmount(request.getProductAmount());
             existingProduct.setProductStatus(request.getProductStatus());
             existingProduct.setProductUsing(request.getProductUsing());

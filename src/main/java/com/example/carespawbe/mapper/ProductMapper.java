@@ -22,9 +22,11 @@ public interface ProductMapper {
 
     @Mapping(target = "categoryId", source = "category.categoryId")
     @Mapping(target = "shopId", source = "shop.shopId")
+    @Mapping(target = "shopName", source = "shop.shopName")
     @Mapping(target = "imageUrls", expression = "java(mapImages(productEntity.getImageProductList()))")
     @Mapping(target = "productVarriants", expression = "java(mapVarriants(productEntity.getProductVarriantList()))")
     ProductResponse toProductResponse(ProductEntity productEntity);
+
     @Mapping(target = "productVarriants", expression = "java(mapVarriants(productEntity.getProductVarriantList()))")
     List<ProductResponse> toProductResponseList(List<ProductEntity> productEntityList);
 

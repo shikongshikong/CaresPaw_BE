@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 public class CartItemResponse {
     private Long cartItemId;
     private Double cartItemPrice;
-    private Double cartItemOriginalPrice;
+//    private Double cartItemOriginalPrice;
     private int cartItemQuantity;
     private Double cartItemTotalPrice;
-    private boolean isFlashSale;
+//    private boolean isFlashSale;
     private ProductResponse product;
 //    private String productVarriantValue;
-    private String imageProductUrl;
+//    private String imageProductUrl;
 //    private String productName;
 //    private Long productVarriantId;
 //    private String variantName;

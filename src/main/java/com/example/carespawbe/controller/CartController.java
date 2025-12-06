@@ -75,7 +75,7 @@ public class CartController {
             @PathVariable Long cartItemId,
             @RequestBody CartItemRequest request) {
         try {
-             CartItemResponse response = cartService.updateCartItem(cartId, cartItemId, request);
+            CartItemResponse response = cartService.updateCartItem(cartId, cartItemId, request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             throw new RuntimeException(e);

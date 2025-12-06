@@ -15,8 +15,8 @@ import java.util.List;
 public class CartResponse {
     private Long cartId;
     private Double cartTotalPrice;
-    private Double cartShippingFee;
-    private int cartTotalCoinEarned;
+//    private Double cartShippingFee;
+//    private int cartTotalCoinEarned;
     private LocalDate createdAt;
     private LocalDate updatedAt;
     private Long userId;

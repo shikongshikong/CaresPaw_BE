@@ -27,11 +27,11 @@ public class CartEntity {
     @Column(updatable = false)
     private Double CartTotalPrice;
 
-    @Column(updatable = false)
-    private Double CartShippingFee;
-
-    @Column(updatable = true)
-    private int CartTotalCoinEarned;
+//    @Column(updatable = false)
+//    private Double CartShippingFee;
+//
+//    @Column(updatable = true)
+//    private int CartTotalCoinEarned;
 
     @Column(updatable = false)
     private LocalDate createdAt;

@@ -12,19 +12,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.*;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     @Autowired private JwtAuthenticationFilter jwtAuthenticationFilter;
     @Autowired private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
     @Autowired private CustomOAuth2UserService customOAuth2UserService;
 
-    // ✅ 1) API chain: JWT only, STATELESS => KHÔNG còn JSESSIONID cho API
+    // 1) API chain: JWT only, STATELESS => KHÔNG còn JSESSIONID cho API
     @Bean
     @Order(1)
     public SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
@@ -45,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/shopManager/**").hasAnyRole("SHOP_OWNER")
                         .requestMatchers("/api/expert/**").hasAnyRole("ADMIN", "EXPERT")
                         .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
+                        .requestMatchers("/cart/**").hasAnyRole("USER","SHOP_OWNER","ADMIN")
 
                         .anyRequest().authenticated()
                 )
@@ -83,11 +87,11 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:3000"));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
 
-        // ✅ nên ghi rõ, đừng *
+        // nên ghi rõ, đừng *
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
 
-        // ✅ JWT dùng Authorization header thì KHÔNG cần credentials
+        // JWT dùng Authorization header thì KHÔNG cần credentials
         config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

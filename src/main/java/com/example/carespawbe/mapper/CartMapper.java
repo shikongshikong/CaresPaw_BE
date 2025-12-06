@@ -6,8 +6,12 @@ import com.example.carespawbe.entity.shop.CartEntity;
 import org.mapstruct.*;
 
 import java.util.List;
-
-@Mapper(componentModel = "spring", nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
+@Mapper(
+        componentModel = "spring",
+        uses = { CartItemMapper.class }, // ✅ BẮT BUỘC
+        nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface CartMapper {
 
     @Mapping(target = "userId", source = "userEntity.id")

@@ -25,14 +25,14 @@ public class ProductEntity {
     @Column(nullable = false)
     private String productName;
 
-    @Column(nullable = false)
-    private String productDescribe;
+//    @Column(nullable = false)
+//    private String productDescribe;
 
     @Column(nullable = false)
     private Double productPrice;
 
-    @Column(nullable = true)
-    private Double productPriceSale;
+//    @Column(nullable = true)
+//    private Double productPriceSale;
 
     @Column(nullable = false)
     private Integer productAmount;

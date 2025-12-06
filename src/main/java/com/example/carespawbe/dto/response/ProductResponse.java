@@ -15,12 +15,13 @@ public class ProductResponse {
     private String productName;
     private String productDescribe;
     private Double productPrice;
-    private Double productPriceSale;
+//    private Double productPriceSale;
     private Integer productAmount;
     private Integer productStatus;
     private String productUsing;
     private Long categoryId;
     private Long shopId;
+    private String shopName;
 //    private List<String> productVarriants;
     private List<ProductVarriantResponse> productVarriants;
     private List<String> imageUrls;
