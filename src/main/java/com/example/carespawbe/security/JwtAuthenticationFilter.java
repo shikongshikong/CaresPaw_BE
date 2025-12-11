@@ -42,21 +42,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Lấy role và map từ số sang ROLE_NAME
-        String roleFromJwt = jwtService.extractUserRole(token); // trả về "0", "1", "2"
-        String role;
-        switch (roleFromJwt) {
-            case "0":
-                role = "ROLE_ADMIN";
-                break;
-            case "1":
-                role = "ROLE_USER";
-                break;
-            case "2":
-                role = "ROLE_SHOP_OWNER";
-                break;
-            default:
-                role = "ROLE_USER"; // default
-        }
+//        String roleFromJwt = jwtService.extractUserRole(token); // trả về "0", "1", "2"
+//        String role;
+//        switch (roleFromJwt) {
+//            case "0":
+//                role = "ROLE_ADMIN";
+//                break;
+//            case "1":
+//                role = "ROLE_USER";
+//                break;
+//            case "2":
+//                role = "ROLE_SHOP_OWNER";
+//                break;
+//            default:
+//                role = "ROLE_USER"; // default
+//        }
+        // Lấy thẳng ROLE_* từ token, KHÔNG map lại số nữa
+        Long userIdLong = jwtService.extractUserId(token);
+        request.setAttribute("userId", userIdLong); // vd: "ROLE_SHOP_OWNER", "ROLE_USER"
+
+//        if (role == null) {
+//            role = "ROLE_USER";   // fallback nếu token không có field role
+//        }
+        String role = jwtService.extractUserRole(token);
+        if (role == null) role = "ROLE_USER";
 
         String userId = String.valueOf(jwtService.extractUserId(token));
 

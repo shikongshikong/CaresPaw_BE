@@ -3,7 +3,7 @@ package com.example.carespawbe.entity.Auth;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
 import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
 import com.example.carespawbe.entity.Forum.ForumPostSaveEntity;
-import com.example.carespawbe.entity.shop.OrderEntity;
+import com.example.carespawbe.entity.Shop.OrderEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

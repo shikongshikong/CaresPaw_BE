@@ -1,8 +1,8 @@
 // đường dẫn: src/main/java/com/example/carespawbe/DBStartupTest.java
 package com.example.carespawbe;
 
-import com.example.carespawbe.repository.shop.CategoryRepository;
-import com.example.carespawbe.repository.shop.ShopRepository;
+import com.example.carespawbe.repository.Shop.CategoryRepository;
+import com.example.carespawbe.repository.Shop.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,7 +33,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Order(1)
     public SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/**")
+                .securityMatcher("/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -40,16 +41,16 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .httpBasic(b -> b.disable())
                 .oauth2Login(o -> o.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+                        .requestMatchers("/auth/**", "/public/**").permitAll()
+                        .requestMatchers("/shop/register").hasRole("USER")
 
                         // nhớ thêm /api vào đây
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
-                        .requestMatchers("/api/shopManager/**").hasAnyRole("SHOP_OWNER")
-                        .requestMatchers("/api/expert/**").hasAnyRole("ADMIN", "EXPERT")
-                        .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
+//                        .requestMatchers("/shopManager/**").hasAnyRole("SHOP_OWNER")
+                        .requestMatchers("/expert/**").hasAnyRole("ADMIN", "EXPERT")
+                        .requestMatchers("/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
                         .requestMatchers("/cart/**").hasAnyRole("USER","SHOP_OWNER","ADMIN")
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -89,6 +90,7 @@ public class SecurityConfig implements WebMvcConfigurer {
 
         // nên ghi rõ, đừng *
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+//        config.addAllowedHeader("*");
         config.setExposedHeaders(List.of("Authorization"));
 
         // JWT dùng Authorization header thì KHÔNG cần credentials
