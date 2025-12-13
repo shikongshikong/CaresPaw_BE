@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,9 +25,6 @@ public class OrderEntity {
     @Column(nullable = false)
     private Double orderShippingFee;
 
-//    @Column(nullable = false)
-//    private int orderCoinUsed;
-
     @Column(nullable = false)
     private Double orderTotalPrice;
 
@@ -43,12 +41,20 @@ public class OrderEntity {
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "voucher_id")
-    private VoucherEntity voucherEntity;
+//    @ManyToOne
+//    @JoinColumn(name = "voucher_id")
+//    private VoucherEntity voucherEntity;
 
-    @OneToMany(mappedBy = "orderEntity")
-    private List<OrderItemEntity> orderItems;
+//    @OneToMany(mappedBy = "orderEntity")
+//    private List<OrderItemEntity> orderItems;
+
+    // 1 order -> N shop_orders
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ShopOrderEntity> shopOrders = new ArrayList<>();
+
+    // 1 order -> N history
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderStatusHistoryEntity> orderStatusHistories = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "payment_id")

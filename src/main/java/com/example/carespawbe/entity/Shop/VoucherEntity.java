@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -51,10 +52,17 @@ public class VoucherEntity {
     @Column(nullable = false)
     private int voucherMinOrder;
 
+    // FK: voucher.shop_id -> shop.shop_id
     @ManyToOne
     @JoinColumn(name = "shop_id", nullable = false)
     private ShopEntity shop;
 
-    @OneToMany(mappedBy = "voucherEntity")
-    private List<OrderEntity> orderEntities;
+    @OneToMany(mappedBy = "orderVoucher")
+    private List<ShopOrderEntity> asOrderVoucherInShopOrders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "shippingVoucher")
+    private List<ShopOrderEntity> asShippingVoucherInShopOrders = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "voucherEntity")
+//    private List<OrderEntity> orderEntities;
 }

@@ -4,6 +4,8 @@ import com.example.carespawbe.entity.Forum.ForumPostEntity;
 import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
 import com.example.carespawbe.entity.Forum.ForumPostSaveEntity;
 import com.example.carespawbe.entity.Shop.OrderEntity;
+import com.example.carespawbe.entity.Shop.OrderStatusHistoryEntity;
+import com.example.carespawbe.entity.Shop.ShopOrderStatusHistoryEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,9 +58,14 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ForumPostHistoryEntity> histories = new ArrayList<>();
 
-    //
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostSaveEntity> forumPostSaveEntity;
+
+    @OneToMany(mappedBy = "changedBy")
+    private List<OrderStatusHistoryEntity> changedOrderStatuses;
+
+    @OneToMany(mappedBy = "changedBy")
+    private List<ShopOrderStatusHistoryEntity> changedShopOrderStatuses;
 
     @PrePersist
     protected void onCreate() {
