@@ -14,6 +14,9 @@ public interface ShopMapper {
     @Mapping(target = "phoneNumber", source = "user.phoneNumber")
     @Mapping(source = "created_at", target = "created_at")
     @Mapping(source = "update_at", target = "updated_at")
+    @Mapping(source = "shopDescription", target = "shopDescription")
+    @Mapping(source = "shopBanner", target = "shopBanner")
+    @Mapping(source = "status", target = "status")
     ShopResponse toResponse(ShopEntity shop);
 
 }

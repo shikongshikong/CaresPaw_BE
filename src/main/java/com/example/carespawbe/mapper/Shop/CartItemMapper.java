@@ -14,9 +14,11 @@ import java.util.List;
 )
 public interface CartItemMapper {
 //    @Mapping(target = "productId", source = "product.productId")
+//    @Mapping(target = "productVarriantId", source = "productVarriant.productVarriantId")
     CartItemResponse toCartItemResponse(CartItemEntity entity);
 
     @Mapping(target = "productId", source = "product.productId")
+//    @Mapping(target = "productVarriantId", source = "productVarriant.productVarriantId")
     CartItemRequest toCartItemRequest(CartItemEntity entity);
 
     List<CartItemResponse> toResponseList(List<CartItemEntity> entities);

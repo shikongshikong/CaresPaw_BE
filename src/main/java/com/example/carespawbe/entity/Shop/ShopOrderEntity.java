@@ -1,11 +1,15 @@
 package com.example.carespawbe.entity.Shop;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Table(
         name = "shop_orders",
         indexes = {
@@ -26,8 +30,8 @@ public class ShopOrderEntity {
     @Column(name = "shop_order_status", nullable = false)
     private int shopOrderStatus;
 
-    @Column(name = "ghn_service_id")
-    private int ghnServiceId;
+//    @Column(name = "ghn_service_id")
+//    private int ghnServiceId;
 
     @Column(name = "ghn_order_code")
     private String ghnOrderCode;
@@ -55,11 +59,11 @@ public class ShopOrderEntity {
     private VoucherEntity shippingVoucher;
 
     // 1 shop_order -> N order_item
-    @OneToMany(mappedBy = "shopOrderId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "shopOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> orderItemEntities = new ArrayList<>();
 
     // 1 shop_order -> N history
-    @OneToMany(mappedBy = "shopOrderId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "shopOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShopOrderStatusHistoryEntity> shopOrderStatusHistories = new ArrayList<>();
 
 }

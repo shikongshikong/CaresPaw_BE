@@ -37,9 +37,11 @@ public class ShopController {
             @RequestParam("shopName") String shopName,
             @RequestParam("shopAddress") String shopAddress,
             @RequestParam("shopPhoneNumber") String shopPhoneNumber,
+            @RequestParam("shopDescription") String shopDescription,
             @RequestParam("userId") Long userId,
 //            @RequestParam("status") int status,
             @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo,
+            @RequestParam(value = "shopBanner", required = false) MultipartFile shopBanner,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         try {
@@ -57,11 +59,12 @@ public class ShopController {
             ShopRequest shopRequest = new ShopRequest();
             shopRequest.setShopName(shopName);
             shopRequest.setShopAddress(shopAddress);
+            shopRequest.setShopDescription(shopDescription);
             shopRequest.setShopPhone(shopPhoneNumber);
             shopRequest.setUserId(userId);
             shopRequest.setStatus(1);
 
-            ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo, authorizationHeader);
+            ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo,shopBanner, authorizationHeader);
 
             return ResponseEntity.ok(shopResponse);
         } catch (Exception e) {
@@ -74,18 +77,23 @@ public class ShopController {
     public ResponseEntity<?> updateShop(
             @RequestParam("shopName") String shopName,
             @RequestParam("shopAddress") String shopAddress,
+            @RequestParam("shopDescription") String shopDescription,
             @RequestParam("shopPhoneNumber") String shopPhoneNumber,
             @RequestParam("userId") Long userId,
-            @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo
-    ){
+            @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo,
+            @RequestParam(value = "shopBanner", required = false) MultipartFile shopBanner,
+            @RequestParam("status") int status
+            ){
         try {
             ShopRequest shopRequest = new ShopRequest();
             shopRequest.setShopName(shopName);
             shopRequest.setShopAddress(shopAddress);
+            shopRequest.setShopDescription(shopDescription);
             shopRequest.setShopPhone(shopPhoneNumber);
             shopRequest.setUserId(userId);
+            shopRequest.setStatus(status);
 
-            ShopResponse shopResponse = shopService.updateShopInfo(userId, shopRequest, shopLogo);
+            ShopResponse shopResponse = shopService.updateShopInfo(userId, shopRequest, shopLogo, shopBanner);
             return ResponseEntity.ok(shopResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -28,8 +28,14 @@ public class ShopEntity {
     @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String shopAddress;
 
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String shopDescription;
+
     @Column(nullable = true)
     private String shopLogo;
+
+    @Column(nullable = true)
+    private String shopBanner;
 
     @Column(nullable = true)
     private int shopAmountFollower;
@@ -45,6 +51,9 @@ public class ShopEntity {
 
     @Column(nullable = true)
     private String shopLogoPublicId;
+
+    @Column(nullable = true)
+    private String shopBannerPublicId;
 
     @OneToMany(mappedBy = "shop")
     private List<ProductEntity> productShopList;

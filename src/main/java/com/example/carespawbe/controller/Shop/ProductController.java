@@ -170,4 +170,15 @@ public class ProductController {
         List<ProductResponse> newProducts = productService.getNewProducts();
         return ResponseEntity.ok(newProducts);
     }
+
+    @GetMapping("/shop/{shopId}")
+    public ResponseEntity<?> getAllProductsByShopId(@PathVariable Long shopId) {
+        try {
+            List<ProductResponse> products = productService.getAllProductsByShopId(shopId);
+            return ResponseEntity.ok(products);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
 }

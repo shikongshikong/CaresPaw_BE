@@ -31,7 +31,7 @@ public class ShopOrderStatusHistoryEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_order_id", nullable = false)
-    private ShopOrderEntity shopOrderId;
+    private ShopOrderEntity shopOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "changed_by_user_id")

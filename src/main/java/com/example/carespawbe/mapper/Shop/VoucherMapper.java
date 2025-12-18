@@ -15,13 +15,13 @@ public interface VoucherMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "voucherId", ignore = true)
     @Mapping(target = "shop", ignore = true)
-    @Mapping(target = "orderEntities", ignore = true)
+//    @Mapping(target = "orderEntities", ignore = true)
     VoucherEntity toEntity(VoucherRequest request);
 
     // Update entity từ request
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "voucherId", ignore = true)
     @Mapping(target = "shop", ignore = true)
-    @Mapping(target = "orderEntities", ignore = true)
+//    @Mapping(target = "orderEntities", ignore = true)
     void updateEntity(@MappingTarget VoucherEntity entity, VoucherRequest request);
 }

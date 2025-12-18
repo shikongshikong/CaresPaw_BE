@@ -41,12 +41,9 @@ public class CartItemEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
-//    @ManyToOne
+//    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "product_varriant_id")
 //    private ProductVarriantEntity productVarriant;
 
-//    @ManyToOne
-//    @JoinColumn(name = "product_varriant_id")
-//    private ProductVarriantEntity productVarriant;
 }
 

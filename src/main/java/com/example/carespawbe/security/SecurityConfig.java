@@ -51,6 +51,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .requestMatchers("/expert/**").hasAnyRole("ADMIN", "EXPERT")
                         .requestMatchers("/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
                         .requestMatchers("/cart/**").hasAnyRole("USER","SHOP_OWNER","ADMIN")
+                        .requestMatchers("/location/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 public class ShopRequest {
     private String shopName;
     private String shopAddress;
+    private String shopDescription;
     private String shopLogo;
+    private String shopBanner;
     private String shopPhone;
     private Long userId;
     private int status;

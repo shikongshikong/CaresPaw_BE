@@ -7,10 +7,7 @@ import com.example.carespawbe.entity.Shop.OrderEntity;
 import com.example.carespawbe.entity.Shop.OrderStatusHistoryEntity;
 import com.example.carespawbe.entity.Shop.ShopOrderStatusHistoryEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,6 +16,8 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

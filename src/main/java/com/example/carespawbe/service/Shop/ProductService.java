@@ -13,5 +13,5 @@ public interface ProductService {
     void deleteProduct(Long productId, String authorizationHeader);
     List<ProductResponse> getAllProducts();
     List<ProductResponse> getNewProducts();
-
+    List<ProductResponse> getAllProductsByShopId(Long shopId);
 }

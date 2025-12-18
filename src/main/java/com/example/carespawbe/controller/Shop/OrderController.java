@@ -1,0 +1,38 @@
+package com.example.carespawbe.controller.Shop;
+
+import com.example.carespawbe.dto.Shop.request.OrderRequest;
+import com.example.carespawbe.dto.Shop.response.OrderResponse;
+import com.example.carespawbe.service.Shop.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/orders")
+@RequiredArgsConstructor
+public class OrderController {
+    private final OrderService orderService;
+
+    @PostMapping("/checkout")
+    public ResponseEntity<OrderResponse> checkout(
+            HttpServletRequest request,
+            @RequestBody OrderRequest body
+    ) {
+        Long userId = (Long) request.getAttribute("userId");
+
+        if (userId == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        OrderResponse response = orderService.checkout(userId, body);
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getOrdersByUserId(@PathVariable Long userId) {
+        List<OrderResponse> response = orderService.getOrderByUserId(userId);
+        return ResponseEntity.ok(response);
+    }
+}

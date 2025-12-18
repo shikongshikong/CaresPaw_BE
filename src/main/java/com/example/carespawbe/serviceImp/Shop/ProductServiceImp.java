@@ -282,4 +282,14 @@ public class ProductServiceImp implements ProductService {
                 .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ProductResponse> getAllProductsByShopId(Long shopId) {
+        List<ProductEntity> productEntities =
+                productRepository.findAllByShop_ShopIdOrderByProductCreatedAtDesc(shopId);
+
+        return productEntities.stream()
+                .map(productMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
 }

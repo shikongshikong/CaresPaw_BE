@@ -1,4 +1,5 @@
 package com.example.carespawbe.entity.Shop;
+import com.example.carespawbe.entity.Auth.UserAddressEntity;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,18 +36,11 @@ public class OrderEntity {
     private LocalDate orderUpdatedAt;
 
     @Column(nullable = false)
-    private int orderStatus;
+    private Integer orderStatus;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
-
-//    @ManyToOne
-//    @JoinColumn(name = "voucher_id")
-//    private VoucherEntity voucherEntity;
-
-//    @OneToMany(mappedBy = "orderEntity")
-//    private List<OrderItemEntity> orderItems;
 
     // 1 order -> N shop_orders
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,4 +53,9 @@ public class OrderEntity {
     @ManyToOne
     @JoinColumn(name = "payment_id")
     private PaymentEntity paymentEntity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id")
+    private UserAddressEntity shippingAddress;
+
 }

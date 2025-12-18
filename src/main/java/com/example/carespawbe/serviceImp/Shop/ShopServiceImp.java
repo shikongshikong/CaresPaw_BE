@@ -28,7 +28,7 @@ public class ShopServiceImp implements ShopService {
     private final JwtService jwtService;
 
     @Override
-    public ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo, String token) {
+    public ShopResponse registerShop(ShopRequest request, MultipartFile shopLogo,MultipartFile shopBanner, String token) {
         // Lấy token JWT (bỏ "Bearer ")
         if (token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -56,6 +56,7 @@ public class ShopServiceImp implements ShopService {
         ShopEntity shopEntity = new ShopEntity();
         shopEntity.setShopName(request.getShopName());
         shopEntity.setShopAddress(request.getShopAddress());
+        shopEntity.setShopDescription(request.getShopDescription());
         shopEntity.setUser(userEntity);
         shopEntity.setCreated_at(LocalDate.now());
         shopEntity.setShopAmountFollower(0);
@@ -69,16 +70,26 @@ public class ShopServiceImp implements ShopService {
             shopEntity.setShopLogoPublicId(""); // hoặc null nếu database chấp nhận
         }
 
+        if (shopBanner != null && !shopBanner.isEmpty()) {
+            Map<String, String> result = cloudinaryService.uploadImageUrlAndPublicId(shopBanner, "shops");
+            shopEntity.setShopBanner(result.get("url"));
+            shopEntity.setShopBannerPublicId(result.get("public_id"));
+        } else {
+            shopEntity.setShopBanner("");
+            shopEntity.setShopBannerPublicId("");
+        }
+
         return shopMapper.toResponse(shopRepository.save(shopEntity));
     }
 
     @Override
-    public ShopResponse updateShopInfo(Long userId, ShopRequest request, MultipartFile newShopLogo) {
+    public ShopResponse updateShopInfo(Long userId, ShopRequest request, MultipartFile newShopLogo, MultipartFile newShopBanner) {
         ShopEntity existingShop = shopRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
 
         existingShop.setShopName(request.getShopName());
         existingShop.setShopAddress(request.getShopAddress());
+        existingShop.setShopDescription(request.getShopDescription());
         existingShop.setUpdate_at(LocalDate.now());
 
         if (newShopLogo != null && !newShopLogo.isEmpty()) {
@@ -90,6 +101,21 @@ public class ShopServiceImp implements ShopService {
             Map<String, String> result = cloudinaryService.uploadImageUrlAndPublicId(newShopLogo, "shops");
             existingShop.setShopLogo(result.get("url"));
             existingShop.setShopLogoPublicId(result.get("public_id"));
+        }
+
+        if (newShopBanner != null && !newShopBanner.isEmpty()) {
+            if (existingShop.getShopBannerPublicId() != null && !existingShop.getShopBannerPublicId().isBlank()) {
+                cloudinaryService.deleteImage(existingShop.getShopBannerPublicId());
+            }
+
+            Map<String, String> result = cloudinaryService.uploadImageUrlAndPublicId(newShopBanner, "shops");
+            existingShop.setShopBanner(result.get("url"));
+            existingShop.setShopBannerPublicId(result.get("public_id"));
+        }
+
+        //update status (1=active, 2=block)
+        if (request.getStatus() == 1 || request.getStatus() == 2) {
+            existingShop.setStatus(request.getStatus());
         }
 
         return shopMapper.toResponse(shopRepository.save(existingShop));

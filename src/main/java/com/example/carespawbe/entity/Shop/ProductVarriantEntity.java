@@ -7,6 +7,8 @@ import java.util.List;
 @Entity
 @Table(name = "product_varriant")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,11 +29,6 @@ public class ProductVarriantEntity {
     @JoinColumn(name = "varriant_id")
     private VarriantEntity varriants;
 
-//    @OneToMany(mappedBy = "productVarriant")
-//    private List<CartItemEntity> cartItemEntityList;
-//    @OneToMany(mappedBy = "productVarriant")
-//    private List<CartItemEntity> cartItemEntityList;
-
-    @OneToMany(mappedBy = "productVarriantEntity")
-    private List<OrderItemEntity> orderItemEntityList;
+//    @OneToMany(mappedBy = "productVarriantEntity")
+//    private List<OrderItemEntity> orderItemEntityList;
 }

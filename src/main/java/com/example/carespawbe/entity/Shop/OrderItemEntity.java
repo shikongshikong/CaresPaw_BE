@@ -34,14 +34,17 @@ public class OrderItemEntity {
 //    private OrderEntity orderEntity;
 
     // FK: order_item.product_varriant_id -> product_varriant.product_varriant_id
+//    @ManyToOne
+//    @JoinColumn(name = "product_varriant_id")
+//    private ProductVarriantEntity productVarriantEntity;
     @ManyToOne
-    @JoinColumn(name = "product_varriant_id")
-    private ProductVarriantEntity productVarriantEntity;
+    @JoinColumn(name = "product_id", nullable = false)
+    private ProductEntity product;
 
     // FK: order_item.shop_order_id -> shop_orders.shop_order_id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_order_id")
-    private ShopOrderEntity shopOrderId;
+    private ShopOrderEntity shopOrder;
 
 }
 
