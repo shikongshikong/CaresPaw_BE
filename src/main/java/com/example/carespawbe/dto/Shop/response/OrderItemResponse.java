@@ -14,6 +14,6 @@ public class OrderItemResponse {
     private Double orderItemTotalPrice;
 
 //    private Long productVarriantId;
-    private Long productId;
+    private ProductResponse product;
     private Long shopOrderId;
 }

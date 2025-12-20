@@ -60,6 +60,7 @@ public class ShopServiceImp implements ShopService {
         shopEntity.setUser(userEntity);
         shopEntity.setCreated_at(LocalDate.now());
         shopEntity.setShopAmountFollower(0);
+        shopEntity.setDistrictId(request.getDistrictId());
 
         if (shopLogo != null && !shopLogo.isEmpty()) {
             Map<String, String> result = cloudinaryService.uploadImageUrlAndPublicId(shopLogo, "shops");

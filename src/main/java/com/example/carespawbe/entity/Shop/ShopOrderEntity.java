@@ -29,7 +29,6 @@ public class ShopOrderEntity {
 
     @Column(name = "shop_order_status", nullable = false)
     private int shopOrderStatus;
-
 //    @Column(name = "ghn_service_id")
 //    private int ghnServiceId;
 

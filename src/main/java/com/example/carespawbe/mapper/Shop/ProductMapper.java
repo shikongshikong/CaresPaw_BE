@@ -13,7 +13,7 @@ import org.mapstruct.NullValueMappingStrategy;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
+@Mapper(componentModel = "spring",uses = {ProductVarriantMapper.class} , nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
 public interface ProductMapper {
 
     @Mapping(target = "categoryId", source = "category.categoryId")

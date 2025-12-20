@@ -1,7 +1,11 @@
 package com.example.carespawbe.dto.Shop.response;
 
+import com.example.carespawbe.entity.Shop.*;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -10,15 +14,18 @@ import java.util.List;
 @Builder
 public class ShopOrderResponse {
     private Long shopOrderId;
-
-    private Long shopId;
-    private Integer shopOrderStatus;
-
-    private Integer ghnServiceId;
     private Double shippingFee;
+    private int shopOrderStatus;
+//    private String ghnOrderCode;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private Long orderId;
+    private Long shopId;
 
-    private Long orderVoucherId;
-    private Long shippingVoucherId;
+    private VoucherResponse orderVoucher;
+    private VoucherResponse shippingVoucher;
 
-    private List<OrderItemResponse> orderItems;
+    private List<OrderItemResponse> orderItemEntities;
+//    private List<ShopOrderStatusHistoryEntity> shopOrderStatusHistories;
+
 }

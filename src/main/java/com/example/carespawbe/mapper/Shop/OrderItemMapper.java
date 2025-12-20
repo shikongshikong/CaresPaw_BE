@@ -11,12 +11,13 @@ import java.util.List;
 
 @Mapper(
         componentModel = "spring",
+        uses = { ProductMapper.class },
         nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL,
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface OrderItemMapper {
-    @Mapping(target = "shopOrderId", source = "shopOrder.shopOrderId")
-    @Mapping(target = "productId", source = "product.productId")
+    @Mapping(source = "product", target = "product") // Dòng này sẽ kích hoạt ProductMapper.toProductResponse()
+    @Mapping(source = "shopOrder.shopOrderId", target = "shopOrderId")
     OrderItemResponse toResponse(OrderItemEntity entity);
     List<OrderItemResponse> toResponseList(List<OrderItemEntity> entities);
 }

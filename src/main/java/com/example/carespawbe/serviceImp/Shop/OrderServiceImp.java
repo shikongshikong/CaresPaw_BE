@@ -4,10 +4,13 @@ import com.example.carespawbe.dto.Shop.request.OrderItemRequest;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
 import com.example.carespawbe.dto.Shop.request.ShopOrderRequest;
 import com.example.carespawbe.dto.Shop.response.OrderResponse;
+import com.example.carespawbe.dto.Shop.response.ShopOrderResponse;
 import com.example.carespawbe.entity.Auth.UserAddressEntity;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Shop.*;
+import com.example.carespawbe.mapper.Shop.OrderItemMapper;
 import com.example.carespawbe.mapper.Shop.OrderMapper;
+import com.example.carespawbe.mapper.Shop.ShopOrderMapper;
 import com.example.carespawbe.repository.Auth.UserAddressRepository;
 import com.example.carespawbe.repository.Shop.*;
 import com.example.carespawbe.service.Shop.OrderService;
@@ -34,6 +37,8 @@ public class OrderServiceImp implements OrderService {
     @Autowired private ProductRepository productRepo;          // ✅ dùng ProductRepository
     @Autowired private UserAddressRepository userAddressRepo;
     @Autowired private OrderMapper orderMapper;
+    @Autowired
+    private ShopOrderMapper shopOrderMapper;
 
     @Override
     @Transactional
@@ -172,5 +177,24 @@ public class OrderServiceImp implements OrderService {
     public List<OrderResponse> getOrderByUserId(Long userId) {
         List<OrderEntity>  order = orderRepo.findAllByUserEntity_Id(userId);
         return orderMapper.toResponseList(order);
+    }
+
+
+
+    @Override
+    public List<ShopOrderResponse> getShopOrdersByShop(Long shopId) {
+        List<ShopOrderEntity> shopOrder = shopOrderRepo.findAllByShop_ShopIdOrderByCreatedAtDesc(shopId);
+        return shopOrderMapper.toResponseList(shopOrder);
+    }
+
+    @Override
+    public List<ShopOrderResponse> getShopOrderByUserId(Long userId) {
+       List<ShopOrderEntity> shopOrder = shopOrderRepo.findListShopOrderByUserId(userId);
+        return shopOrderMapper.toResponseList(shopOrder);
+    }
+
+    @Override
+    public List<ShopOrderResponse> updateOrderStatus(Long userId) {
+        return List.of();
     }
 }

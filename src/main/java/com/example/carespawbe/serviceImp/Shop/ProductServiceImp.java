@@ -292,4 +292,22 @@ public class ProductServiceImp implements ProductService {
                 .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ProductResponse> getAllProductsByShopIdAndCategoryId(Long shopId, Long categoryId) {
+        return productRepository
+                .findAllByShop_ShopIdAndCategory_CategoryIdOrderByProductCreatedAtDesc(shopId, categoryId)
+                .stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponse> getProductsByCategory(Long categoryId) {
+        List<ProductEntity> products = productRepository.findProductsByCategoryId(categoryId);
+
+        return products.stream()
+                .map(productMapper::toProductResponse) // đổi đúng tên hàm mapper của bạn
+                .collect(Collectors.toList());
+    }
 }

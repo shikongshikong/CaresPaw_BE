@@ -40,6 +40,7 @@ public class ShopController {
             @RequestParam("shopDescription") String shopDescription,
             @RequestParam("userId") Long userId,
 //            @RequestParam("status") int status,
+            @RequestParam("districtId") Integer districtId,
             @RequestParam(value = "shopLogo", required = false) MultipartFile shopLogo,
             @RequestParam(value = "shopBanner", required = false) MultipartFile shopBanner,
             @RequestHeader("Authorization") String authorizationHeader
@@ -63,6 +64,7 @@ public class ShopController {
             shopRequest.setShopPhone(shopPhoneNumber);
             shopRequest.setUserId(userId);
             shopRequest.setStatus(1);
+            shopRequest.setDistrictId(districtId);
 
             ShopResponse shopResponse = shopService.registerShop(shopRequest, shopLogo,shopBanner, authorizationHeader);
 

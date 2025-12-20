@@ -20,4 +20,5 @@ public class ShopResponse {
     private LocalDate created_at;
     private LocalDate updated_at;
     private int status;
+    private Integer districtId;
 }

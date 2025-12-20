@@ -181,4 +181,18 @@ public class ProductController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/shop/{shopId}/category/{categoryId}")
+    public ResponseEntity<List<ProductResponse>> getProductsByShopAndCategory(
+            @PathVariable Long shopId,
+            @PathVariable Long categoryId
+    ) {
+        List<ProductResponse> result = productService.getAllProductsByShopIdAndCategoryId(shopId, categoryId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public List<ProductResponse> getProductsByCategory(@PathVariable Long categoryId) {
+        return productService.getProductsByCategory(categoryId);
+    }
 }

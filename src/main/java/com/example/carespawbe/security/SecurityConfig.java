@@ -42,11 +42,13 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .oauth2Login(o -> o.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/public/**").permitAll()
-                        .requestMatchers("/shop/register").hasRole("USER")
-
+                                .requestMatchers("/forum", "/forum/**").permitAll()
+                                .requestMatchers("/shop/register").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET, "/shop/*").hasAnyRole("USER","SHOP_OWNER","ADMIN")
                         // nhớ thêm /api vào đây
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
+                                .requestMatchers("/products/**").hasAnyRole("ADMIN", "SHOP_OWNER","USER")
 //                        .requestMatchers("/shopManager/**").hasAnyRole("SHOP_OWNER")
                         .requestMatchers("/expert/**").hasAnyRole("ADMIN", "EXPERT")
                         .requestMatchers("/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")

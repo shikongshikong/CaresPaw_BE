@@ -55,6 +55,9 @@ public class ShopEntity {
     @Column(nullable = true)
     private String shopBannerPublicId;
 
+    @Column(name = "district_id")
+    private Integer districtId;
+
     @OneToMany(mappedBy = "shop")
     private List<ProductEntity> productShopList;
 
