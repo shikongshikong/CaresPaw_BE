@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,13 +13,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.*;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -27,12 +31,12 @@ public class SecurityConfig {
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
 
-    // ✅ 1) API chain: JWT only, STATELESS => KHÔNG còn JSESSIONID cho API
+    // 1) API chain: JWT only, STATELESS => KHÔNG còn JSESSIONID cho API
     @Bean
     @Order(1)
     public SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/sol/**")
+                .securityMatcher("/carespaw/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -40,24 +44,22 @@ public class SecurityConfig {
                 .httpBasic(b -> b.disable())
                 .oauth2Login(o -> o.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
-
-                        // // nhớ thêm /api vào đây
-                        // .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // .requestMatchers("/api/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
-                        // .requestMatchers("/api/shopManager/**").hasAnyRole("SHOP_OWNER")
-                        // .requestMatchers("/api/expert/**").hasAnyRole("ADMIN", "EXPERT")
-                        // .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER",
-                        // "EXPERT")
-                        .requestMatchers("/sol/auth/**", "/api/public/**").permitAll()
-
+                        .requestMatchers("/carespaw/auth/**", "/public/**").permitAll()
+                                .requestMatchers("/carespaw/forum", "/carespaw/forum/**").permitAll()
+                                .requestMatchers("/carespaw/shop/register").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET, "/carespaw/shop/*").hasAnyRole("USER","SHOP_OWNER","ADMIN")
                         // nhớ thêm /api vào đây
-                        .requestMatchers("/sol/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/sol/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
-                        .requestMatchers("/sol/shopManager/**").hasAnyRole("SHOP_OWNER")
-                        .requestMatchers("/sol/expert/**").hasAnyRole("ADMIN", "EXPERT")
-                        .requestMatchers("/sol/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
-                        .anyRequest().authenticated())
+                        .requestMatchers("/carespaw/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/carespaw/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
+                                .requestMatchers("/carespaw/products/**").hasAnyRole("ADMIN", "SHOP_OWNER","USER")
+                                .requestMatchers("/carespaw/feedbacks/**").hasAnyRole("USER", "SHOP_OWNER")
+//                        .requestMatchers("/shopManager/**").hasAnyRole("SHOP_OWNER")
+                        .requestMatchers("/carespaw/expert/**").hasAnyRole("ADMIN", "EXPERT")
+                        .requestMatchers("/carespaw/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
+                        .requestMatchers("/carespaw/cart/**").hasAnyRole("USER","SHOP_OWNER","ADMIN")
+                        .requestMatchers("/carespaw/location/**").permitAll()
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -91,11 +93,12 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:3000"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // ✅ nên ghi rõ, đừng *
+        // nên ghi rõ, đừng *
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+//        config.addAllowedHeader("*");
         config.setExposedHeaders(List.of("Authorization"));
 
-        // ✅ JWT dùng Authorization header thì KHÔNG cần credentials
+        // JWT dùng Authorization header thì KHÔNG cần credentials
         config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

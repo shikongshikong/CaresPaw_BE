@@ -3,12 +3,12 @@ package com.example.carespawbe.entity.Auth;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
 import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
 import com.example.carespawbe.entity.Forum.ForumPostSaveEntity;
-import com.example.carespawbe.entity.shop.OrderEntity;
+import com.example.carespawbe.entity.Shop.FeedbackEntity;
+import com.example.carespawbe.entity.Shop.OrderEntity;
+import com.example.carespawbe.entity.Shop.OrderStatusHistoryEntity;
+import com.example.carespawbe.entity.Shop.ShopOrderStatusHistoryEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,6 +17,8 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -56,9 +58,17 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ForumPostHistoryEntity> histories = new ArrayList<>();
 
-    //
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostSaveEntity> forumPostSaveEntity;
+
+    @OneToMany(mappedBy = "changedBy")
+    private List<OrderStatusHistoryEntity> changedOrderStatuses;
+
+    @OneToMany(mappedBy = "changedBy")
+    private List<ShopOrderStatusHistoryEntity> changedShopOrderStatuses;
+
+    @OneToMany(mappedBy = "user")
+    private List<FeedbackEntity>  feedbackList = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
