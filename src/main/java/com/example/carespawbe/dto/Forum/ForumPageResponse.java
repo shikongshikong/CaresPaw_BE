@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 public class ForumPageResponse {
-    private List<ShortForumPostResponse> popularPosts;
+//    private List<ShortForumPostResponse> popularPosts;
 //    private List<ShortForumPostResponse> postList;
 
     private List<ForumPostHistoryTagResponse> historyPosts;

@@ -10,11 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,26 @@ public class ForumPostService {
 
     @Autowired
     private ViewLimiterService viewLimiterService;
+
+    @Autowired
+    private PostRecommendationService postRecommendationService;
+
+    public List<ForumPostTrainingDTO> getForumPostsGroupCategory(){
+        List<ForumPostEntity>  forumPostEntities = forumPostRepository.findAllWithCategories();
+        List<ForumPostTrainingDTO> forumPostTrainingDTOs = forumPostEntities.stream()
+                .map(p -> new ForumPostTrainingDTO(
+                        p.getId(),
+                        p.getTitle(),
+                        p.getContent(),
+                        p.getCreateAt(),
+                        p.getState(),
+                        p.getTypeId(),
+                        p.getToCategories().stream().map(tc -> tc.getForumPostCategoryEntity().getId())
+                                .distinct()
+                                .toList()
+                )).toList();
+        return forumPostTrainingDTOs;
+    }
 
     public List<ShortForumPostResponse> getForumPostByKeyword(String keyword, Long userId) {
 //        int size = 5;
@@ -214,20 +237,88 @@ public class ForumPostService {
         return forumPostRepository.save(forumPostEntity);
     }
 
-    public ForumPageFilterResponse getPostListByTypeAndCategories(Long userId, int page, int typeId, List<Integer> categoryList) {
+    public ForumPageFilterResponse getPostListByTypeAndCategories(Long userId, int page, int typeId, List<Integer> categoryList, String colFilter) {
         int size = 5;
-        ForumPageFilterResponse response  = new ForumPageFilterResponse();
+        ForumPageFilterResponse response = new ForumPageFilterResponse();
+
+        String colPageabe = "createAt";
+
+        switch (colFilter) {
+            case "newest":
+                colPageabe = "createAt";
+                break;
+//            case "recommend":
+//                colPageabe = "createAt";
+//                break;
+            case "popular":
+                colPageabe = "viewedAmount";
+                break;
+            case "comments":
+                colPageabe = "commentedAmount";
+                break;
+            default:
+                colPageabe = "createAt";
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(colPageabe).descending());
 
         if (typeId == 0 && !categoryList.isEmpty())
-            response.setPostList(forumPostRepository.findPageShortsByCategory(userId, categoryList, PageRequest.of(page - 1, size)));
+            response.setPostList(forumPostRepository.findPageShortsByCategory(userId, categoryList, pageable));
         else if (typeId != 0 && categoryList.isEmpty())
-            response.setPostList(forumPostRepository.findPageShortsByType(userId, typeId, PageRequest.of(page - 1, size)));
+            response.setPostList(forumPostRepository.findPageShortsByType(userId, typeId, pageable));
         else if (typeId == 0 && categoryList.isEmpty())
-            response.setPostList(forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size)));
+            response.setPostList(forumPostRepository.findPageShortByCreateAt(userId, pageable));
         else
-            response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, PageRequest.of(page - 1, size)));
+//            response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, (Pageable) Sort.by("createAt").descending()));
+//            pageable = switch (colFilter) {
+//                case "newest" -> (Pageable) Sort.by("createAt").descending();
+//                case "popular" -> (Pageable) Sort.by("viewedAmount").descending();
+//                case "comments" -> (Pageable) Sort.by("commentedAmount").descending();
+//                default -> PageRequest.of(page - 1, size, Sort.by("createAt").descending());
+//            };
+//            response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, pageable));
+            switch (colFilter) {
+                case "newest":
+                    response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, pageable));
+                    break;
+//                case "recommend":
+//                    response.setPostList(new ForumPostService.getRecommendedPosts());
+//                    break;
+                case "popular":
+                    response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, pageable));
+                    break;
+                case "comments":
+                    response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, pageable));
+                    break;
+                default:
+                    response.setPostList(forumPostRepository.findPageShortByTypeAndToCategories(userId, typeId, categoryList, pageable));
+            }
         return response;
     }
 
+    public List<ShortForumPostResponse> getRecommendedPosts(Long userId) {
+        List<Long> postIds = postRecommendationService.getRecommendedPosts(userId);
+        List<ShortForumPostResponse> shortForumPostResponses = new ArrayList<>();
+        if (postIds.isEmpty()) return null;
+        for (Long postId : postIds) {
+            System.out.println("postId: " + postId);
+            ShortForumPostResponse shortForumPost = forumPostRepository.findByPostId(postId, userId);
+            if (shortForumPost == null) continue;
+            shortForumPostResponses.add(shortForumPost);
+        }
+        return shortForumPostResponses;
+    }
 
+    public List<ShortSimilarPost> getSimilarPosts(Long postId) {
+        List<Long> postIds = postRecommendationService.getSimilarPosts(postId);
+        List<ShortSimilarPost> shortSimilarPosts = new ArrayList<>();
+        if (postIds.isEmpty()) return null;
+        for (Long similarId : postIds) {
+            System.out.println("postId: " + similarId);
+            Optional<ForumPostEntity> similarPost = forumPostRepository.findForumPostById(similarId);
+            if (similarPost.isEmpty()) continue;
+            shortSimilarPosts.add(postMapper.toShortSimilarPost(similarPost.get()));
+        }
+        return shortSimilarPosts;
+    }
 }
