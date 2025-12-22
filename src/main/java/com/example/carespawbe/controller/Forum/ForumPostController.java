@@ -83,6 +83,7 @@ public class ForumPostController {
                 .post(forumPostService.getForumPostById(postId, userId, request))
                 .comments(forumPostCommentService.getPostCommentsByPostId(postId))
                 .statusId(forumPostLikeService.getLikeStatusByPostIdAndUserId(postId, userId))
+                .similarPosts(forumPostService.getSimilarPosts(postId))
                 .build();
         System.out.println("save of forum detail: " + response.getPost().isSaved());
         return ResponseEntity.ok(response);
@@ -148,22 +149,14 @@ public class ForumPostController {
     @GetMapping("")
     public ResponseEntity<?> getForumData(HttpServletRequest request,
                                           @RequestParam(defaultValue = "0") int page,
-                                          @RequestParam(defaultValue = "false") boolean includePopular,
-                                          @RequestParam(defaultValue = "false") boolean includeHistory
+                                          @RequestParam(defaultValue = "true") boolean includeHistory
     ) {
         Long userId = (Long) request.getAttribute("userId");
         //Long userId = 0L;
-//        System.out.println("UserEntity id in getForumData: " + userId);
+        System.out.println("UserEntity id in getForumData: " + userId);
 
-        return ResponseEntity.ok(forumService.getForumData(userId, includePopular, includeHistory, page));
+        return ResponseEntity.ok(forumService.getForumData(userId, includeHistory, page));
     }
-
-//    @GetMapping("/post-list")
-//    public ResponseEntity<?> getPostList(HttpServletRequest request, @RequestParam(defaultValue = "0") int page) {
-//        Long userId = (Long) request.getAttribute("userId");
-//        List<ShortForumPostResponse> posts = forumPostService.getForumPostListByPage(userId, page);
-//        return ResponseEntity.ok(posts);
-//    }
 
     @GetMapping("/post-list")
     public ResponseEntity<?> getPostList(HttpServletRequest request, int page) {
@@ -191,9 +184,12 @@ public class ForumPostController {
     }
 
     @GetMapping("/post-list/filter")
-    public ResponseEntity<?> getPostListByTypeAndCategories(@RequestParam int page, @RequestParam int typeId, @RequestParam String categoryList, HttpServletRequest request) {
+    public ResponseEntity<?> getPostListByTypeAndCategories(@RequestParam int page, @RequestParam int typeId, @RequestParam String categoryList, @RequestParam String colFilter, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
 
+        if (colFilter.equals("recommend")) {
+            return ResponseEntity.ok(forumPostService.getRecommendedPosts(userId));
+        }
         List<Integer> categoryIds = (categoryList != null && !categoryList.isBlank() && !Objects.equals(categoryList, "All"))
                 ? Arrays.stream(categoryList.split(","))
                 .map(Integer::parseInt)
@@ -203,6 +199,12 @@ public class ForumPostController {
         System.out.println("typeId in getPostListByTypeAndCategories: " + typeId);
         System.out.println("Categories in getPostListByTypeAndCategories: " + categoryList);
 
-        return ResponseEntity.ok(forumPostService.getPostListByTypeAndCategories(userId, page, typeId, categoryIds));
+        return ResponseEntity.ok(forumPostService.getPostListByTypeAndCategories(userId, page, typeId, categoryIds, colFilter));
+    }
+
+    @GetMapping("/getRcmPostDB")
+    public ResponseEntity<?> getPostTrainingData() {
+
+        return ResponseEntity.ok(forumService.getForumTrainData());
     }
 }

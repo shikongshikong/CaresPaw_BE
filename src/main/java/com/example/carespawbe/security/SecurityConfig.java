@@ -20,16 +20,19 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
-    @Autowired private CustomOAuth2UserService customOAuth2UserService;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     // ✅ 1) API chain: JWT only, STATELESS => KHÔNG còn JSESSIONID cho API
     @Bean
     @Order(1)
     public SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/**")
+                .securityMatcher("/sol/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -37,17 +40,24 @@ public class SecurityConfig {
                 .httpBasic(b -> b.disable())
                 .oauth2Login(o -> o.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+                        // .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
+
+                        // // nhớ thêm /api vào đây
+                        // .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // .requestMatchers("/api/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
+                        // .requestMatchers("/api/shopManager/**").hasAnyRole("SHOP_OWNER")
+                        // .requestMatchers("/api/expert/**").hasAnyRole("ADMIN", "EXPERT")
+                        // .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER",
+                        // "EXPERT")
+                        .requestMatchers("/sol/auth/**", "/api/public/**").permitAll()
 
                         // nhớ thêm /api vào đây
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
-                        .requestMatchers("/api/shopManager/**").hasAnyRole("SHOP_OWNER")
-                        .requestMatchers("/api/expert/**").hasAnyRole("ADMIN", "EXPERT")
-                        .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
-
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/sol/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/sol/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
+                        .requestMatchers("/sol/shopManager/**").hasAnyRole("SHOP_OWNER")
+                        .requestMatchers("/sol/expert/**").hasAnyRole("ADMIN", "EXPERT")
+                        .requestMatchers("/sol/user/**").hasAnyRole("ADMIN", "USER", "SHOP_OWNER", "EXPERT")
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -62,12 +72,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/public/**", "/login/**", "/oauth2/**").permitAll()
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(oAuth2SuccessHandler)
-                );
+                        .successHandler(oAuth2SuccessHandler));
 
         return http.build();
     }
@@ -81,7 +89,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
         // ✅ nên ghi rõ, đừng *
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));

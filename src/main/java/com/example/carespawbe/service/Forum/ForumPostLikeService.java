@@ -1,6 +1,8 @@
 package com.example.carespawbe.service.Forum;
 
+import com.example.carespawbe.dto.Like.LikeTrainDTO;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
+import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
 import com.example.carespawbe.entity.Forum.ForumPostLikeEntity;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.repository.Forum.ForumPostLikeRepository;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -59,5 +62,16 @@ public class ForumPostLikeService {
 
         if (forumPostLikeEntity.isEmpty()) return 0;
         return forumPostLikeEntity.get().getStatus();
+    }
+
+    public List<LikeTrainDTO> getAllLike() {
+        List<ForumPostLikeEntity> likeList = forumPostLikeRepository.findAll();
+        List<LikeTrainDTO> likeTrainDTOS = likeList.stream()
+                .map(l -> new LikeTrainDTO(
+                        l.getUser().getId(),
+                        l.getId(),
+                        l.getStatus()
+                )).toList();
+        return likeTrainDTOS;
     }
 }

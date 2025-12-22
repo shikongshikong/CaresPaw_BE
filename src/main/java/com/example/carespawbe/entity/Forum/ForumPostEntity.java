@@ -1,6 +1,7 @@
 package com.example.carespawbe.entity.Forum;
 
 import com.example.carespawbe.entity.Auth.UserEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,19 +39,24 @@ public class ForumPostEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostHistoryEntity> histories;
 
     //
+    @JsonManagedReference
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostSaveEntity> forumPostSaveEntity;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostCommentEntity> comments;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostToCategoryEntity> toCategories;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "forumPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostLikeEntity> forumPostLikeEntity;
 
