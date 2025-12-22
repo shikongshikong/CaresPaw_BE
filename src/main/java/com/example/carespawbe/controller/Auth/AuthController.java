@@ -125,9 +125,9 @@ public class AuthController {
         // Trả lại dữ liệu cho frontend
         return ResponseEntity.ok(Map.of(
                 "message", "Login successful",
-                "userId", userEntity.getId(),
-                "role", userEntity.getRole(),
-                "email", userEntity.getEmail(),
+//                "userId", userEntity.getId(),
+//                "role", userEntity.getRole(),
+//                "email", userEntity.getEmail(),
                 "token", token
         ));
 

@@ -2,6 +2,7 @@ package com.example.carespawbe.mapper.Forum;
 
 import com.example.carespawbe.dto.Forum.ForumPostRequest;
 import com.example.carespawbe.dto.Forum.ForumPostResponse;
+import com.example.carespawbe.dto.Forum.ShortSimilarPost;
 import com.example.carespawbe.dto.UserProfile.UserPostResponse;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
 import org.mapstruct.Mapper;
@@ -25,4 +26,8 @@ public interface ForumPostMapper {
     UserPostResponse toUserPostResponse(ForumPostEntity forumPostEntity);
 
     List<UserPostResponse> toUserPostResponseList(List<ForumPostEntity> forumPostEntities);
+
+    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "user.fullname", target = "fullname")
+    ShortSimilarPost toShortSimilarPost(ForumPostEntity forumPostEntity);
 }

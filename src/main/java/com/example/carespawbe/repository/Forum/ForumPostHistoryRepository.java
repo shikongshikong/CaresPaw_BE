@@ -29,15 +29,17 @@ public interface ForumPostHistoryRepository extends JpaRepository<ForumPostHisto
     @Query("SELECT new com.example.carespawbe.dto.History.ForumPostHistoryTagResponse(p.id, p.user.id, p.user.fullname, p.title, p.createAt, p.viewedAmount, p.commentedAmount, " +
             "CASE " +
             "WHEN p.user.id = :userId THEN 0 " +
-            "WHEN f.follower.id = :userId AND f.followee.id = p.user.id THEN 1 " +
+            "WHEN f.id IS NOT NULL THEN 1 " +
+//            "WHEN f.follower.id = :userId AND f.followee.id = p.user.id THEN 1 " +
             "ELSE 2 END ) " +
             "FROM ForumPostEntity p " +
-            "LEFT JOIN ForumPostHistoryEntity h " +
+            "INNER JOIN ForumPostHistoryEntity h " +
             "ON h.forumPostEntity.id = p.id and h.user.id = :userId " +
             "LEFT JOIN FollowingEntity f " +
             "ON f.follower.id = :userId and p.user.id = f.followee.id " +
             "WHERE h.user.id = :userId " +
-            "ORDER BY h.createdAt DESC")
+            "GROUP BY p.id, p.user.id, p.user.fullname, p.title, p.createAt, p.viewedAmount, p.commentedAmount, f.id " +
+            "ORDER BY MAX(h.createdAt) DESC")
     List<ForumPostHistoryTagResponse> findForumPostHistoryEntityByUserIdHasFollow(@Param("userId") Long userId, Pageable pageable);
 
 //    List<ForumPostHistoryEntity> findForumPostHistoryEntitiesByUserId(Long userId, Pageable pageable);

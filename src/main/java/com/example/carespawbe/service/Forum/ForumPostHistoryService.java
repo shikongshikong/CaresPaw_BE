@@ -1,6 +1,7 @@
 package com.example.carespawbe.service.Forum;
 
 import com.example.carespawbe.dto.Forum.ForumPostDetailRequest;
+import com.example.carespawbe.dto.History.ForumHistoryTrainDTO;
 import com.example.carespawbe.dto.History.ForumPostHistoryTagResponse;
 import com.example.carespawbe.dto.UserProfile.UserHistoryResponse;
 import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
@@ -10,10 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +29,34 @@ public class ForumPostHistoryService {
     @Autowired
     private ForumPostHistoryMapper forumPostHistoryMapper;
 
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    private void saveToRedis(ForumPostHistoryEntity history) {
+
+        String key = "user:" + history.getUser().getId() + ":history";
+        long now = System.currentTimeMillis();
+
+        redisTemplate.opsForZSet()
+                .add(key, history.getForumPostEntity().getId().toString(), now);
+
+        redisTemplate.opsForZSet()
+                .removeRange(key, 0, -101);
+
+        redisTemplate.expire(key, 7, TimeUnit.DAYS);
+    }
+
+
     public void addPostHistory(ForumPostDetailRequest request) {
         ForumPostHistoryEntity history = forumPostHistoryMapper.toHistoryEntity(request);
+
         forumPostHistoryRepository.save(history);
+
+        try {
+            saveToRedis(history);
+        } catch (Exception e) {
+            System.out.println("Redis save failed" + e.getMessage());
+        }
     }
 
     public boolean isExistHistoryByUserIdAndPostId(Long userId, Long postId) {
@@ -50,5 +79,21 @@ public class ForumPostHistoryService {
     public List<UserHistoryResponse> getUserHistoryByUserId(Long userId) {
         return forumPostHistoryRepository.findHistoryEntityByUserId(userId);
     }
+
+    public List<ForumHistoryTrainDTO> getAllHistory() {
+        List<ForumPostHistoryEntity> historyEntities = forumPostHistoryRepository.findAll();
+        List<ForumHistoryTrainDTO> forumHistoryTrainDTOs = historyEntities.stream()
+                .map(h -> new ForumHistoryTrainDTO(
+                        h.getUser().getId(),
+                        h.getId(),
+                        h.getCreatedAt()
+                )).toList();
+        return forumHistoryTrainDTOs;
+    }
+
+//    public void savePostForTrain(Long userId, Long postId) {
+//        String key = "user:" + userId + "history";
+//        long now = System.currentTimeMillis();
+//    }
 
 }

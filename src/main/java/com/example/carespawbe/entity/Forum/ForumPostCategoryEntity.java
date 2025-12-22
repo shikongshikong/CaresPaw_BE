@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity.Forum;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class ForumPostCategoryEntity {
 
     private String name;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "forumPostCategoryEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForumPostToCategoryEntity> toCategories;
 }

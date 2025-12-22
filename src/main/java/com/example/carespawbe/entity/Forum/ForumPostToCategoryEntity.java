@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity.Forum;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,10 +19,12 @@ public class ForumPostToCategoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference
     @ManyToOne()
     @JoinColumn(name = "postId", nullable = false)
     private ForumPostEntity forumPostEntity;
 
+    @JsonBackReference
     @ManyToOne()
     @JoinColumn(name = "categoryId", nullable = false)
     private ForumPostCategoryEntity forumPostCategoryEntity;
