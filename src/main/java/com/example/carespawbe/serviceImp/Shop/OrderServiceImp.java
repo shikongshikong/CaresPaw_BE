@@ -8,6 +8,7 @@ import com.example.carespawbe.dto.Shop.response.ShopOrderResponse;
 import com.example.carespawbe.entity.Auth.UserAddressEntity;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Shop.*;
+import com.example.carespawbe.enums.OrderStatus;
 import com.example.carespawbe.mapper.Shop.OrderItemMapper;
 import com.example.carespawbe.mapper.Shop.OrderMapper;
 import com.example.carespawbe.mapper.Shop.ShopOrderMapper;
@@ -34,7 +35,7 @@ public class OrderServiceImp implements OrderService {
     @Autowired private ShopOrderRepository shopOrderRepo;
     @Autowired private VoucherRepository voucherRepo;
     @Autowired private ShopRepository shopRepo;
-    @Autowired private ProductRepository productRepo;          // ✅ dùng ProductRepository
+    @Autowired private ProductRepository productRepo;
     @Autowired private UserAddressRepository userAddressRepo;
     @Autowired private OrderMapper orderMapper;
     @Autowired
@@ -81,7 +82,7 @@ public class OrderServiceImp implements OrderService {
                 .orderShippingFee(req.getOrderShippingFee())
                 .orderTotalPrice(req.getOrderTotalPrice())
                 .orderCreatedAt(LocalDate.now())
-                .orderStatus(req.getOrderStatus() == null ? 1 : req.getOrderStatus())
+                .orderStatus(OrderStatus.PENDING_CONFIRMATION.getValue())
                 .userEntity(UserEntity.builder().id(userId).build())
                 .shippingAddress(address)
                 .build();
@@ -112,8 +113,7 @@ public class OrderServiceImp implements OrderService {
             shopOrder.setOrder(order);
             shopOrder.setShop(shop);
             shopOrder.setShippingFee(soReq.getShippingFee() == null ? 0.0 : soReq.getShippingFee());
-            shopOrder.setShopOrderStatus(soReq.getShopOrderStatus() == null ? 1 : soReq.getShopOrderStatus());
-//            shopOrder.setGhnServiceId(soReq.getGhnServiceId() == null ? 0 : soReq.getGhnServiceId());
+            shopOrder.setShopOrderStatus(OrderStatus.PENDING_CONFIRMATION.getValue());
             shopOrder.setCreatedAt(LocalDateTime.now());
             shopOrder.setUpdatedAt(null);
             shopOrder.setOrderVoucher(orderVoucher);
@@ -138,7 +138,7 @@ public class OrderServiceImp implements OrderService {
                     Double total = itemReq.getOrderItemTotalPrice();
                     if (total == null) total = price * qty;
 
-                    // ✅ NEW: OrderItemEntity lưu product_id
+                    // OrderItemEntity lưu product_id
                     // Ưu tiên lấy product từ cartItem để đảm bảo đúng dữ liệu thuộc user
                     ProductEntity product = ci.getProduct();
                     if (product == null) throw new RuntimeException("CartItem has no product: " + ci.getCartItemId());
@@ -152,8 +152,8 @@ public class OrderServiceImp implements OrderService {
                             .orderItemQuantity(qty)
                             .orderItemPrice(price)
                             .orderItemTotalPrice(total)
-                            .product(product)          // ✅ set product
-                            .shopOrder(shopOrder)      // ✅ set shopOrder
+                            .product(product)          //set product
+                            .shopOrder(shopOrder)      //set shopOrder
                             .build();
 
                     orderItems.add(oi);
@@ -179,8 +179,6 @@ public class OrderServiceImp implements OrderService {
         return orderMapper.toResponseList(order);
     }
 
-
-
     @Override
     public List<ShopOrderResponse> getShopOrdersByShop(Long shopId) {
         List<ShopOrderEntity> shopOrder = shopOrderRepo.findAllByShop_ShopIdOrderByCreatedAtDesc(shopId);
@@ -194,7 +192,23 @@ public class OrderServiceImp implements OrderService {
     }
 
     @Override
-    public List<ShopOrderResponse> updateOrderStatus(Long userId) {
-        return List.of();
+    @Transactional
+    public ShopOrderResponse updateShopOrderStatus(Long shopOrderId, Integer newStatus) {
+        if (shopOrderId == null) throw new RuntimeException("shopOrderId is required");
+        if (newStatus == null) throw new RuntimeException("newStatus is required");
+
+        if (newStatus < OrderStatus.PENDING_CONFIRMATION.getValue() || newStatus > OrderStatus.RETURN_REFUND.getValue()) {
+            throw new RuntimeException("Invalid status. Must be 0..6");
+        }
+
+        ShopOrderEntity shopOrder = shopOrderRepo.findById(shopOrderId)
+                .orElseThrow(() -> new RuntimeException("ShopOrder not found: " + shopOrderId));
+
+        shopOrder.setShopOrderStatus(newStatus);
+        shopOrder.setUpdatedAt(LocalDateTime.now());
+
+        ShopOrderEntity saved = shopOrderRepo.save(shopOrder);
+        return shopOrderMapper.toResponse(saved);
     }
+
 }

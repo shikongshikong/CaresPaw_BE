@@ -3,6 +3,7 @@ package com.example.carespawbe.entity.Auth;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
 import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
 import com.example.carespawbe.entity.Forum.ForumPostSaveEntity;
+import com.example.carespawbe.entity.Shop.FeedbackEntity;
 import com.example.carespawbe.entity.Shop.OrderEntity;
 import com.example.carespawbe.entity.Shop.OrderStatusHistoryEntity;
 import com.example.carespawbe.entity.Shop.ShopOrderStatusHistoryEntity;
@@ -65,6 +66,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "changedBy")
     private List<ShopOrderStatusHistoryEntity> changedShopOrderStatuses;
+
+    @OneToMany(mappedBy = "user")
+    private List<FeedbackEntity>  feedbackList = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

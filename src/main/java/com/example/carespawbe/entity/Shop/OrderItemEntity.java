@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "order_item")
 @Data
@@ -26,17 +29,6 @@ public class OrderItemEntity {
     @Column(nullable = false)
     private Double orderItemTotalPrice;
 
-//    @Column(updatable = false)
-//    private boolean flashSale;
-
-//    @ManyToOne
-//    @JoinColumn(name = "order_id")
-//    private OrderEntity orderEntity;
-
-    // FK: order_item.product_varriant_id -> product_varriant.product_varriant_id
-//    @ManyToOne
-//    @JoinColumn(name = "product_varriant_id")
-//    private ProductVarriantEntity productVarriantEntity;
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
@@ -45,6 +37,9 @@ public class OrderItemEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_order_id")
     private ShopOrderEntity shopOrder;
+
+    @OneToMany(mappedBy = "orderItem")
+    private List<FeedbackEntity> feedbackList = new ArrayList<>();
 
 }
 

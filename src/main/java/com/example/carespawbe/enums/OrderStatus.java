@@ -4,11 +4,13 @@ import lombok.Getter;
 
 @Getter
 public enum OrderStatus {
-    PENDING(0),      // Chờ xác nhận
-    CONFIRMED(1),    // Đã xác nhận / Đang đóng gói
-    SHIPPING(2),     // Đang giao hàng (Cập nhật vận chuyển ở đây)
-    DELIVERED(3),    // Giao thành công
-    CANCELLED(4);    // Đã hủy
+    PENDING_CONFIRMATION(0), // Chờ xác nhận
+    AWAITING_PICKUP(1),       // Chờ lấy hàng
+    SHIPPING(2),              // Vận chuyển
+    AWAITING_DELIVERY(3),     // Chờ giao hàng
+    COMPLETED(4),             // Hoàn thành
+    CANCELLED(5),             // Đã huỷ
+    RETURN_REFUND(6);         // Trả hàng/Hoàn tiền
 
     private final int value;
     OrderStatus(int value) { this.value = value; }

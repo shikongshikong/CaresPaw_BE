@@ -47,4 +47,14 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/shop_order/{shopOrderId}/status")
+    public ResponseEntity<?> updateShopOrderStatus(
+            @PathVariable Long shopOrderId,
+            @RequestParam Integer status
+    ) {
+        ShopOrderResponse res = orderService.updateShopOrderStatus(shopOrderId, status);
+        return ResponseEntity.ok(res);
+    }
+
+
 }

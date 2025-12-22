@@ -1,0 +1,92 @@
+package com.example.carespawbe.serviceImp.Shop;
+
+import com.example.carespawbe.dto.Shop.request.FeedbackMediaRequest;
+import com.example.carespawbe.dto.Shop.request.FeedbackRequest;
+import com.example.carespawbe.dto.Shop.response.FeedbackResponse;
+import com.example.carespawbe.entity.Auth.UserEntity;
+import com.example.carespawbe.entity.Shop.*;
+import com.example.carespawbe.mapper.Shop.FeedbackMapper;
+import com.example.carespawbe.repository.Auth.UserRepository;
+import com.example.carespawbe.repository.Shop.*;
+import com.example.carespawbe.service.CloudinaryService;
+import com.example.carespawbe.service.Shop.FeedbackService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Service
+@Transactional
+public class FeedbackServiceImp implements FeedbackService {
+    @Autowired
+    private FeedbackRepository feedbackRepository;
+    @Autowired
+    private ShopRepository shopRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+    @Autowired
+    private CloudinaryService cloudinaryService;
+    @Autowired
+    private FeedbackMapper feedbackMapper;
+
+    @Override
+    public FeedbackResponse createFeedback(FeedbackRequest request) {
+        FeedbackEntity feedback = new FeedbackEntity();
+        UserEntity user = userRepository.findById(request.getUserId()).orElseThrow(() -> new RuntimeException("User not found!"));
+        ShopEntity shop = shopRepository.findById(request.getShopId()).orElseThrow(() -> new RuntimeException("Shop not found!"));
+        OrderItemEntity orderItem = orderItemRepository.findById(request.getOrderItemId()).orElseThrow(() -> new RuntimeException("Order item not found!"));
+
+        feedback.setUser(user);
+        feedback.setShop(shop);
+        feedback.setOrderItem(orderItem);
+        feedback.setStar(request.getStar());
+        feedback.setContent(request.getContent());
+        List<FeedbackMediaEntity> feedbackMedias = new ArrayList<>();
+        if (request.getFeedbackMedia() != null && !request.getFeedbackMedia().isEmpty()) {
+            for (FeedbackMediaRequest feedbackMediaRequest : request.getFeedbackMedia()) {
+                FeedbackMediaEntity feedbackMedia = new FeedbackMediaEntity();
+                String type = feedbackMediaRequest.getResourceType();
+                feedbackMedia.setResourceType(type);
+                if ("IMAGE".equalsIgnoreCase(type)) {
+                    Map<String, String> result = cloudinaryService.uploadImageUrlAndPublicId(feedbackMediaRequest.getFile(), "feedbacks/images");
+                    feedbackMedia.setFeedback(feedback);
+                    feedbackMedia.setPublicId(result.get("public_id"));
+                    feedbackMedia.setSecureUrl(result.get("url"));
+                    feedbackMedias.add(feedbackMedia);
+                }
+                else if ("VIDEO".equalsIgnoreCase(type)) {
+                    Map<String, String> result = cloudinaryService.uploadVideoUrlAndPublicId(feedbackMediaRequest.getFile(), "feedbacks/videos");
+                    feedbackMedia.setFeedback(feedback);
+                    feedbackMedia.setPublicId(result.get("public_id"));
+                    feedbackMedia.setSecureUrl(result.get("url"));
+                    feedbackMedias.add(feedbackMedia);
+                }
+
+
+            }
+        }
+        feedback.setFeedbackMedia(feedbackMedias);
+        return feedbackMapper.toResponse(feedbackRepository.save(feedback));
+    }
+
+    @Override
+    public List<FeedbackResponse> findByProductId(Long productId) {
+        List<FeedbackEntity> feedback = feedbackRepository.findAllByOrderItem_Product_ProductId(productId);
+        return feedbackMapper.toResponseList(feedback);
+    }
+
+    @Override
+    public List<FeedbackResponse> findByUserId(Long userId) {
+        List<FeedbackEntity> feedback = feedbackRepository.findAllByUser_Id(userId);
+        return feedbackMapper.toResponseList(feedback);
+    }
+}

@@ -6,6 +6,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VariantRequest {
-    private String name;
+public class VarriantRequest {
+    private String varriantName;
 }

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -67,6 +68,9 @@ public class ShopEntity {
 
     @OneToMany(mappedBy = "shop")
     private List<VoucherEntity> voucherEntityList;
+
+    @OneToMany(mappedBy = "shop")
+    private List<FeedbackEntity>  feedbackList = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

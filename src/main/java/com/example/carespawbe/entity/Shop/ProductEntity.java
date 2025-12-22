@@ -68,13 +68,4 @@ public class ProductEntity {
     @OneToMany(mappedBy = "imageProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ImageProductEntity> imageProductList = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "product")
-//    private List<CartItemEntity> cartItemList;
-
-//    @PrePersist
-//    protected void onCreate() {
-//        productCreatedAt = LocalDate.now();
-//        productUpdatedAt = LocalDate.now();
-//    }
-
 }
