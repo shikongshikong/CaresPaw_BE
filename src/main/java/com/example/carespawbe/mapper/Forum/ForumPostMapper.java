@@ -22,7 +22,7 @@ public interface ForumPostMapper {
     @Mapping(target = "saved", expression = "java(forumPostEntity.getForumPostSaveEntity() != null)")
     ForumPostResponse toPostResponse(ForumPostEntity forumPostEntity);
 
-    @Mapping(source = "typeId", target = "typeId")
+    @Mapping(source = "typeEntity.id", target = "typeId")
     UserPostResponse toUserPostResponse(ForumPostEntity forumPostEntity);
 
     List<UserPostResponse> toUserPostResponseList(List<ForumPostEntity> forumPostEntities);

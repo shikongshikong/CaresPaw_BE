@@ -19,6 +19,9 @@ public class UserProfileController {
     @GetMapping("")
     public ResponseEntity<?> getUserProfileData(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            userId = 0L;
+        }
         UserProfileData data = userProfileService.getUserProfileData(userId);
         System.out.println("User Profile Data: " + data.getUser().getBirthday());
         return ResponseEntity.ok(data);

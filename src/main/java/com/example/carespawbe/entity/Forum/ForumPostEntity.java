@@ -31,7 +31,11 @@ public class ForumPostEntity {
     private LocalDate createAt;
     private LocalDate updateAt;
     private int state;
-    private int typeId; // new field
+
+    @ManyToOne
+    @JoinColumn(name = "type_id", nullable = false)
+    private ForumPostTypeEntity typeEntity;
+
     private Long viewedAmount;
     private Long commentedAmount;
 

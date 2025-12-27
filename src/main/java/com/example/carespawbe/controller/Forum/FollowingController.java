@@ -22,6 +22,9 @@ public class FollowingController {
         System.out.println("FolloweeId: " + request);
         Long followeeIdLong = request.get("followeeId");
         Long userid = (Long) httpServletRequest.getAttribute("userId");
+        if (userid == null) {
+            userid = 0L;
+        }
         try {
             followingService.addFollowing(userid, followeeIdLong);
             System.out.println("Add FolloweeId: " + followeeIdLong);
@@ -35,6 +38,9 @@ public class FollowingController {
     public ResponseEntity<String> deleteFollowing(@PathVariable Long followeeId,
             HttpServletRequest httpServletRequest) {
         Long userid = (Long) httpServletRequest.getAttribute("userId");
+        if (userid == null) {
+            userid = 0L;
+        }
         try {
             followingService.unFollowing(userid, followeeId);
             return ResponseEntity.ok("success");
