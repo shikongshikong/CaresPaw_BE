@@ -30,6 +30,18 @@ public class SecurityConfig implements WebMvcConfigurer {
     private CustomOAuth2SuccessHandler oAuth2SuccessHandler;
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
+    //  0) Webhook chain chạy ĐẦU TIÊN và chỉ match /webhook/**
+    @Bean
+    @Order(0)
+    public SecurityFilterChain webhookFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/carespaw/webhook/**")
+                .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        return http.build();
+    }
 
     // 1) API chain: JWT only, STATELESS => KHÔNG còn JSESSIONID cho API
     @Bean
@@ -49,7 +61,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                                 .requestMatchers("/carespaw/shop/register").hasRole("USER")
                                 .requestMatchers(HttpMethod.GET, "/carespaw/shop/*").hasAnyRole("USER","SHOP_OWNER","ADMIN")
                         // nhớ thêm /api vào đây
-                        .requestMatchers("/carespaw/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/carespaw/payment/**", "/carespaw/sse/**").permitAll()
+                                .requestMatchers("/carespaw/admin/**").hasRole("ADMIN")
                         .requestMatchers("/carespaw/shop/**").hasAnyRole("ADMIN", "SHOP_OWNER")
                                 .requestMatchers("/carespaw/products/**").hasAnyRole("ADMIN", "SHOP_OWNER","USER")
                                 .requestMatchers("/carespaw/feedbacks/**").hasAnyRole("USER", "SHOP_OWNER")

@@ -6,20 +6,20 @@ import com.example.carespawbe.entity.Shop.CartItemEntity;
 import org.mapstruct.*;
 
 import java.util.List;
+
 @Mapper(
         componentModel = "spring",
-        uses = { ProductMapper.class }, // ✅ để map ProductEntity -> ProductResponse theo mapper bạn viết
+        uses = { ProductMapper.class },
         nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL,
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface CartItemMapper {
-//    @Mapping(target = "productId", source = "product.productId")
-//    @Mapping(target = "productVarriantId", source = "productVarriant.productVarriantId")
+
+    // ✅ entity String -> response String (MapStruct auto map)
     CartItemResponse toCartItemResponse(CartItemEntity entity);
 
-    @Mapping(target = "productId", source = "product.productId")
-//    @Mapping(target = "productVarriantId", source = "productVarriant.productVarriantId")
-    CartItemRequest toCartItemRequest(CartItemEntity entity);
+//    @Mapping(target = "productId", source = "product.productId")
+//    CartItemRequest toCartItemRequest(CartItemEntity entity);
 
     List<CartItemResponse> toResponseList(List<CartItemEntity> entities);
 }

@@ -70,12 +70,33 @@ public class FeedbackServiceImp implements FeedbackService {
                     feedbackMedia.setSecureUrl(result.get("url"));
                     feedbackMedias.add(feedbackMedia);
                 }
-
-
             }
         }
         feedback.setFeedbackMedia(feedbackMedias);
-        return feedbackMapper.toResponse(feedbackRepository.save(feedback));
+
+        // Lưu feedback trước
+        FeedbackEntity savedFeedback = feedbackRepository.save(feedback);
+
+        // ✅ [NEW] LOGIC CẬP NHẬT RATING CHO SẢN PHẨM
+        // Lấy ProductId thông qua OrderItem
+        Long productId = orderItem.getProduct().getProductId();
+
+        // 1. Tính trung bình sao mới từ Repository
+        Double newRating = feedbackRepository.getAverageRatingByProductId(productId);
+
+        // 2. Xử lý null & Làm tròn 1 chữ số thập phân
+        if (newRating == null) newRating = 0.0;
+        newRating = Math.round(newRating * 10.0) / 10.0;
+
+        // 3. Update vào bảng Product
+        ProductEntity product = productRepository.findById(productId).orElse(null);
+        if (product != null) {
+            product.setRating(newRating); // Đảm bảo Entity Product đã có field 'rating'
+            productRepository.save(product);
+        }
+        // ✅ [END NEW]
+
+        return feedbackMapper.toResponse(savedFeedback);
     }
 
     @Override

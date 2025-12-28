@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +45,10 @@ public class ProductServiceImp implements ProductService {
     @Autowired
     private JwtService jwtService;
 
+    // ✅ ĐÃ CẬP NHẬT: Repository để chuẩn hóa dữ liệu varriant_value_id
+    @Autowired
+    private VarriantValueRepository varriantValueRepository;
+
     private Long getUserIdFromAuthHeader(String authorizationHeader) {
         String token = authorizationHeader != null && authorizationHeader.startsWith("Bearer ")
                 ? authorizationHeader.substring(7)
@@ -57,9 +62,43 @@ public class ProductServiceImp implements ProductService {
 
     private ShopEntity getMyShop(String authorizationHeader) {
         Long userId = getUserIdFromAuthHeader(authorizationHeader);
-
         return shopRepository.findByUser_Id(userId)
                 .orElseThrow(() -> new RuntimeException("User chưa có shop"));
+    }
+
+    // ✅ ĐÃ CẬP NHẬT: Hàm xử lý tách dòng để lưu vào DB chuẩn 1NF (Mỗi giá trị 1 dòng)
+    private void saveProductVariants(List<ProductVarriantRequest> requests, ProductEntity savedProduct) {
+        if (requests == null) return;
+
+        for (ProductVarriantRequest vr : requests) {
+            VarriantEntity variant = varriantRepository.findById(vr.getVarriantId())
+                    .orElseThrow(() -> new RuntimeException("Varriant not found with ID: " + vr.getVarriantId()));
+
+            String rawValues = vr.getValue(); // Ví dụ nhận vào: "s,m"
+
+            if (rawValues != null && !rawValues.trim().isEmpty()) {
+                // Tách chuỗi bằng dấu phẩy
+                String[] splitValues = rawValues.split(",");
+
+                for (String val : splitValues) {
+                    String cleanVal = val.trim();
+                    if (cleanVal.isEmpty()) continue;
+
+                    // Tạo thực thể mới cho MỖI giá trị đơn lẻ
+                    ProductVarriantEntity varEntity = new ProductVarriantEntity();
+                    varEntity.setProductVarriants(savedProduct);
+                    varEntity.setVarriants(variant);
+                    varEntity.setProductVarriantValue(cleanVal); // Lưu "s" hoặc "m"
+
+                    // Tìm ID chính xác từ bảng varriant_value để cột varriant_value_id KHÔNG bị NULL
+                    varriantValueRepository.findByValueNameAndVarriant_VarriantId(cleanVal, variant.getVarriantId())
+                            .ifPresent(varEntity::setVarriantValue);
+
+                    // Lưu trực tiếp từng dòng vào database
+                    productVarriantRepository.save(varEntity);
+                }
+            }
+        }
     }
 
     @Override
@@ -72,16 +111,13 @@ public class ProductServiceImp implements ProductService {
             CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found"));
 
-            // ✅ shop theo token
             ShopEntity shop = getMyShop(authorizationHeader);
 
             ProductEntity productEntity = new ProductEntity();
             productEntity.setCategory(category);
             productEntity.setShop(shop);
             productEntity.setProductName(request.getProductName());
-//            productEntity.setProductDescribe(request.getProductDescribe());
             productEntity.setProductPrice(request.getProductPrice());
-//            productEntity.setProductPriceSale(request.getProductPriceSale());
             productEntity.setProductAmount(request.getProductAmount());
             productEntity.setProductStatus(request.getProductStatus());
             productEntity.setProductUsing(request.getProductUsing());
@@ -90,7 +126,7 @@ public class ProductServiceImp implements ProductService {
 
             ProductEntity savedProduct = productRepository.save(productEntity);
 
-            // Upload ảnh
+            // Xử lý Upload ảnh
             if (images != null && images.length > 0) {
                 List<ImageProductEntity> imageEntities = new ArrayList<>();
                 for (MultipartFile file : images) {
@@ -106,36 +142,22 @@ public class ProductServiceImp implements ProductService {
                 savedProduct.setImageProductList(imageEntities);
             }
 
-            // Upload video
+            // Xử lý Upload video
             if (video != null && !video.isEmpty()) {
                 Map<String, String> videoResult = cloudinaryService.uploadVideoUrlAndPublicId(video, "products/videos");
                 savedProduct.setProductVideoUrl(videoResult.get("url"));
                 savedProduct.setProductVideoPublicId(videoResult.get("public_id"));
             }
 
-            // Product variants
+            // ✅ GỌI HÀM LƯU BIẾN THỂ TÁCH DÒNG
             if (request.getProductVarriants() != null && !request.getProductVarriants().isEmpty()) {
-                List<ProductVarriantEntity> variantEntities = new ArrayList<>();
-                for (ProductVarriantRequest vr : request.getProductVarriants()) {
-                    VarriantEntity variant = varriantRepository.findById(vr.getVarriantId())
-                            .orElseThrow(() -> new RuntimeException("Varriant not found"));
-
-                    ProductVarriantEntity varEntity = new ProductVarriantEntity();
-                    varEntity.setProductVarriants(savedProduct);
-                    varEntity.setVarriants(variant);
-                    varEntity.setProductVarriantValue(vr.getValue());
-                    variantEntities.add(varEntity);
-                }
-                productVarriantRepository.saveAll(variantEntities);
-                savedProduct.setProductVarriantList(variantEntities);
+                saveProductVariants(request.getProductVarriants(), savedProduct);
             }
 
-            savedProduct = productRepository.save(savedProduct);
-            return productMapper.toProductResponse(savedProduct);
+            return productMapper.toProductResponse(productRepository.save(savedProduct));
 
         } catch (Exception e) {
             e.printStackTrace();
-            // ✅ FIX: không return null
             throw new RuntimeException("Error creating product: " + e.getMessage());
         }
     }
@@ -146,47 +168,34 @@ public class ProductServiceImp implements ProductService {
             ProductEntity existingProduct = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product not found"));
 
-            if (images != null && images.length > 9) {
-                throw new RuntimeException("Chỉ được upload tối đa 9 ảnh");
-            }
-
             CategoryEntity category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found"));
 
-            // ✅ shop theo token
             ShopEntity shop = getMyShop(authorizationHeader);
 
-            // ✅ chặn sửa sản phẩm shop khác
-            if (existingProduct.getShop() == null ||
-                    !existingProduct.getShop().getShopId().equals(shop.getShopId())) {
-                throw new RuntimeException("Bạn không có quyền sửa sản phẩm của shop khác");
+            if (existingProduct.getShop() == null || !existingProduct.getShop().getShopId().equals(shop.getShopId())) {
+                throw new RuntimeException("Bạn không có quyền sửa sản phẩm này");
             }
 
             existingProduct.setProductName(request.getProductName());
-//            existingProduct.setProductDescribe(request.getProductDescribe());
             existingProduct.setProductPrice(request.getProductPrice());
-//            existingProduct.setProductPriceSale(request.getProductPriceSale());
             existingProduct.setProductAmount(request.getProductAmount());
             existingProduct.setProductStatus(request.getProductStatus());
             existingProduct.setProductUsing(request.getProductUsing());
             existingProduct.setCategory(category);
-            existingProduct.setShop(shop);
+            existingProduct.setProductUpdatedAt(LocalDate.now());
 
-            // ảnh mới
+            // Xử lý ảnh mới
             if (images != null && images.length > 0) {
                 List<ImageProductEntity> oldImages = imageProductRepository.findByImageProduct(existingProduct);
                 for (ImageProductEntity img : oldImages) {
-                    if (img.getImagePublicId() != null) {
-                        cloudinaryService.deleteImage(img.getImagePublicId());
-                    }
+                    if (img.getImagePublicId() != null) cloudinaryService.deleteImage(img.getImagePublicId());
                 }
                 imageProductRepository.deleteAll(oldImages);
 
                 List<ImageProductEntity> imageEntities = new ArrayList<>();
                 for (MultipartFile file : images) {
-                    Map<String, String> uploadResult =
-                            cloudinaryService.uploadImageUrlAndPublicId(file, "products/images");
-
+                    Map<String, String> uploadResult = cloudinaryService.uploadImageUrlAndPublicId(file, "products/images");
                     ImageProductEntity imageEntity = new ImageProductEntity();
                     imageEntity.setImageProduct(existingProduct);
                     imageEntity.setImageProductUrl(uploadResult.get("url"));
@@ -195,49 +204,17 @@ public class ProductServiceImp implements ProductService {
                     imageEntities.add(imageEntity);
                 }
                 imageProductRepository.saveAll(imageEntities);
-                existingProduct.setImageProductList(imageEntities);
             }
 
-            // video mới
-            if (video != null && !video.isEmpty()) {
-                if (existingProduct.getProductVideoPublicId() != null) {
-                    cloudinaryService.deleteVideo(existingProduct.getProductVideoPublicId());
-                }
-
-                Map<String, String> videoResult =
-                        cloudinaryService.uploadVideoUrlAndPublicId(video, "products/videos");
-
-                existingProduct.setProductVideoUrl(videoResult.get("url"));
-                existingProduct.setProductVideoPublicId(videoResult.get("public_id"));
-            }
-
-            // variants
+            // ✅ CẬP NHẬT BIẾN THỂ TÁCH DÒNG
             if (request.getProductVarriants() != null) {
                 productVarriantRepository.deleteByProductVarriants(existingProduct);
-
-                List<ProductVarriantEntity> variantEntities = new ArrayList<>();
-                for (ProductVarriantRequest vr : request.getProductVarriants()) {
-                    VarriantEntity variant = varriantRepository.findById(vr.getVarriantId())
-                            .orElseThrow(() -> new RuntimeException("Varriant not found"));
-
-                    ProductVarriantEntity varEntity = new ProductVarriantEntity();
-                    varEntity.setProductVarriants(existingProduct);
-                    varEntity.setVarriants(variant);
-                    varEntity.setProductVarriantValue(vr.getValue());
-                    variantEntities.add(varEntity);
-                }
-                productVarriantRepository.saveAll(variantEntities);
-                existingProduct.setProductVarriantList(variantEntities);
+                saveProductVariants(request.getProductVarriants(), existingProduct);
             }
 
-            // ✅ FIX: cập nhật updatedAt
-            existingProduct.setProductUpdatedAt(LocalDate.now());
-
-            ProductEntity saved = productRepository.save(existingProduct);
-            return productMapper.toProductResponse(saved);
+            return productMapper.toProductResponse(productRepository.save(existingProduct));
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Error updating product: " + e.getMessage());
         }
     }
@@ -253,13 +230,10 @@ public class ProductServiceImp implements ProductService {
     public void deleteProduct(Long productId, String authorizationHeader) {
         ProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        // ✅ FIX: lấy shop theo token
         ShopEntity myShop = getMyShop(authorizationHeader);
 
-        // ✅ FIX: chỉ xóa nếu thuộc shop của mình
         if (product.getShop() == null || !product.getShop().getShopId().equals(myShop.getShopId())) {
-            throw new RuntimeException("Bạn không có quyền xóa sản phẩm của shop khác");
+            throw new RuntimeException("Bạn không có quyền xóa sản phẩm này");
         }
 
         imageProductRepository.deleteByImageProduct(product);
@@ -269,26 +243,21 @@ public class ProductServiceImp implements ProductService {
 
     @Override
     public List<ProductResponse> getAllProducts() {
-        List<ProductEntity> productEntities = productRepository.findAll();
-        return productEntities.stream()
+        return productRepository.findAll().stream()
                 .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ProductResponse> getNewProducts() {
-        List<ProductEntity> newProducts = productRepository.findTop6ByOrderByProductCreatedAtDesc();
-        return newProducts.stream()
+        return productRepository.findTop6ByOrderByProductCreatedAtDesc().stream()
                 .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ProductResponse> getAllProductsByShopId(Long shopId) {
-        List<ProductEntity> productEntities =
-                productRepository.findAllByShop_ShopIdOrderByProductCreatedAtDesc(shopId);
-
-        return productEntities.stream()
+        return productRepository.findAllByShop_ShopIdOrderByProductCreatedAtDesc(shopId).stream()
                 .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
@@ -304,10 +273,8 @@ public class ProductServiceImp implements ProductService {
 
     @Override
     public List<ProductResponse> getProductsByCategory(Long categoryId) {
-        List<ProductEntity> products = productRepository.findProductsByCategoryId(categoryId);
-
-        return products.stream()
-                .map(productMapper::toProductResponse) // đổi đúng tên hàm mapper của bạn
+        return productRepository.findProductsByCategoryId(categoryId).stream()
+                .map(productMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
 }

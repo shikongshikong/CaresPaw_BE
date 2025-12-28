@@ -11,9 +11,10 @@ import java.util.List;
 public interface ProductVarriantMapper {
 
     @Mapping(target = "varriantId", source = "varriants.varriantId")
-    @Mapping(target = "productVarriantValue", source = "productVarriantValue")
+    @Mapping(target = "varriantName", source = "varriants.varriantName")
+    @Mapping(target = "varriantValueId", source = "varriantValue.varriantValueId")
+    @Mapping(target = "valueName", source = "varriantValue.valueName")
     ProductVarriantResponse toResponse(ProductVarriantEntity entity);
-    @Mapping(target = "varriantId", source = "varriants.varriantId")
-    @Mapping(target = "productVarriantValue", source = "productVarriantValue")
+
     List<ProductVarriantResponse> toResponseList(List<ProductVarriantEntity> entities);
 }

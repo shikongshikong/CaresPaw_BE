@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class CartServiceImp implements CartService {
@@ -51,55 +53,113 @@ public class CartServiceImp implements CartService {
         try {
             UserEntity userEntity = userRepository.findById(request.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
-//            VoucherEntity voucherEntity = request.getVoucherId() != null
-//                    ? voucherRepository.findVoucherEntitiesByVoucherId(request.getVoucherId())
-//                    : null;
-            // tìm cart của user
+
             CartEntity cartEntity = cartRepository.findCartEntityByUserEntity_Id(request.getUserId());
-            // nếu chưa có thì tạo mới
+
             if (cartEntity == null) {
                 cartEntity = new CartEntity();
                 cartEntity.setUserEntity(userEntity);
                 cartEntity.setCreatedAt(request.getCreatedAt());
                 cartEntity.setCartItemEntityList(new ArrayList<>());
             }
-            cartEntity.setCartTotalPrice(request.getCartTotalPrice());
-//            cartEntity.setCartShippingFee(request.getCartShippingFee());
-//            cartEntity.setCartTotalCoinEarned(request.getCartTotalCoinEarned());
-//            cartEntity.setVoucher(voucherEntity);
+
+            cartEntity.setUpdatedAt(request.getUpdatedAt());
+
             if (request.getCartItems() != null && !request.getCartItems().isEmpty()) {
                 for (CartItemRequest itemReq : request.getCartItems()) {
-                    ProductEntity product = productRepository.findProductEntityByProductId(itemReq.getProductId());
-                    // tìm xem product này đã có trong cart chưa
-                    CartItemEntity existingItemOpt = cartEntity.getCartItemEntityList().stream()
-                            .filter(item -> item.getProduct().getProductId().equals(product.getProductId()))
+
+                    Long productId = itemReq.getProductId();
+                    if (productId == null) throw new RuntimeException("productId is required");
+
+                    ProductEntity product = productRepository.findProductEntityByProductId(productId);
+                    if (product == null) throw new RuntimeException("Product not found: " + productId);
+
+                    // ✅ selected ids từ FE
+                    List<Long> selectedIds = itemReq.getSelectedValueIds();
+
+                    // ✅ product có biến thể không?
+                    boolean hasVariant =
+                            product.getProductVarriantList() != null && !product.getProductVarriantList().isEmpty();
+
+                    // ✅ nếu có biến thể -> bắt buộc chọn
+                    if (hasVariant && (selectedIds == null || selectedIds.isEmpty())) {
+                        throw new RuntimeException("Please select variants for productId=" + productId);
+                    }
+
+                    // ✅ normalize key để merge
+                    String selectedKey = normalizeSelectedValueIds(selectedIds);
+
+                    // ✅ build text (hàm của bạn đã validate id hợp lệ)
+                    String variantText = hasVariant ? buildVariantText(product, selectedIds) : "";
+
+                    // ✅ OPTIONAL: dọn item cũ bị "[]" (do logic cũ) để khỏi sinh cartItem rác
+                    if (hasVariant) {
+                        cartEntity.getCartItemEntityList().removeIf(i ->
+                                i.getProduct() != null
+                                        && i.getProduct().getProductId().equals(productId)
+                                        && (i.getSelectedValueIds() == null || "[]".equals(i.getSelectedValueIds()))
+                        );
+                    }
+
+                    // ✅ merge theo (productId + selectedKey)
+                    CartItemEntity existing = cartEntity.getCartItemEntityList().stream()
+                            .filter(i -> i.getProduct() != null
+                                    && i.getProduct().getProductId().equals(productId)
+                                    && Objects.equals(i.getSelectedValueIds(), selectedKey))
                             .findFirst()
                             .orElse(null);
 
-                    if (existingItemOpt != null) {
-                        existingItemOpt.setCartItemQuantity(existingItemOpt.getCartItemQuantity() + itemReq.getCartItemQuantity());
-                        existingItemOpt.setCartItemTotalPrice(existingItemOpt.getCartItemTotalPrice() + itemReq.getCartItemTotalPrice());
-                        existingItemOpt.setCartItemPrice(itemReq.getCartItemPrice());
+                    int qtyAdd = itemReq.getCartItemQuantity() == null ? 0 : itemReq.getCartItemQuantity();
+                    if (qtyAdd <= 0) throw new RuntimeException("cartItemQuantity must be > 0");
+
+                    double price = itemReq.getCartItemPrice() == null ? 0.0 : itemReq.getCartItemPrice();
+                    if (price < 0) throw new RuntimeException("cartItemPrice must be >= 0");
+
+                    if (existing != null) {
+                        // ✅ tăng số lượng
+                        existing.setCartItemQuantity(existing.getCartItemQuantity() + qtyAdd);
+
+                        // ✅ update price mới nhất (nếu bạn muốn cố định giá lúc add thì bỏ dòng này)
+                        existing.setCartItemPrice(price);
+
+                        // ✅ total luôn tính theo qty * price
+                        existing.setCartItemTotalPrice(existing.getCartItemQuantity() * price);
+
+                        // snapshot option
+                        existing.setSelectedValueIds(selectedKey);
+                        existing.setVariantText(variantText);
+
                     } else {
                         CartItemEntity cartItemEntity = new CartItemEntity();
                         cartItemEntity.setCart(cartEntity);
-                        cartItemEntity.setCartItemPrice(itemReq.getCartItemPrice());
-//                        cartItemEntity.setCartItemOriginalPrice(itemReq.getCartItemOriginalPrice());
-                        cartItemEntity.setCartItemQuantity(itemReq.getCartItemQuantity());
-                        cartItemEntity.setCartItemTotalPrice(itemReq.getCartItemTotalPrice());
-//                        cartItemEntity.setFlashSale(itemReq.isFlashSale());
                         cartItemEntity.setProduct(product);
+
+                        cartItemEntity.setCartItemQuantity(qtyAdd);
+                        cartItemEntity.setCartItemPrice(price);
+                        cartItemEntity.setCartItemTotalPrice(qtyAdd * price);
+
+                        cartItemEntity.setSelectedValueIds(selectedKey);
+                        cartItemEntity.setVariantText(variantText);
+
                         cartEntity.getCartItemEntityList().add(cartItemEntity);
                     }
                 }
             }
+
+            // ✅ QUAN TRỌNG: tính lại cart total từ items, không lấy request.getCartTotalPrice()
+            double total = cartEntity.getCartItemEntityList().stream()
+                    .mapToDouble(i -> i.getCartItemTotalPrice() == null ? 0.0 : i.getCartItemTotalPrice())
+                    .sum();
+
+            cartEntity.setCartTotalPrice(total);
+
             CartEntity savedCart = cartRepository.saveAndFlush(cartEntity);
             return cartMapper.toCartResponse(savedCart);
+
         } catch (Exception e) {
             throw new RuntimeException("Error creating cart", e);
         }
     }
-
 
 
     @Override
@@ -204,6 +264,48 @@ public class CartServiceImp implements CartService {
             return imageProductMapper.toResponseList(image); // ✅ trùng kiểu
         }
         return null;
+    }
+
+    private String normalizeSelectedValueIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return "[]";
+        return ids.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .map(String::valueOf)
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+    }
+
+    private String buildVariantText(ProductEntity product, List<Long> selectedIds) {
+        if (selectedIds == null || selectedIds.isEmpty()) return "";
+
+        // lấy các option hợp lệ của product
+        List<ProductVarriantEntity> allowed =
+                productVarriantRepository.findProductVarriantEntitiesByProductVarriants(product);
+
+        // chỉ lấy value đang active
+        Map<Long, String> valueIdToText = allowed.stream()
+                .filter(pv -> pv.getVarriantValue() != null && Boolean.TRUE.equals(pv.getVarriantValue().getIsActive()))
+                .collect(java.util.stream.Collectors.toMap(
+                        pv -> pv.getVarriantValue().getVarriantValueId(),
+                        pv -> pv.getVarriants().getVarriantName() + ": " + pv.getVarriantValue().getValueName(),
+                        (a, b) -> a
+                ));
+
+        // validate: mỗi selectedId phải thuộc product và active
+        for (Long id : selectedIds) {
+            if (id == null || !valueIdToText.containsKey(id)) {
+                throw new RuntimeException("Invalid selectedValueId=" + id + " for productId=" + product.getProductId());
+            }
+        }
+
+        // build text theo thứ tự ổn định
+        return selectedIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .map(valueIdToText::get)
+                .collect(java.util.stream.Collectors.joining(", "));
     }
 
 }

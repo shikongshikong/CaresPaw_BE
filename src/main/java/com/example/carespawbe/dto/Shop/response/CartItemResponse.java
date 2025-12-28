@@ -22,4 +22,6 @@ public class CartItemResponse {
 //    private String productName;
 //    private Long productVarriantId;
 //    private String variantName;
+private String selectedValueIds;
+    private String variantText;
 }

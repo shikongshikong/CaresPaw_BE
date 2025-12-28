@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity.Shop;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,14 +25,8 @@ public class ProductEntity {
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String productName;
 
-//    @Column(nullable = false)
-//    private String productDescribe;
-
     @Column(nullable = false)
     private Double productPrice;
-
-//    @Column(nullable = true)
-//    private Double productPriceSale;
 
     @Column(nullable = false)
     private Integer productAmount;
@@ -53,6 +48,12 @@ public class ProductEntity {
 
     @Column(nullable = true)
     private LocalDate productUpdatedAt;
+
+    @Column(name = "sold", columnDefinition = "bigint default 0")
+    private Long sold = 0L; // Số lượng đã bán
+
+    @Column(name = "rating", columnDefinition = "double default 0.0")
+    private Double rating = 0.0; // Điểm trung bình sao
 
     @ManyToOne
     @JoinColumn(name = "shop_id", nullable = false)

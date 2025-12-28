@@ -2,6 +2,7 @@ package com.example.carespawbe.entity.Shop;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,4 +22,8 @@ public class VarriantEntity {
 
     @OneToMany(mappedBy = "varriants")
     private List<ProductVarriantEntity> varriantList;
+
+    @OneToMany(mappedBy = "varriant", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<VarriantValueEntity> values = new ArrayList<>();
+
 }

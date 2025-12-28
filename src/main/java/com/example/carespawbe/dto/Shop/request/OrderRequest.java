@@ -23,4 +23,5 @@ public class OrderRequest {
 
     // children tables
     private List<ShopOrderRequest> shopOrders;
+    private PaymentRequest payment;
 }

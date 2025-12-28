@@ -8,6 +8,6 @@ import lombok.*;
 public class ProductVarriantRequest {
     private Long varriantId;
     private String value;
-    private Integer type;
-
+//    private Integer type;
+    private Long varriantValueId;
 }

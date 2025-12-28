@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +18,8 @@ public class CartItemRequest {
     private Double cartItemOriginalPrice;
     private Integer cartItemQuantity;
     private Double cartItemTotalPrice;
-    private boolean isFlashSale;
+//    private boolean isFlashSale;
     private Long productId;
 //    private Long productVarriantId;
+    private List<Long> selectedValueIds;
 }

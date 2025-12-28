@@ -2,6 +2,7 @@ package com.example.carespawbe.serviceImp.Shop;
 
 import com.example.carespawbe.dto.Shop.request.OrderItemRequest;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
+import com.example.carespawbe.dto.Shop.request.PaymentRequest;
 import com.example.carespawbe.dto.Shop.request.ShopOrderRequest;
 import com.example.carespawbe.dto.Shop.response.OrderResponse;
 import com.example.carespawbe.dto.Shop.response.ShopOrderResponse;
@@ -37,6 +38,10 @@ public class OrderServiceImp implements OrderService {
     @Autowired private ShopRepository shopRepo;
     @Autowired private ProductRepository productRepo;
     @Autowired private UserAddressRepository userAddressRepo;
+
+    // ✅ [NEW] Thêm Repository này để tính tổng Sold
+    @Autowired private OrderItemRepository orderItemRepo;
+
     @Autowired private OrderMapper orderMapper;
     @Autowired
     private ShopOrderMapper shopOrderMapper;
@@ -44,13 +49,12 @@ public class OrderServiceImp implements OrderService {
     @Override
     @Transactional
     public OrderResponse checkout(Long userId, OrderRequest req) {
-
+        // ... (Giữ nguyên logic checkout cũ của bạn) ...
         if (userId == null) throw new RuntimeException("userId is required");
         if (req == null || req.getShopOrders() == null || req.getShopOrders().isEmpty()) {
             throw new RuntimeException("shopOrders is empty");
         }
 
-        // ==== 1) gom tất cả cartItemId từ request ====
         List<Long> cartItemIds = req.getShopOrders().stream()
                 .flatMap(so -> (so.getOrderItems() == null ? List.<OrderItemRequest>of() : so.getOrderItems()).stream())
                 .map(OrderItemRequest::getCartItemId)
@@ -62,22 +66,28 @@ public class OrderServiceImp implements OrderService {
             throw new RuntimeException("No items to checkout");
         }
 
-        // ==== 2) lấy cart items thuộc user ====
         List<CartItemEntity> cartItems = cartItemRepo.findCheckoutItems(userId, cartItemIds);
 
-        if (cartItems.size() != cartItemIds.size()) {
-            throw new RuntimeException("Some cart items not found or not belong to user");
+        Set<Long> foundIds = cartItems.stream()
+                .map(CartItemEntity::getCartItemId)
+                .collect(Collectors.toSet());
+
+        List<Long> missingIds = cartItemIds.stream()
+                .filter(id -> !foundIds.contains(id))
+                .toList();
+
+        if (!missingIds.isEmpty()) {
+            throw new RuntimeException("Cart items not found/not belong to user: " + missingIds);
         }
+
 
         Map<Long, CartItemEntity> cartById = cartItems.stream()
                 .collect(Collectors.toMap(CartItemEntity::getCartItemId, Function.identity()));
 
-        // ==== 3) validate address ====
         UserAddressEntity address = userAddressRepo
                 .findByAddressIdAndUser_IdAndIsDeletedFalse(req.getShippingAddressId(), userId)
                 .orElseThrow(() -> new RuntimeException("Shipping address not found"));
 
-        // ==== 4) tạo OrderEntity ====
         OrderEntity order = OrderEntity.builder()
                 .orderShippingFee(req.getOrderShippingFee())
                 .orderTotalPrice(req.getOrderTotalPrice())
@@ -89,7 +99,6 @@ public class OrderServiceImp implements OrderService {
 
         order = orderRepo.save(order);
 
-        // ==== 5) tạo ShopOrder + OrderItem theo từng shopOrders request ====
         List<ShopOrderEntity> shopOrdersToSave = new ArrayList<>();
 
         for (ShopOrderRequest soReq : req.getShopOrders()) {
@@ -119,7 +128,6 @@ public class OrderServiceImp implements OrderService {
             shopOrder.setOrderVoucher(orderVoucher);
             shopOrder.setShippingVoucher(shippingVoucher);
 
-            // items của shopOrder
             List<OrderItemEntity> orderItems = new ArrayList<>();
 
             if (soReq.getOrderItems() != null) {
@@ -138,12 +146,9 @@ public class OrderServiceImp implements OrderService {
                     Double total = itemReq.getOrderItemTotalPrice();
                     if (total == null) total = price * qty;
 
-                    // OrderItemEntity lưu product_id
-                    // Ưu tiên lấy product từ cartItem để đảm bảo đúng dữ liệu thuộc user
                     ProductEntity product = ci.getProduct();
                     if (product == null) throw new RuntimeException("CartItem has no product: " + ci.getCartItemId());
 
-                    // Nếu bạn muốn bắt buộc FE gửi productId và verify khớp:
                     if (itemReq.getProductId() != null && !Objects.equals(product.getProductId(), itemReq.getProductId())) {
                         throw new RuntimeException("Product mismatch for cartItemId=" + ci.getCartItemId());
                     }
@@ -152,24 +157,38 @@ public class OrderServiceImp implements OrderService {
                             .orderItemQuantity(qty)
                             .orderItemPrice(price)
                             .orderItemTotalPrice(total)
-                            .product(product)          //set product
-                            .shopOrder(shopOrder)      //set shopOrder
+                            .product(product)
+                            .shopOrder(shopOrder)
+                            .selectedValueIds(ci.getSelectedValueIds())
+                            .variantText(ci.getVariantText())
                             .build();
 
                     orderItems.add(oi);
                 }
             }
 
-            shopOrder.setOrderItemEntities(orderItems); // cascade ALL => lưu luôn order_item
+            shopOrder.setOrderItemEntities(orderItems);
             shopOrdersToSave.add(shopOrder);
         }
 
-        shopOrderRepo.saveAll(shopOrdersToSave);
+        if (req.getPayment() != null) {
+            PaymentEntity payment = PaymentEntity.builder()
+                    .paymentCode(req.getPayment().getPaymentCode())
+                    .paymentMethod(req.getPayment().getPaymentMethod())
+                    .pricePayment(req.getPayment().getPricePayment())
+                    .description(req.getPayment().getDescription())
+                    .paymentCreatedAt(LocalDate.now())
+                    .build();
 
-        // ==== 6) xoá cart items sau checkout ====
+            order.setPayment(payment);
+            payment.setOrder(order);
+        }
+
+
+        shopOrderRepo.saveAll(shopOrdersToSave);
+        orderRepo.save(order);
         cartItemRepo.deleteAllByCart_UserEntity_IdAndCartItemIdIn(userId, cartItemIds);
 
-        // ==== 7) trả response ====
         return orderMapper.toResponse(order);
     }
 
@@ -187,7 +206,7 @@ public class OrderServiceImp implements OrderService {
 
     @Override
     public List<ShopOrderResponse> getShopOrderByUserId(Long userId) {
-       List<ShopOrderEntity> shopOrder = shopOrderRepo.findListShopOrderByUserId(userId);
+        List<ShopOrderEntity> shopOrder = shopOrderRepo.findListShopOrderByUserId(userId);
         return shopOrderMapper.toResponseList(shopOrder);
     }
 
@@ -208,7 +227,30 @@ public class OrderServiceImp implements OrderService {
         shopOrder.setUpdatedAt(LocalDateTime.now());
 
         ShopOrderEntity saved = shopOrderRepo.save(shopOrder);
+
+        // ✅ [NEW] LOGIC CẬP NHẬT SỐ LƯỢNG ĐÃ BÁN (SOLD)
+        // Nếu trạng thái mới là COMPLETED (giả sử số 4, bạn check lại Enum của bạn nhé)
+        if (newStatus == 4) {
+            // Duyệt qua tất cả item trong đơn đó
+            List<OrderItemEntity> items = shopOrder.getOrderItemEntities();
+            if (items != null) {
+                for (OrderItemEntity item : items) {
+                    Long productId = item.getProduct().getProductId();
+
+                    // 1. Gọi Repo tính tổng sold (Status 4 = Completed)
+                    Long totalSold = orderItemRepo.countTotalSoldByProductId(productId, 4);
+
+                    // 2. Update vào Product
+                    ProductEntity product = productRepo.findById(productId).orElse(null);
+                    if (product != null) {
+                        product.setSold(totalSold); // Đảm bảo Entity Product đã có field 'sold'
+                        productRepo.save(product);
+                    }
+                }
+            }
+        }
+        // ✅ [END NEW]
+
         return shopOrderMapper.toResponse(saved);
     }
-
 }

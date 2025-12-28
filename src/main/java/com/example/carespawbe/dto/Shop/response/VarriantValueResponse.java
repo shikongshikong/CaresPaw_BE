@@ -6,10 +6,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductVarriantResponse {
+public class VarriantValueResponse {
+    private Long varriantValueId;
     private Long varriantId;
     private String varriantName;
-
-    private Long varriantValueId;
     private String valueName;
+    private Boolean isActive;
 }

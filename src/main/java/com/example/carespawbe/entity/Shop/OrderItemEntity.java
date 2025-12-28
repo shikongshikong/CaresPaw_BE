@@ -29,7 +29,7 @@ public class OrderItemEntity {
     @Column(nullable = false)
     private Double orderItemTotalPrice;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
@@ -41,5 +41,10 @@ public class OrderItemEntity {
     @OneToMany(mappedBy = "orderItem")
     private List<FeedbackEntity> feedbackList = new ArrayList<>();
 
+    @Column(name = "selected_value_ids", columnDefinition = "NVARCHAR(MAX)")
+    private String selectedValueIds;
+
+    @Column(name = "variant_text", columnDefinition = "NVARCHAR(255)")
+    private String variantText;
 }
 

@@ -1,5 +1,6 @@
 package com.example.carespawbe.dto.Shop.response;
 
+import jakarta.persistence.Column;
 import lombok.*;
 
 @Data
@@ -16,4 +17,6 @@ public class OrderItemResponse {
 //    private Long productVarriantId;
     private ProductResponse product;
     private Long shopOrderId;
+    private String selectedValueIds;
+    private String variantText;
 }

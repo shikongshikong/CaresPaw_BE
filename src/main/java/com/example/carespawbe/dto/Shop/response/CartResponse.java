@@ -21,7 +21,7 @@ public class CartResponse {
     private LocalDate updatedAt;
     private Long userId;
     private String userFullName;
-    private Long voucherId;
-    private String voucherName;
+//    private Long voucherId;
+//    private String voucherName;
     private List<CartItemResponse> cartItems;
 }

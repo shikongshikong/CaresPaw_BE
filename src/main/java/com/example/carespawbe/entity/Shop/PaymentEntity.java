@@ -21,26 +21,17 @@ public class PaymentEntity {
     private Long paymentId;
 
     @Column(nullable = false, columnDefinition = "NVARCHAR(100)")
-    private String payment_method;
+    private String paymentMethod;
 
     @Column(nullable = false)
-    private Double amount_before;
-
-    @Column(nullable = false)
-    private int paymentCoinUsed;
-
-    @Column(nullable = false)
-    private Double amount_after;
-
-    @Column(nullable = false)
-    private int paymentStatus;
+    private Double pricePayment;
+    private Long paymentCode;
+    private String description;
 
     @Column(nullable = false)
     private LocalDate paymentCreatedAt;
 
-    @Column(nullable = true)
-    private LocalDate paymentUpdatedAt;
 
-    @OneToMany(mappedBy = "paymentEntity")
-    private List<OrderEntity> orderEntities;
+    @OneToOne(mappedBy = "payment")
+    private OrderEntity order;
 }

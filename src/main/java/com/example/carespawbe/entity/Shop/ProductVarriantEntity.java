@@ -1,4 +1,5 @@
 package com.example.carespawbe.entity.Shop;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,12 +23,19 @@ public class ProductVarriantEntity {
     private String productVarriantValue;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "product_id")
     private ProductEntity productVarriants;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "varriant_id")
     private VarriantEntity varriants;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "varriant_value_id")
+    private VarriantValueEntity varriantValue;
 
 //    @OneToMany(mappedBy = "productVarriantEntity")
 //    private List<OrderItemEntity> orderItemEntityList;
