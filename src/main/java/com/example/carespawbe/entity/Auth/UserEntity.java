@@ -1,5 +1,7 @@
 package com.example.carespawbe.entity.Auth;
 
+import com.example.carespawbe.entity.Expert.ExpertEntity;
+import com.example.carespawbe.entity.Expert.PetEntity;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
 import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
 import com.example.carespawbe.entity.Forum.ForumPostSaveEntity;
@@ -16,7 +18,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Data
+//@Data
 @Getter
 @Setter
 @NoArgsConstructor
@@ -69,6 +71,12 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user")
     private List<FeedbackEntity>  feedbackList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<PetEntity> petEntityList = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ExpertEntity expertEntity;
 
     @PrePersist
     protected void onCreate() {

@@ -2,17 +2,16 @@ package com.example.carespawbe.entity.Forum;
 
 import com.example.carespawbe.entity.Auth.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "followee_id"}), name = "following")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
+@Getter
+@Setter
+//@Data
 public class FollowingEntity {
 
     @Id

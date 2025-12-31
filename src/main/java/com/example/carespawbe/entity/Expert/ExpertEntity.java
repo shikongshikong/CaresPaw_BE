@@ -1,40 +1,48 @@
-//package com.example.carespawbe.entity;
-//
-//import jakarta.persistence.*;
-//import lombok.AllArgsConstructor;
-//import lombok.Builder;
-//import lombok.Data;
-//import lombok.NoArgsConstructor;
-//
-//import java.time.LocalDate;
-//
-////@Entity
-////@Table(name = "expertEntity")
-//@Data
-//@AllArgsConstructor
-//@NoArgsConstructor
-//@Builder
-//public class ExpertEntity {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "expert_id")
-//    private Long id;
-//
-//    private String introduction;
-//    private String experience;
-//    private String address;
-//    private String status;
+package com.example.carespawbe.entity.Expert;
+
+import com.example.carespawbe.entity.Auth.UserEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Entity
+@Table(name = "expert")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
+public class ExpertEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "expert_id")
+    private Long id;
+
+    private String fullName;
+    @Column(name = "biography", length = 2000)
+    private String biography;
+    private Integer experienceYear;
+    private Double price;
+    private Integer status; // 0:pending, 1:active, 2: block
+    private String idImage;
 //    private float rating;
+    private String location;
 //    private LocalDate createAt;
-//
-//    @OneToOne
-//    @JoinColumn(name = "user_id")
-//    private UserEntity user;
-//
-//    @PrePersist
-//    protected void onCreate() {
-//        status = "active";
-//        rating = 0.0f;
-//    }
-//}
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private UserEntity user;
+
+    @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExpertToExpertCategoryEntity> expertToCategoryEntities;
+
+    @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CertificateEntity> certificateEntities;
+
+    @PrePersist
+    protected void onCreate() {
+        status = 0;
+    }
+}
