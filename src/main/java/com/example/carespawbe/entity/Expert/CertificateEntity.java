@@ -22,7 +22,7 @@ public class CertificateEntity {
     private LocalDate issue_date;
     private LocalDate expiry_date;
     private String image;
-    private Integer status;
+    private Integer status; // 0: pending, 1: approved, 2: rejected
 
     @ManyToOne
     @JoinColumn(name = "expert_id")

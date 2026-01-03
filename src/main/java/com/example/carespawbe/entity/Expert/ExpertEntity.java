@@ -4,6 +4,8 @@ import com.example.carespawbe.entity.Auth.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,9 +29,9 @@ public class ExpertEntity {
     private Double price;
     private Integer status; // 0:pending, 1:active, 2: block
     private String idImage;
-//    private float rating;
     private String location;
-//    private LocalDate createAt;
+    private BigDecimal sessionPrice;
+    private String portfolioLink;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
@@ -40,6 +42,12 @@ public class ExpertEntity {
 
     @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CertificateEntity> certificateEntities;
+
+    @OneToMany(mappedBy = "expert", cascade = CascadeType.ALL)
+    private List<AvailabilitySlotEntity> slotList;
+
+    @OneToMany(mappedBy = "expert")
+    private List<MedicalRecordEntity> medicalRecordList = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

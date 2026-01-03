@@ -6,3 +6,9 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+app:
+  jitsi:
+    base-url: https://meet.jit.si
+    jwt-enabled: false
+

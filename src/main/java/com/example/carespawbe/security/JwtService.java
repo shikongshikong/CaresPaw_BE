@@ -82,11 +82,13 @@
 package com.example.carespawbe.security;
 
 import com.example.carespawbe.entity.Auth.UserEntity;
+import com.example.carespawbe.service.Expert.ExpertEntityService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -101,6 +103,8 @@ public class JwtService {
     private static final String SECRET_KEY = "U1eR9sdU8HdJ3qLkp09sN8vX0Az17Egk";
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 24h
 
+    @Autowired private ExpertEntityService  expertEntityService;
+
     private SecretKey key;
 
     @PostConstruct
@@ -113,6 +117,10 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
         claims.put("userState", user.getState());
+
+        if (user.getRole() == 3) {
+            claims.put("expertId", expertEntityService.getExpertByUserId(user.getId()).getId());
+        }
 
         // Chuyển role từ số -> chuỗi ROLE_...
         String roleName = switch (user.getRole()) {

@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity.Auth;
 
+import com.example.carespawbe.entity.Expert.AppointmentEntity;
 import com.example.carespawbe.entity.Expert.ExpertEntity;
 import com.example.carespawbe.entity.Expert.PetEntity;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
@@ -77,6 +78,9 @@ public class UserEntity {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ExpertEntity expertEntity;
+
+    @OneToMany(mappedBy = "user")
+    private List<AppointmentEntity> appointmentEntityList = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
