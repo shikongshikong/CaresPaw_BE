@@ -1,9 +1,6 @@
 package com.example.carespawbe.dto.Shop.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,13 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CartRequest {
-    private Double cartTotalPrice;
-//    private Double cartShippingFee;
-//    private int cartTotalCoinEarned;
     private LocalDate createdAt;
     private LocalDate updatedAt;
     private Long userId;
-//    private Long voucherId;
-//    private String voucherName;
+
     private List<CartItemRequest> cartItems;
 }

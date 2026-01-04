@@ -9,11 +9,16 @@ import java.util.List;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<FeedbackEntity, Long> {
-    List<FeedbackEntity> findAllByOrderItem_Product_ProductId(Long productId);
+
+    List<FeedbackEntity> findAllByOrderItem_ProductSku_Product_ProductId(Long productId);
+
     List<FeedbackEntity> findAllByUser_Id(Long userId);
 
-    @Query("SELECT COALESCE(AVG(f.star), 0.0) " +
-            "FROM FeedbackEntity f " +
-            "WHERE f.orderItem.product.productId = :productId")
+    @Query("""
+        SELECT COALESCE(AVG(f.star), 0.0)
+        FROM FeedbackEntity f
+        WHERE f.orderItem.productSku.product.productId = :productId
+    """)
     Double getAverageRatingByProductId(@Param("productId") Long productId);
 }
+

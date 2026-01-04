@@ -62,6 +62,13 @@ public class VarriantServiceImp implements VarriantService {
         varriantRepository.deleteById(id);
     }
 
+    @Override
+    public VarriantResponse getById(Long id) {
+        VarriantEntity entity = varriantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể với ID: " + id));
+        return mapToResponse(entity);
+    }
+
     // Hàm phụ trợ để chuyển Entity sang Response
     private VarriantResponse mapToResponse(VarriantEntity entity) {
         return VarriantResponse.builder()

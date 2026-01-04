@@ -5,18 +5,25 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long> {
 
-    List<OrderItemEntity> findAllByShopOrder_ShopOrderId(Long shopOrderId);
+    // ✅ SOLD theo SKU
+    @Query("""
+        SELECT COALESCE(SUM(oi.orderItemQuantity), 0)
+        FROM OrderItemEntity oi
+        JOIN oi.shopOrder so
+        WHERE oi.productSku.productSkuId = :skuId
+          AND so.shopOrderStatus = :status
+    """)
+    Long countTotalSoldBySkuId(@Param("skuId") Long skuId, @Param("status") int status);
 
-    List<OrderItemEntity> findAllByShopOrder_Order_OrderId(Long orderId);
-
-    @Query("SELECT COALESCE(SUM(oi.orderItemQuantity), 0) " +
-            "FROM OrderItemEntity oi " +       // Tên class
-            "JOIN oi.shopOrder so " +          // Biến 'shopOrder' dòng 40
-            "WHERE oi.product.productId = :productId " + // Biến 'product' dòng 35
-            "AND so.shopOrderStatus = :status") // Check bên ShopOrderEntity tên biến status là gì (thường là shopOrderStatus)
+    // ✅ (optional) tổng sold theo PRODUCT (join qua SKU)
+    @Query("""
+        SELECT COALESCE(SUM(oi.orderItemQuantity), 0)
+        FROM OrderItemEntity oi
+        JOIN oi.shopOrder so
+        WHERE oi.productSku.product.productId = :productId
+          AND so.shopOrderStatus = :status
+    """)
     Long countTotalSoldByProductId(@Param("productId") Long productId, @Param("status") int status);
 }

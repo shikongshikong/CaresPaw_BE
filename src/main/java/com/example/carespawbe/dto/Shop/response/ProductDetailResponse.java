@@ -9,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductResponse {
+public class ProductDetailResponse {
     private Long productId;
     private String productName;
     private Double productPrice;
@@ -25,16 +25,16 @@ public class ProductResponse {
 
     private List<String> imageUrls;
     private String productVideoUrl;
+
     private LocalDate productUpdatedAt;
     private LocalDate productCreatedAt;
 
     private Long sold;
     private Double rating;
 
-    // ✅ optional: trả luôn list SKU để FE render nhanh
-    private List<SkuResponse> skus;
-
-    // ✅ NEW: trả list varriant values để FE render chip (Phong cách/Size...)
-//    private List<VarriantValueResponse> varriantValues;
+    // ✅ FE render biến thể + disable option hết hàng
     private List<VariantGroupResponse> variantGroups;
+
+    // ✅ FE match theo selectedValueIds để đổi giá/tồn kho và chặn mua
+    private List<SkuResponse> skus;
 }

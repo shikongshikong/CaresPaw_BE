@@ -50,7 +50,20 @@ public class VarriantValueServiceImp implements VarriantValueService {
         VarriantValueEntity e = valueRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy varriantValueId: " + id));
 
-        if (request.getValueName() != null) e.setValueName(request.getValueName());
+        // nếu đổi tên -> check trùng trong cùng varriant
+        if (request.getValueName() != null && !request.getValueName().isBlank()) {
+            Long varId = e.getVarriant().getVarriantId();
+            String newName = request.getValueName().trim();
+
+            boolean duplicate = valueRepo.existsByVarriant_VarriantIdAndValueName(varId, newName)
+                    && !newName.equalsIgnoreCase(e.getValueName());
+
+            if (duplicate) {
+                throw new RuntimeException("Giá trị đã tồn tại cho biến thể này!");
+            }
+            e.setValueName(newName);
+        }
+
         if (request.getIsActive() != null) e.setIsActive(request.getIsActive());
 
         return toRes(valueRepo.save(e));
@@ -60,6 +73,27 @@ public class VarriantValueServiceImp implements VarriantValueService {
     public void delete(Long id) {
         if (!valueRepo.existsById(id)) throw new RuntimeException("Không tìm thấy varriantValueId để xóa!");
         valueRepo.deleteById(id);
+    }
+
+    // ✅ DONE: getById
+    @Override
+    public VarriantValueResponse getById(Long id) {
+        VarriantValueEntity e = valueRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy varriantValueId: " + id));
+        return toRes(e);
+    }
+
+    // ✅ DONE: toggleActive
+    @Override
+    public void toggleActive(Long id, Boolean isActive) {
+        if (isActive == null) {
+            throw new RuntimeException("isActive is required");
+        }
+        VarriantValueEntity e = valueRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy varriantValueId: " + id));
+
+        e.setIsActive(isActive);
+        valueRepo.save(e);
     }
 
     private VarriantValueResponse toRes(VarriantValueEntity e) {

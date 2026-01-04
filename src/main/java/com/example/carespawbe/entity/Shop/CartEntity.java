@@ -24,27 +24,20 @@ public class CartEntity {
     @Column(name = "cart_id")
     private Long cartId;
 
-    @Column(updatable = false)
-    private Double CartTotalPrice;
+    @Column(name = "cart_total_price")
+    private Double cartTotalPrice = 0.0;
 
-//    @Column(updatable = false)
-//    private Double CartShippingFee;
-//
-//    @Column(updatable = true)
-//    private int CartTotalCoinEarned;
-
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDate createdAt;
 
-    @Column(updatable = true)
+    @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
     private UserEntity userEntity;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<CartItemEntity> cartItemEntityList = new ArrayList<>();
-
-
 }

@@ -29,7 +29,7 @@ public class ProductEntity {
     private Double productPrice;
 
     @Column(nullable = false)
-    private Integer productAmount;
+    private Integer productAmount = 0;
 
     @Column(nullable = false)
     private Integer productStatus;
@@ -63,10 +63,13 @@ public class ProductEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
-    @OneToMany(mappedBy = "productVarriants",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<ProductVarriantEntity> productVarriantList = new ArrayList<>();
+//    @OneToMany(mappedBy = "productVarriants",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private List<ProductVarriantEntity> productVarriantList = new ArrayList<>();
 
     @OneToMany(mappedBy = "imageProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ImageProductEntity> imageProductList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductSkuEntity> skuList = new ArrayList<>();
 
 }

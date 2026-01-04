@@ -1,9 +1,8 @@
 package com.example.carespawbe.dto.Shop.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -11,17 +10,15 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CartItemResponse {
     private Long cartItemId;
-    private Double cartItemPrice;
-//    private Double cartItemOriginalPrice;
-    private int cartItemQuantity;
-    private Double cartItemTotalPrice;
-//    private boolean isFlashSale;
-    private ProductResponse product;
-//    private String productVarriantValue;
-//    private String imageProductUrl;
-//    private String productName;
-//    private Long productVarriantId;
-//    private String variantName;
-private String selectedValueIds;
+
+    // ✅ SKU
+    private Long productSkuId;
+    private String skuCode;
     private String variantText;
+
+    private Integer cartItemQuantity;
+    private Double cartItemPrice;        // snapshot (from SKU)
+    private Double cartItemTotalPrice;
+
+    private ProductResponse product;     // có thể giữ để show tên/ảnh
 }

@@ -2,8 +2,10 @@ package com.example.carespawbe.mapper.Shop;
 
 import com.example.carespawbe.dto.Shop.request.ProductRequest;
 import com.example.carespawbe.dto.Shop.response.ProductResponse;
+import com.example.carespawbe.dto.Shop.response.SkuResponse;
 import com.example.carespawbe.entity.Shop.ImageProductEntity;
 import com.example.carespawbe.entity.Shop.ProductEntity;
+import com.example.carespawbe.entity.Shop.ProductSkuEntity;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -11,7 +13,6 @@ import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
-        uses = { ProductVarriantMapper.class },
         nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL
 )
 public interface ProductMapper {
@@ -22,26 +23,42 @@ public interface ProductMapper {
 
     @Mapping(target = "categoryId", source = "category.categoryId")
     @Mapping(target = "categoryName", source = "category.categoryName")
-
     @Mapping(target = "shopId", source = "shop.shopId")
     @Mapping(target = "shopName", source = "shop.shopName")
     @Mapping(target = "imageUrls", expression = "java(mapImages(productEntity.getImageProductList()))")
-    // ✅ ĐỔI: map trực tiếp list entity -> list response, MapStruct sẽ gọi ProductVarriantMapper
-    @Mapping(target = "productVarriants", source = "productVarriantList")
 
-    @Mapping(target = "sold", source = "sold")
-    @Mapping(target = "rating", source = "rating")
+    // ✅ QUAN TRỌNG: map sold của product (tổng sold)
+    @Mapping(target = "sold", expression = "java(productEntity.getSold() == null ? 0L : productEntity.getSold())")
+
+    // ✅ SKU list optional
+    @Mapping(target = "skus", expression = "java(mapSkus(productEntity.getSkuList()))")
     ProductResponse toProductResponse(ProductEntity productEntity);
 
-    @Mapping(target = "imageUrls", expression = "java(mapImages(productEntity.getImageProductList()))")
-    @Mapping(target = "productVarriants", source = "productVarriantList")
     List<ProductResponse> toProductResponseList(List<ProductEntity> productEntityList);
 
-    // map list ảnh
     default List<String> mapImages(List<ImageProductEntity> images) {
         if (images == null) return null;
         return images.stream()
                 .map(ImageProductEntity::getImageProductUrl)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ map sku list (giữ nhẹ, không cần join sâu)
+    default List<SkuResponse> mapSkus(List<ProductSkuEntity> skus) {
+        if (skus == null) return null;
+        return skus.stream()
+                .map(s -> SkuResponse.builder()
+                        .productSkuId(s.getProductSkuId())
+                        .skuCode(s.getSkuCode())
+                        .skuName(s.getSkuName())
+                        .stock(s.getStock())
+                        .price(s.getPrice())
+
+                        // ✅ QUAN TRỌNG: map sold của sku (NULL -> 0)
+                        .sold(s.getSold() == null ? 0L : s.getSold())
+
+                        .isActive(s.getIsActive())
+                        .build())
                 .collect(Collectors.toList());
     }
 }

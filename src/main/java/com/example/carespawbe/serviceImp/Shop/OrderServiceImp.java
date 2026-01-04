@@ -2,7 +2,6 @@ package com.example.carespawbe.serviceImp.Shop;
 
 import com.example.carespawbe.dto.Shop.request.OrderItemRequest;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
-import com.example.carespawbe.dto.Shop.request.PaymentRequest;
 import com.example.carespawbe.dto.Shop.request.ShopOrderRequest;
 import com.example.carespawbe.dto.Shop.response.OrderResponse;
 import com.example.carespawbe.dto.Shop.response.ShopOrderResponse;
@@ -10,7 +9,6 @@ import com.example.carespawbe.entity.Auth.UserAddressEntity;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Shop.*;
 import com.example.carespawbe.enums.OrderStatus;
-import com.example.carespawbe.mapper.Shop.OrderItemMapper;
 import com.example.carespawbe.mapper.Shop.OrderMapper;
 import com.example.carespawbe.mapper.Shop.ShopOrderMapper;
 import com.example.carespawbe.repository.Auth.UserAddressRepository;
@@ -38,23 +36,23 @@ public class OrderServiceImp implements OrderService {
     @Autowired private ShopRepository shopRepo;
     @Autowired private ProductRepository productRepo;
     @Autowired private UserAddressRepository userAddressRepo;
-
-    // ✅ [NEW] Thêm Repository này để tính tổng Sold
     @Autowired private OrderItemRepository orderItemRepo;
 
+    // ✅ NEW: cần SKU repo để check/trừ/hoàn stock + update sold
+    @Autowired private ProductSkuRepository productSkuRepo;
+
     @Autowired private OrderMapper orderMapper;
-    @Autowired
-    private ShopOrderMapper shopOrderMapper;
+    @Autowired private ShopOrderMapper shopOrderMapper;
 
     @Override
     @Transactional
     public OrderResponse checkout(Long userId, OrderRequest req) {
-        // ... (Giữ nguyên logic checkout cũ của bạn) ...
         if (userId == null) throw new RuntimeException("userId is required");
         if (req == null || req.getShopOrders() == null || req.getShopOrders().isEmpty()) {
             throw new RuntimeException("shopOrders is empty");
         }
 
+        // ===== 1) LẤY cartItemIds từ request =====
         List<Long> cartItemIds = req.getShopOrders().stream()
                 .flatMap(so -> (so.getOrderItems() == null ? List.<OrderItemRequest>of() : so.getOrderItems()).stream())
                 .map(OrderItemRequest::getCartItemId)
@@ -62,10 +60,9 @@ public class OrderServiceImp implements OrderService {
                 .distinct()
                 .toList();
 
-        if (cartItemIds.isEmpty()) {
-            throw new RuntimeException("No items to checkout");
-        }
+        if (cartItemIds.isEmpty()) throw new RuntimeException("No items to checkout");
 
+        // ===== 2) LẤY cart items thuộc user =====
         List<CartItemEntity> cartItems = cartItemRepo.findCheckoutItems(userId, cartItemIds);
 
         Set<Long> foundIds = cartItems.stream()
@@ -80,17 +77,49 @@ public class OrderServiceImp implements OrderService {
             throw new RuntimeException("Cart items not found/not belong to user: " + missingIds);
         }
 
-
         Map<Long, CartItemEntity> cartById = cartItems.stream()
                 .collect(Collectors.toMap(CartItemEntity::getCartItemId, Function.identity()));
 
+        // ===== 3) LOAD ADDRESS =====
         UserAddressEntity address = userAddressRepo
                 .findByAddressIdAndUser_IdAndIsDeletedFalse(req.getShippingAddressId(), userId)
                 .orElseThrow(() -> new RuntimeException("Shipping address not found"));
 
+        // ===== 4) ✅ RECALCULATE TOTAL BACKEND (KHÔNG TIN FE) =====
+        double backendTotalShippingFee = 0.0;
+        double backendTotalProductAmount = 0.0;
+
+        for (ShopOrderRequest soReq : req.getShopOrders()) {
+            double shopShippingFee = soReq.getShippingFee() == null ? 0.0 : soReq.getShippingFee();
+            backendTotalShippingFee += shopShippingFee;
+
+            if (soReq.getOrderItems() != null) {
+                for (OrderItemRequest itemReq : soReq.getOrderItems()) {
+                    CartItemEntity ci = cartById.get(itemReq.getCartItemId());
+                    if (ci == null) continue;
+
+                    int qty = (itemReq.getOrderItemQuantity() == null || itemReq.getOrderItemQuantity() < 1)
+                            ? (ci.getCartItemQuantity() == null ? 1 : ci.getCartItemQuantity())
+                            : itemReq.getOrderItemQuantity();
+
+                    ProductSkuEntity sku = ci.getProductSku();
+                    if (sku == null) throw new RuntimeException("CartItem has no SKU: " + ci.getCartItemId());
+
+                    double unitPrice = 0.0;
+                    if (sku.getPrice() != null) unitPrice = sku.getPrice().doubleValue();
+                    else if (ci.getCartItemPrice() != null) unitPrice = ci.getCartItemPrice();
+
+                    backendTotalProductAmount += unitPrice * qty;
+                }
+            }
+        }
+
+        double backendOrderTotal = backendTotalProductAmount + backendTotalShippingFee;
+
+        // ===== 5) CREATE ORDER =====
         OrderEntity order = OrderEntity.builder()
-                .orderShippingFee(req.getOrderShippingFee())
-                .orderTotalPrice(req.getOrderTotalPrice())
+                .orderShippingFee(backendTotalShippingFee)
+                .orderTotalPrice(backendOrderTotal)
                 .orderCreatedAt(LocalDate.now())
                 .orderStatus(OrderStatus.PENDING_CONFIRMATION.getValue())
                 .userEntity(UserEntity.builder().id(userId).build())
@@ -101,6 +130,54 @@ public class OrderServiceImp implements OrderService {
 
         List<ShopOrderEntity> shopOrdersToSave = new ArrayList<>();
 
+        // ===== 6) ✅ CHECK & TRỪ STOCK THEO SKU (TRONG TRANSACTION) =====
+        Map<Long, Integer> skuNeedQty = new HashMap<>();
+        for (ShopOrderRequest soReq : req.getShopOrders()) {
+            if (soReq.getOrderItems() == null) continue;
+
+            for (OrderItemRequest itemReq : soReq.getOrderItems()) {
+                CartItemEntity ci = cartById.get(itemReq.getCartItemId());
+                if (ci == null) continue;
+
+                ProductSkuEntity sku = ci.getProductSku();
+                if (sku == null) throw new RuntimeException("CartItem has no SKU: " + ci.getCartItemId());
+
+                int qty = (itemReq.getOrderItemQuantity() == null || itemReq.getOrderItemQuantity() < 1)
+                        ? (ci.getCartItemQuantity() == null ? 1 : ci.getCartItemQuantity())
+                        : itemReq.getOrderItemQuantity();
+
+                skuNeedQty.merge(sku.getProductSkuId(), qty, Integer::sum);
+            }
+        }
+
+        List<ProductSkuEntity> skus = productSkuRepo.findAllByProductSkuIdIn(new ArrayList<>(skuNeedQty.keySet()));
+        Map<Long, ProductSkuEntity> skuMap = skus.stream()
+                .collect(Collectors.toMap(ProductSkuEntity::getProductSkuId, Function.identity()));
+
+        for (Map.Entry<Long, Integer> e : skuNeedQty.entrySet()) {
+            Long skuId = e.getKey();
+            int need = e.getValue();
+
+            ProductSkuEntity sku = skuMap.get(skuId);
+            if (sku == null) throw new RuntimeException("SKU not found: " + skuId);
+
+            Integer stock = sku.getStock() == null ? 0 : sku.getStock();
+            if (need > stock) {
+                throw new RuntimeException("Not enough stock for SKU " + skuId + ". Need=" + need + ", Stock=" + stock);
+            }
+        }
+
+        for (Map.Entry<Long, Integer> e : skuNeedQty.entrySet()) {
+            Long skuId = e.getKey();
+            int need = e.getValue();
+
+            ProductSkuEntity sku = skuMap.get(skuId);
+            int stock = sku.getStock() == null ? 0 : sku.getStock();
+            sku.setStock(stock - need);
+        }
+        productSkuRepo.saveAll(skus);
+
+        // ===== 7) BUILD SHOP ORDERS + ORDER ITEMS =====
         for (ShopOrderRequest soReq : req.getShopOrders()) {
 
             ShopEntity shop = shopRepo.findById(soReq.getShopId())
@@ -137,30 +214,27 @@ public class OrderServiceImp implements OrderService {
                     if (ci == null) throw new RuntimeException("CartItem not found: " + itemReq.getCartItemId());
 
                     int qty = (itemReq.getOrderItemQuantity() == null || itemReq.getOrderItemQuantity() < 1)
-                            ? 1
+                            ? (ci.getCartItemQuantity() == null ? 1 : ci.getCartItemQuantity())
                             : itemReq.getOrderItemQuantity();
 
-                    Double price = itemReq.getOrderItemPrice();
-                    if (price == null) price = ci.getCartItemPrice();
+                    ProductSkuEntity sku = ci.getProductSku();
+                    if (sku == null) throw new RuntimeException("CartItem has no SKU: " + ci.getCartItemId());
 
-                    Double total = itemReq.getOrderItemTotalPrice();
-                    if (total == null) total = price * qty;
+                    double unitPrice = 0.0;
+                    if (sku.getPrice() != null) unitPrice = sku.getPrice().doubleValue();
+                    else if (ci.getCartItemPrice() != null) unitPrice = ci.getCartItemPrice();
 
-                    ProductEntity product = ci.getProduct();
-                    if (product == null) throw new RuntimeException("CartItem has no product: " + ci.getCartItemId());
-
-                    if (itemReq.getProductId() != null && !Objects.equals(product.getProductId(), itemReq.getProductId())) {
-                        throw new RuntimeException("Product mismatch for cartItemId=" + ci.getCartItemId());
-                    }
+                    double total = unitPrice * qty;
 
                     OrderItemEntity oi = OrderItemEntity.builder()
                             .orderItemQuantity(qty)
-                            .orderItemPrice(price)
+                            .orderItemPrice(unitPrice)
                             .orderItemTotalPrice(total)
-                            .product(product)
+                            .productSku(sku)
                             .shopOrder(shopOrder)
-                            .selectedValueIds(ci.getSelectedValueIds())
+                            .skuCode(ci.getSkuCode() != null ? ci.getSkuCode() : sku.getSkuCode())
                             .variantText(ci.getVariantText())
+                            .productName(sku.getProduct().getProductName())
                             .build();
 
                     orderItems.add(oi);
@@ -171,22 +245,9 @@ public class OrderServiceImp implements OrderService {
             shopOrdersToSave.add(shopOrder);
         }
 
-        if (req.getPayment() != null) {
-            PaymentEntity payment = PaymentEntity.builder()
-                    .paymentCode(req.getPayment().getPaymentCode())
-                    .paymentMethod(req.getPayment().getPaymentMethod())
-                    .pricePayment(req.getPayment().getPricePayment())
-                    .description(req.getPayment().getDescription())
-                    .paymentCreatedAt(LocalDate.now())
-                    .build();
-
-            order.setPayment(payment);
-            payment.setOrder(order);
-        }
-
-
         shopOrderRepo.saveAll(shopOrdersToSave);
         orderRepo.save(order);
+
         cartItemRepo.deleteAllByCart_UserEntity_IdAndCartItemIdIn(userId, cartItemIds);
 
         return orderMapper.toResponse(order);
@@ -194,7 +255,7 @@ public class OrderServiceImp implements OrderService {
 
     @Override
     public List<OrderResponse> getOrderByUserId(Long userId) {
-        List<OrderEntity>  order = orderRepo.findAllByUserEntity_Id(userId);
+        List<OrderEntity> order = orderRepo.findAllByUserEntity_Id(userId);
         return orderMapper.toResponseList(order);
     }
 
@@ -216,40 +277,85 @@ public class OrderServiceImp implements OrderService {
         if (shopOrderId == null) throw new RuntimeException("shopOrderId is required");
         if (newStatus == null) throw new RuntimeException("newStatus is required");
 
-        if (newStatus < OrderStatus.PENDING_CONFIRMATION.getValue() || newStatus > OrderStatus.RETURN_REFUND.getValue()) {
+        if (newStatus < OrderStatus.PENDING_CONFIRMATION.getValue()
+                || newStatus > OrderStatus.RETURN_REFUND.getValue()) {
             throw new RuntimeException("Invalid status. Must be 0..6");
         }
 
         ShopOrderEntity shopOrder = shopOrderRepo.findById(shopOrderId)
                 .orElseThrow(() -> new RuntimeException("ShopOrder not found: " + shopOrderId));
 
-        shopOrder.setShopOrderStatus(newStatus);
-        shopOrder.setUpdatedAt(LocalDateTime.now());
+        Integer oldStatus = shopOrder.getShopOrderStatus();
 
-        ShopOrderEntity saved = shopOrderRepo.save(shopOrder);
+        final int CANCELLED_STATUS = OrderStatus.CANCELLED.getValue(); // sửa nếu enum khác
+        final int DONE_STATUS = 4; // bạn đang dùng 4
 
-        // ✅ [NEW] LOGIC CẬP NHẬT SỐ LƯỢNG ĐÃ BÁN (SOLD)
-        // Nếu trạng thái mới là COMPLETED (giả sử số 4, bạn check lại Enum của bạn nhé)
-        if (newStatus == 4) {
-            // Duyệt qua tất cả item trong đơn đó
+        boolean isCancellingNow = (newStatus == CANCELLED_STATUS) && (oldStatus == null || !oldStatus.equals(CANCELLED_STATUS));
+        boolean isDoneNow = (newStatus == DONE_STATUS) && (oldStatus == null || !oldStatus.equals(DONE_STATUS));
+
+        // ✅ HOÀN STOCK KHI HUỶ
+        if (isCancellingNow) {
             List<OrderItemEntity> items = shopOrder.getOrderItemEntities();
-            if (items != null) {
-                for (OrderItemEntity item : items) {
-                    Long productId = item.getProduct().getProductId();
+            if (items != null && !items.isEmpty()) {
+                Map<Long, Integer> restoreMap = new HashMap<>();
+                for (OrderItemEntity it : items) {
+                    if (it.getProductSku() == null) continue;
+                    Long skuId = it.getProductSku().getProductSkuId();
+                    int qty = it.getOrderItemQuantity() == null ? 0 : it.getOrderItemQuantity();
+                    restoreMap.merge(skuId, qty, Integer::sum);
+                }
 
-                    // 1. Gọi Repo tính tổng sold (Status 4 = Completed)
-                    Long totalSold = orderItemRepo.countTotalSoldByProductId(productId, 4);
-
-                    // 2. Update vào Product
-                    ProductEntity product = productRepo.findById(productId).orElse(null);
-                    if (product != null) {
-                        product.setSold(totalSold); // Đảm bảo Entity Product đã có field 'sold'
-                        productRepo.save(product);
+                if (!restoreMap.isEmpty()) {
+                    List<ProductSkuEntity> skus = productSkuRepo.findAllByProductSkuIdIn(new ArrayList<>(restoreMap.keySet()));
+                    for (ProductSkuEntity sku : skus) {
+                        int cur = sku.getStock() == null ? 0 : sku.getStock();
+                        int add = restoreMap.getOrDefault(sku.getProductSkuId(), 0);
+                        sku.setStock(cur + add);
                     }
+                    productSkuRepo.saveAll(skus);
                 }
             }
         }
-        // ✅ [END NEW]
+
+        // ✅ SET STATUS
+        shopOrder.setShopOrderStatus(newStatus);
+        shopOrder.setUpdatedAt(LocalDateTime.now());
+        ShopOrderEntity saved = shopOrderRepo.save(shopOrder);
+
+        // ✅ DONE: cộng sold cho SKU + sync product.sold
+        if (isDoneNow) {
+            List<OrderItemEntity> items = shopOrder.getOrderItemEntities();
+            if (items != null && !items.isEmpty()) {
+
+                Map<Long, Long> skuQtyMap = new HashMap<>();
+                Set<Long> productIds = new HashSet<>();
+
+                for (OrderItemEntity it : items) {
+                    ProductSkuEntity sku = it.getProductSku();
+                    if (sku == null) continue;
+
+                    Long skuId = sku.getProductSkuId();
+                    long qty = it.getOrderItemQuantity() == null ? 0L : it.getOrderItemQuantity().longValue();
+                    if (qty <= 0) continue;
+
+                    skuQtyMap.merge(skuId, qty, Long::sum);
+
+                    if (sku.getProduct() != null && sku.getProduct().getProductId() != null) {
+                        productIds.add(sku.getProduct().getProductId());
+                    }
+                }
+
+                // 1) cộng sold vào từng SKU (atomic)
+                for (Map.Entry<Long, Long> e : skuQtyMap.entrySet()) {
+                    productSkuRepo.increaseSold(e.getKey(), e.getValue());
+                }
+
+                // 2) sync product.sold = SUM sku.sold active
+                for (Long pid : productIds) {
+                    productRepo.syncProductSoldFromSkus(pid);
+                }
+            }
+        }
 
         return shopOrderMapper.toResponse(saved);
     }
