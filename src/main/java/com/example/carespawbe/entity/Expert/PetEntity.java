@@ -1,6 +1,7 @@
 package com.example.carespawbe.entity.Expert;
 
 import com.example.carespawbe.entity.Auth.UserEntity;
+import com.example.carespawbe.entity.Forum.ForumPostTypeEntity;
 import com.example.carespawbe.entity.Shop.CategoryEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -33,7 +34,7 @@ public class PetEntity {
     private Double weight;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private CategoryEntity species;
+    private ForumPostTypeEntity species;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

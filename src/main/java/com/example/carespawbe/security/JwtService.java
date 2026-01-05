@@ -158,6 +158,14 @@ public class JwtService {
         return extractAllClaims(token).get("role", String.class);
     }
 
+    public Long extractExpertId(String token) {
+        Object v = extractAllClaims(token).get("expertId");
+        if (v == null) return null;
+        if (v instanceof Long l) return l;
+        if (v instanceof Integer i) return i.longValue();
+        return Long.parseLong(v.toString());
+    }
+
     public Integer extractUserState(String token) {
         Object stateObj = extractAllClaims(token).get("userState");
         if (stateObj instanceof Integer) {

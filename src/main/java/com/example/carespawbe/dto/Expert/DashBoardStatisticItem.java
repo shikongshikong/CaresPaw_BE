@@ -1,5 +1,6 @@
 package com.example.carespawbe.dto.Expert;
 
+import lombok.Getter;
 import lombok.Setter;
 
 @Setter
@@ -12,6 +13,7 @@ import lombok.Setter;
 //        this.growthRate = growthRate;
 //    }
 //}
+@Getter
 public class DashBoardStatisticItem<T extends Number> {
     private T currentAmount;
     private double growthRate;

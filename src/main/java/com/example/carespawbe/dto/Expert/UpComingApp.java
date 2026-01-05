@@ -21,8 +21,9 @@ public class UpComingApp {
     private String userName;
     private Double weight;
     private String userNote;
+    private Integer status;
 
-    public UpComingApp(Long appId, LocalDate date, LocalTime startTime, LocalTime endTime, String petImageUrl, String petName, String species, String breed, String userName, Double weight, String userNote) {
+    public UpComingApp(Long appId, LocalDate date, LocalTime startTime, LocalTime endTime, String petImageUrl, String petName, String species, String breed, String userName, Double weight, String userNote, Integer status) {
         this.appId = appId;
         this.date = date;
         this.startTime = startTime;
@@ -34,5 +35,6 @@ public class UpComingApp {
         this.userName = userName;
         this.weight = weight;
         this.userNote = userNote;
+        this.status = status;
     }
 }

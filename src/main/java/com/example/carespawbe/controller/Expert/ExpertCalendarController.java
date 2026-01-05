@@ -13,7 +13,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/expert/me")
+@RequestMapping("/expert")
 @RequiredArgsConstructor
 public class ExpertCalendarController {
 
@@ -23,7 +23,7 @@ public class ExpertCalendarController {
     public List<CalendarItemResponse> getMonthCalendar(
             @RequestParam("month") String month, HttpServletRequest request
     ) {
-        Long expertId = (Long) request.getSession().getAttribute("expertId");
+        Long expertId = (Long) request.getAttribute("expertId");
         YearMonth ym = YearMonth.parse(month);
         return calendarService.getMonthCalendar(expertId, ym);
     }
@@ -32,7 +32,7 @@ public class ExpertCalendarController {
     public CreateSlotsResponse createSlots(
             @RequestBody CreateSlotRequest req, HttpServletRequest request
     ) {
-        Long expertId = (Long) request.getSession().getAttribute("expertId");
+        Long expertId = (Long) request.getAttribute("expertId");
         return calendarService.createSlotsWithRecurrence(expertId, req);
     }
 }

@@ -37,10 +37,10 @@ public class ExpertEarningService {
 
         // Lấy tổng thu nhập
         BigDecimal revenueThisMonth = Optional.ofNullable(
-                earningRepository.sumEarningsBetween(startCurrent, endCurrent)).orElse(BigDecimal.ZERO);
+                earningRepository.sumEarningsBetween(expertId, startCurrent, endCurrent)).orElse(BigDecimal.ZERO);
 
         BigDecimal revenueLastMonth = Optional.ofNullable(
-                earningRepository.sumEarningsBetween(startLast, endLast)).orElse(BigDecimal.ZERO);
+                earningRepository.sumEarningsBetween(expertId, startLast, endLast)).orElse(BigDecimal.ZERO);
 
         // Tính phần trăm tăng trưởng
         double growthRate = 0.0;
@@ -58,7 +58,12 @@ public class ExpertEarningService {
     }
 
     public static Specification<ExpertEarningEntity> byExpertId(Long expertId) {
-        return (root, query, cb) -> cb.equal(root.get("expertEntity").get("id"), expertId);
+        return (root, query, cb) -> cb.equal(root.get("id"), expertId);
+//        return (root, query, cb) -> {
+//            if (expertId == null) return cb.conjunction();
+            // Phải truy cập vào trường expertEntity bên trong ExpertEarningEntity, sau đó mới lấy id
+//            return cb.equal(root.get("expert").get("id"), expertId);
+//        };
     }
 
     public static Specification<ExpertEarningEntity> createdFrom(LocalDate from) {
@@ -91,7 +96,7 @@ public class ExpertEarningService {
             Long val;
             try { val = Long.parseLong(s); } catch (Exception e) { return cb.conjunction(); }
 
-            var appt = root.join("appointmentEntity", JoinType.LEFT);
+            var appt = root.join("appointment", JoinType.LEFT);
             return cb.or(
                     cb.equal(root.get("id"), val),
                     cb.equal(appt.get("id"), val)

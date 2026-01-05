@@ -25,7 +25,7 @@ public class ExpertCenterController {
 
     @GetMapping("/dashboard")
     public ResponseEntity<?> getExpertDashboard(HttpServletRequest request) {
-        Long expertId = (Long) request.getSession().getAttribute("expertId");
+        Long expertId = (Long) request.getAttribute("expertId");
 
         if (expertId == null) {
             return ResponseEntity.badRequest().build();
@@ -37,7 +37,7 @@ public class ExpertCenterController {
 
     @GetMapping("/applist")
     public ResponseEntity<?> getExpertAppList(ExpertAppListRequest appListRequest, HttpServletRequest request) {
-        Long expertId = (Long) request.getSession().getAttribute("expertId");
+        Long expertId = (Long) request.getAttribute("expertId");
 
         if (expertId == null) {
             return ResponseEntity.badRequest().build();
@@ -45,6 +45,15 @@ public class ExpertCenterController {
 
         PagedResponse<ExpertAppListItem> appList = coordination.getAppList(expertId, appListRequest);
         return ResponseEntity.ok(appList);
+    }
+
+    @PatchMapping("/{id}/confirm")
+    public ResponseEntity<Void> confirm(@PathVariable("id") Long id, HttpServletRequest request) {
+        Long expertId = (Long) request.getAttribute("expertId");
+        if (expertId == null) return ResponseEntity.badRequest().build();
+
+        coordination.confirmApp(expertId, id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/cancel")
@@ -64,7 +73,7 @@ public class ExpertCenterController {
             @RequestParam(defaultValue = "createAt,desc") String sort,
             HttpServletRequest request
     ) {
-        Long expertId = (Long) request.getSession().getAttribute("expertId");
+        Long expertId = (Long) request.getAttribute("expertId");
         Integer statusNum = parseStatus(status);
 
         String sortKey = "createAt";

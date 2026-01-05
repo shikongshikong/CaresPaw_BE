@@ -3,6 +3,8 @@ package com.example.carespawbe.entity.Expert;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,7 +22,13 @@ public class AvailabilitySlotEntity {
     private Long id;
 
     private LocalDate date;
+
+    @Column(name = "start_time", columnDefinition = "time")
+//    @JdbcTypeCode(SqlTypes.TIME)
     private LocalTime startTime;
+
+    @Column(name = "end_time", columnDefinition = "time")
+//    @JdbcTypeCode(SqlTypes.TIME)
     private LocalTime endTime;
     private BigDecimal price;
     private Integer booked; // 0: empty, 1: booked, 2: cancel

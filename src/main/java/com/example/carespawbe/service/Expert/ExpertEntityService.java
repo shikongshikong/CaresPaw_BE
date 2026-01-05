@@ -3,6 +3,8 @@ package com.example.carespawbe.service.Expert;
 import com.example.carespawbe.dto.Expert.ExpertApplyRequest;
 import com.example.carespawbe.dto.Expert.ExpertCVResponse;
 import com.example.carespawbe.dto.Expert.ExpertCVUpdateRequest;
+import com.example.carespawbe.dto.Expert.qanda.ExpertCardResponse;
+import com.example.carespawbe.dto.Expert.qanda.ExpertProfileResponse;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Expert.CertificateEntity;
 import com.example.carespawbe.entity.Expert.ExpertCategoryEntity;
@@ -59,44 +61,105 @@ public class ExpertEntityService {
         return expertRepository.findByUser(userEntity);
     }
 
+//    public ExpertCVResponse getExpertCv(Long expertId) {
+//        ExpertEntity e = expertRepository.findByExpertIdWithCvData(expertId)
+//                .orElseThrow(() -> new RuntimeException("Expert not found for expertId=" + expertId));
+//
+//        // categoryIds
+//        List<Long> categoryIds = (e.getExpertToCategoryEntities() == null) ? List.of() :
+//                e.getExpertToCategoryEntities().stream()
+//                        .map(x -> x.getExpertCategory().getId())   // <-- tùy id type
+//                        .distinct()
+//                        .sorted(Comparator.comparingLong(Long::longValue))
+//                        .toList();
+//
+//        // certificates -> degrees
+//        List<ExpertCVResponse.CertificateItem> degrees = (e.getCertificateEntities() == null) ? List.of() :
+//                e.getCertificateEntities().stream()
+//                        .sorted(Comparator.comparing(CertificateEntity::getIssue_date,
+//                                Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+//                        .map(cert -> ExpertCVResponse.CertificateItem.builder()
+//                                .id(cert.getId())
+//                                .title(cert.getName())
+//                                .issuer(cert.getIssue_place())
+//                                .year(cert.getIssue_date() != null ? cert.getIssue_date().getYear() : null)
+//                                .imageUrl(cert.getImage())
+//                                .status(cert.getStatus()) // 0/1/2
+//                                .build())
+//                        .toList();
+//
+//        // phone/avatar nếu UserEntity có field tương ứng:
+//        // giả sử user có getPhone() và getAvatarUrl()
+//        String phone = null;
+//        String avatarUrl = null;
+//        if (e.getUser() != null) {
+//            try {
+//                phone = (String) e.getUser().getClass().getMethod("getPhoneNumber").invoke(e.getUser());
+//            } catch (Exception ignore) {}
+//            try {
+//                avatarUrl = (String) e.getUser().getClass().getMethod("getAvatar").invoke(e.getUser());
+//            } catch (Exception ignore) {}
+//        }
+//
+//        return ExpertCVResponse.builder()
+//                .fullName(e.getFullName())
+//                .biography(e.getBiography())
+//                .yearsOfExperience(e.getExperienceYear())
+//                .cccdImageUrl(e.getIdImage())
+//                .address(e.getLocation())
+//                .sessionPrice(e.getSessionPrice())
+//                .phone(phone)
+//                .avatarUrl(avatarUrl)
+//                .categoryIds(categoryIds)
+//                .degrees(degrees)
+//                .build();
+//    }
+
     public ExpertCVResponse getExpertCv(Long expertId) {
         ExpertEntity e = expertRepository.findByExpertIdWithCvData(expertId)
                 .orElseThrow(() -> new RuntimeException("Expert not found for expertId=" + expertId));
 
-        // categoryIds
-        List<Long> categoryIds = (e.getExpertToCategoryEntities() == null) ? List.of() :
-                e.getExpertToCategoryEntities().stream()
-                        .map(x -> x.getExpertCategory().getId())   // <-- tùy id type
-                        .distinct()
-                        .sorted(Comparator.comparingLong(Long::longValue))
-                        .toList();
+        // ✅ categoryIds: phải là ID của CategoryEntity (chỉnh getter cho đúng model của bạn)
+        List<Long> categoryIds = (e.getExpertToCategoryEntities() == null) ? List.of()
+                : e.getExpertToCategoryEntities().stream()
+                .map(x -> x.getExpertCategory() != null ? x.getExpertCategory().getId() : null) // ⚠️ đảm bảo đây là categoryId thật
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .toList();
 
-        // certificates -> degrees
-        List<ExpertCVResponse.CertificateItem> degrees = (e.getCertificateEntities() == null) ? List.of() :
-                e.getCertificateEntities().stream()
-                        .sorted(Comparator.comparing(CertificateEntity::getIssue_date,
-                                Comparator.nullsLast(Comparator.naturalOrder())).reversed())
-                        .map(cert -> ExpertCVResponse.CertificateItem.builder()
-                                .id(cert.getId())
-                                .title(cert.getName())
-                                .issuer(cert.getIssue_place())
-                                .year(cert.getIssue_date() != null ? cert.getIssue_date().getYear() : null)
-                                .imageUrl(cert.getImage())
-                                .status(cert.getStatus()) // 0/1/2
-                                .build())
-                        .toList();
+        // ✅ certificates -> degrees (chống duplicate cert do fetch join)
+        List<ExpertCVResponse.CertificateItem> degrees = (e.getCertificateEntities() == null) ? List.of()
+                : e.getCertificateEntities().stream()
+                .filter(c -> c.getId() != null)
+                .collect(java.util.stream.Collectors.toMap(
+                        CertificateEntity::getId,
+                        c -> c,
+                        (a, b) -> a // giữ bản đầu
+                ))
+                .values()
+                .stream()
+                .sorted(Comparator.comparing(
+                        CertificateEntity::getIssue_date,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ).reversed())
+                .map(cert -> ExpertCVResponse.CertificateItem.builder()
+                        .id(cert.getId())
+                        .title(cert.getName())
+                        .issuer(cert.getIssue_place())
+                        .year(cert.getIssue_date() != null ? cert.getIssue_date().getYear() : null)
+                        .imageUrl(cert.getImage())
+                        .status(cert.getStatus())
+                        .build())
+                .toList();
 
-        // phone/avatar nếu UserEntity có field tương ứng:
-        // giả sử user có getPhone() và getAvatarUrl()
+        // ✅ phone/avatar: map thẳng (đổi theo getter thật trong UserEntity)
         String phone = null;
         String avatarUrl = null;
         if (e.getUser() != null) {
-            try {
-                phone = (String) e.getUser().getClass().getMethod("getPhoneNumber").invoke(e.getUser());
-            } catch (Exception ignore) {}
-            try {
-                avatarUrl = (String) e.getUser().getClass().getMethod("getAvatar").invoke(e.getUser());
-            } catch (Exception ignore) {}
+            // ví dụ:
+            // phone = e.getUser().getPhoneNumber();
+            // avatarUrl = e.getUser().getAvatar();
         }
 
         return ExpertCVResponse.builder()
@@ -108,6 +171,7 @@ public class ExpertEntityService {
                 .sessionPrice(e.getSessionPrice())
                 .phone(phone)
                 .avatarUrl(avatarUrl)
+                .portfolioLink(e.getPortfolioLink()) // ✅ thiếu cái này trong code bạn
                 .categoryIds(categoryIds)
                 .degrees(degrees)
                 .build();
@@ -247,4 +311,49 @@ public class ExpertEntityService {
                 .degrees(degrees)
                 .build();
     }
+
+    private ExpertCardResponse toCard(ExpertEntity e) {
+        return ExpertCardResponse.builder()
+                .id(e.getId())
+                .fullName(e.getFullName())
+                .idImage(e.getIdImage())
+                .location(e.getLocation())
+                .experienceYear(e.getExperienceYear())
+                .status(e.getStatus())
+                .price(e.getPrice())                 // chỉ field này
+                .portfolioLink(e.getPortfolioLink())
+                .build();
+    }
+
+    public ExpertProfileResponse getProfile(Long expertId) {
+        ExpertEntity e = expertRepository.findByIdWithCertificates(expertId)
+                .orElseThrow(() -> new RuntimeException("Expert not found: " + expertId));
+
+        List<ExpertProfileResponse.CertificateItem> certs =
+                (e.getCertificateEntities() == null) ? List.of()
+                        : e.getCertificateEntities().stream()
+                        .sorted(Comparator.comparing(
+                                CertificateEntity::getIssue_date,
+                                Comparator.nullsLast(Comparator.naturalOrder())
+                        ).reversed())
+                        .map(c -> ExpertProfileResponse.CertificateItem.builder()
+                                .id(c.getId())
+                                .title(c.getName())
+                                .issuer(c.getIssue_place())
+                                .issueDate(c.getIssue_date())
+                                .build())
+                        .toList();
+
+        return ExpertProfileResponse.builder()
+                .id(e.getId())
+                .fullName(e.getFullName())
+                .biography(e.getBiography())
+                .experienceYear(e.getExperienceYear())
+                .idImage(e.getIdImage())
+                .price(e.getPrice())
+                .portfolioLink(e.getPortfolioLink())
+                .certificates(certs)
+                .build();
+    }
+
 }

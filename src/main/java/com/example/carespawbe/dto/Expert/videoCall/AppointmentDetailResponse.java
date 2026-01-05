@@ -1,9 +1,14 @@
 package com.example.carespawbe.dto.Expert.videoCall;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+@Builder
 public record AppointmentDetailResponse(
         Long appointmentId,
         Integer status,
@@ -21,6 +26,7 @@ public record AppointmentDetailResponse(
 
         JitsiCallInfo jitsi
 ) {
+    @Builder
     public record PetSnapshot(
             Long id,
             String name,
@@ -35,7 +41,10 @@ public record AppointmentDetailResponse(
             Double weight
     ) {}
 
+    @Builder
     public record UserSnapshot(Long id, String fullName) {}
+
+    @Builder
     public record ExpertSnapshot(Long id, String fullName) {}
 
     public record JitsiCallInfo(

@@ -3,6 +3,7 @@ package com.example.carespawbe.dto.Expert;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Setter
@@ -10,11 +11,10 @@ import java.util.List;
 public class ExpertDashboardResponse {
     // upcoming app, today remain app list, this month (total apps, total patients, total income, today apps)
     private UpComingApp upComingApp;
-
     private List<RemainApp> todayAppList;
-    private DashBoardStatisticItem totalApps;
-    private DashBoardStatisticItem totalPatients;
-    private DashBoardStatisticItem totalIncome;
-    private long remainApps;
+    private DashBoardStatisticItem<Long> totalApps;
+    private DashBoardStatisticItem<Long> totalPatients;
+    private DashBoardStatisticItem<BigDecimal> totalIncome;
+    private Long remainApps;
 
 }

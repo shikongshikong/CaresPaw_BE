@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/expert/appointments")
+@RequestMapping("/expert/appointments")
 public class ExpertCallingController {
 
     private final AppointmentService appointmentService;

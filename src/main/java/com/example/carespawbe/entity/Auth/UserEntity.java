@@ -49,7 +49,7 @@ public class UserEntity {
     private List<OrderEntity> orderEntities;
 
     private String avatar;
-    private int role;
+    private int role; // 1: user, 2: shop owner, 3: expert
     private int state;
     private LocalDate birthday;
     private LocalDate createdAt;

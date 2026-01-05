@@ -4,12 +4,14 @@ import com.example.carespawbe.entity.Expert.AppointmentEntity;
 import com.example.carespawbe.entity.Expert.AvailabilitySlotEntity;
 import com.example.carespawbe.entity.Expert.PetEntity;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Duration;
 
 @Setter
 @Builder
+@Getter
 public class ExpertAppListItem {
     private Long appId;
     private String petImageUrl;

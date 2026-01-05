@@ -16,6 +16,9 @@ public class ForumPostCategoryService {
     @Autowired
     private ForumPostToCategoryRepository forumPostToCategoryRepository;
 
+//    @Autowired
+//    private ForumPostCa forumPostToCategoryRepository;
+
     @Autowired
     private ForumPostCategoryMapper forumPostCategoryMapper;
 
