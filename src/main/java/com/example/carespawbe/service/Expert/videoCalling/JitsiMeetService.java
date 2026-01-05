@@ -21,11 +21,9 @@ import java.time.LocalTime;
 public class JitsiMeetService {
 
     private final JitsiProperties props;
-    private final AppointmentRepository appointmentRepository;
 
     public JitsiMeetService(JitsiProperties props, AppointmentRepository appointmentRepository) {
         this.props = props;
-        this.appointmentRepository = appointmentRepository;
     }
 
     public String buildRoomName(Long appointmentId) {
@@ -46,53 +44,53 @@ public class JitsiMeetService {
         return null;
     }
 
-    @Value("${app.jitsi.domain:meet.jit.si}")
-    private String jitsiDomain;
-
-    public JoinCallResponse joinCall(Long userId, Long appointmentId) {
-        AppointmentEntity a = appointmentRepository.findDetailForUser(appointmentId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
-
-        if (a.getStatus() != null && a.getStatus() == 3) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Appointment is cancelled");
-        }
-
-        AvailabilitySlotEntity s = a.getSlot();
-        if (s == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing slot");
-
-        LocalDate date = s.getDate();
-        LocalTime start = s.getStartTime();
-        LocalTime end = s.getEndTime();
-
-        if (date == null || start == null || end == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid schedule");
-        }
-
-        LocalDateTime startDt = LocalDateTime.of(date, start);
-        LocalDateTime endDt = LocalDateTime.of(date, end);
-
-        LocalDateTime windowStart = startDt.minusMinutes(10);
-        LocalDateTime windowEnd = endDt.plusMinutes(15);
-
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(windowStart) || now.isAfter(windowEnd)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Join is only available near the appointment time");
-        }
-
-        // ✅ same room for user & expert
-        String roomId = "app_" + a.getId();
-
-        // ✅ normalize domain (no protocol)
-        String domain = (jitsiDomain == null || jitsiDomain.isBlank()) ? "meet.jit.si" : jitsiDomain.trim()
-                .replace("https://", "").replace("http://", "").replaceAll("/+$", "");
-
-        String joinUrl = "https://" + domain + "/" + roomId;
-
-        // optional displayName (user fullname)
-        String displayName = (a.getUser() != null) ? a.getUser().getFullname() : "Guest";
-
-        return new JoinCallResponse(roomId, domain, joinUrl, displayName);
-    }
+//    @Value("${app.jitsi.domain:meet.jit.si}")
+//    private String jitsiDomain;
+//
+//    public JoinCallResponse joinCall(Long userId, Long appointmentId) {
+//        AppointmentEntity a = appointmentRepository.findDetailForUser(appointmentId, userId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+//
+//        if (a.getStatus() != null && a.getStatus() == 3) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Appointment is cancelled");
+//        }
+//
+//        AvailabilitySlotEntity s = a.getSlot();
+//        if (s == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing slot");
+//
+//        LocalDate date = s.getDate();
+//        LocalTime start = s.getStartTime();
+//        LocalTime end = s.getEndTime();
+//
+//        if (date == null || start == null || end == null) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid schedule");
+//        }
+//
+//        LocalDateTime startDt = LocalDateTime.of(date, start);
+//        LocalDateTime endDt = LocalDateTime.of(date, end);
+//
+//        LocalDateTime windowStart = startDt.minusMinutes(10);
+//        LocalDateTime windowEnd = endDt.plusMinutes(15);
+//
+//        LocalDateTime now = LocalDateTime.now();
+//        if (now.isBefore(windowStart) || now.isAfter(windowEnd)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//                    "Join is only available near the appointment time");
+//        }
+//
+//        // ✅ same room for user & expert
+//        String roomId = "app_" + a.getId();
+//
+//        // ✅ normalize domain (no protocol)
+//        String domain = (jitsiDomain == null || jitsiDomain.isBlank()) ? "meet.jit.si" : jitsiDomain.trim()
+//                .replace("https://", "").replace("http://", "").replaceAll("/+$", "");
+//
+//        String joinUrl = "https://" + domain + "/" + roomId;
+//
+//        // optional displayName (user fullname)
+//        String displayName = (a.getUser() != null) ? a.getUser().getFullname() : "Guest";
+//
+//        return new JoinCallResponse(roomId, domain, joinUrl, displayName);
+//    }
 }
 

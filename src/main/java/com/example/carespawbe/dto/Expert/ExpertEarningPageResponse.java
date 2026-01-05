@@ -14,8 +14,6 @@ public class ExpertEarningPageResponse {
     private long total;
     private ExpertEarningSummaryDto summary;
 
-    public ExpertEarningPageResponse() {}
-
     public ExpertEarningPageResponse(List<ExpertEarningItemDto> items, int page, int size, long total, ExpertEarningSummaryDto summary) {
         this.items = items;
         this.page = page;

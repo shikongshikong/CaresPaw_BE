@@ -85,19 +85,21 @@ public class BookingCheckoutService {
 
         // 4) Create payment
         PaymentEntity payment = new PaymentEntity();
-        payment.setPayment_method(req.getPayment().getMethod());
+        payment.setPaymentMethod(req.getPayment().getMethod());
 
-        double amountBefore = slot.getPrice() != null ? slot.getPrice().doubleValue() : 0.0;
-        int coinUsed = req.getPayment().getCoinUsed() != null ? req.getPayment().getCoinUsed() : 0;
+//        double amountBefore = slot.getPrice() != null ? slot.getPrice().doubleValue() : 0.0;
+//        int coinUsed = req.getPayment().getCoinUsed() != null ? req.getPayment().getCoinUsed() : 0;
 
-        double amountAfter = amountBefore; // TODO: trừ coin nếu có
-        payment.setAmount_before(amountBefore);
-        payment.setPaymentCoinUsed(coinUsed);
-        payment.setAmount_after(amountAfter);
+//        double amountAfter = amountBefore; // TODO: trừ coin nếu có
+//        payment.setAmount_before(amountBefore);
+//        payment.setPaymentCoinUsed(coinUsed);
+//        payment.setAmount_after(amountAfter);
+        // set price
+        payment.setPricePayment(100000.0);
 
-        payment.setPaymentStatus(PaymentStatus.PENDING);
+//        payment.setPaymentStatus(PaymentStatus.PENDING);
         payment.setPaymentCreatedAt(LocalDate.now());
-        payment.setPaymentUpdatedAt(null);
+//        payment.setPaymentUpdatedAt(null);
 
         payment = paymentRepository.save(payment);
 
@@ -106,8 +108,8 @@ public class BookingCheckoutService {
         String paymentUrl;
 
         if ("cash".equalsIgnoreCase(method)) {
-            payment.setPaymentStatus(PaymentStatus.PAID);
-            payment.setPaymentUpdatedAt(LocalDate.now());
+//            payment.setPaymentStatus(PaymentStatus.PAID);
+//            payment.setPaymentUpdatedAt(LocalDate.now());
             paymentRepository.save(payment);
             paymentUrl = null;
         } else {
