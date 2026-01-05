@@ -50,9 +50,9 @@ public class OrderEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderStatusHistoryEntity> orderStatusHistories = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "payment_id")
-    private PaymentEntity paymentEntity;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "payment_id", unique = true) // ✅ unique để đảm bảo 1-1 ở DB
+    private PaymentEntity payment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id")

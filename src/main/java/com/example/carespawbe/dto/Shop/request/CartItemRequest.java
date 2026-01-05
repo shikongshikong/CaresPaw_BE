@@ -1,9 +1,6 @@
 package com.example.carespawbe.dto.Shop.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -12,11 +9,9 @@ import lombok.NoArgsConstructor;
 public class CartItemRequest {
     private Long cartItemId;
     private Long cartId;
-    private Double cartItemPrice;
-    private Double cartItemOriginalPrice;
+
+    // ✅ BẮT BUỘC: SKU
+    private Long productSkuId;
+
     private Integer cartItemQuantity;
-    private Double cartItemTotalPrice;
-    private boolean isFlashSale;
-    private Long productId;
-//    private Long productVarriantId;
 }

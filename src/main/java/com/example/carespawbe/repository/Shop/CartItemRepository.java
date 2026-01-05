@@ -1,37 +1,29 @@
 package com.example.carespawbe.repository.Shop;
 
-import com.example.carespawbe.entity.Shop.CartEntity;
 import com.example.carespawbe.entity.Shop.CartItemEntity;
-import com.example.carespawbe.entity.Shop.ProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface CartItemRepository extends JpaRepository<CartItemEntity, Long> {
-    CartItemEntity findByCartAndProductAndCartItemId(CartEntity cart, ProductEntity product, Long cartItemId);
 
-    //lấy danh sách cartItem theo user + list ids (dùng cho checkout)
-    List<CartItemEntity> findAllByCart_UserEntity_IdAndCartItemIdIn(Long userId, List<Long> cartItemIds);
+    Optional<CartItemEntity> findByCart_CartIdAndProductSku_ProductSkuId(Long cartId, Long skuId);
 
-    //lấy 1 cartItem theo user + id (dùng cho validate 1 item)
-    Optional<CartItemEntity> findByCartItemIdAndCart_UserEntity_Id(Long cartItemId, Long userId);
+    List<CartItemEntity> findAllByCart_CartId(Long cartId);
 
-    //xoá nhiều cartItem theo user + ids (sau khi checkout xong)
-    void deleteAllByCart_UserEntity_IdAndCartItemIdIn(Long userId, List<Long> cartItemIds);
+    void deleteAllByCart_CartId(Long cartId);
 
-    //nếu muốn fetch join để tránh Lazy load N+1
+    // checkout items thuộc user + nằm trong list id
     @Query("""
-        select ci
-        from CartItemEntity ci
-        join fetch ci.product p
-        join fetch p.shop s
+        select ci from CartItemEntity ci
         where ci.cart.userEntity.id = :userId
-          and ci.cartItemId in :ids
+          and ci.cartItemId in :cartItemIds
     """)
-    List<CartItemEntity> findCheckoutItems(@Param("userId") Long userId, @Param("ids") List<Long> ids);
+    List<CartItemEntity> findCheckoutItems(@Param("userId") Long userId,
+                                           @Param("cartItemIds") List<Long> cartItemIds);
+
+    void deleteAllByCart_UserEntity_IdAndCartItemIdIn(Long userId, List<Long> cartItemIds);
 }
