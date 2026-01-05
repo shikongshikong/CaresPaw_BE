@@ -209,7 +209,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "ON s.forumPostEntity.id = p.id and s.user.id = :userId " +
             "LEFT JOIN FollowingEntity f " +
             "ON f.follower.id = :userId and p.user.id = f.followee.id " +
-            "WHERE p.typeId = :typeId " +
+            "WHERE p.typeEntity.id = :typeId " +
             "AND p.state <> 0")
     Page<ShortForumPostResponse> findPageShortsByType(@Param("userId") Long userId, @Param("typeId") int typeId, Pageable pageable);
 
@@ -301,7 +301,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
                 ON s.forumPostEntity.id = p.id AND s.user.id = :userId
             LEFT JOIN FollowingEntity f
                 ON f.follower.id = :userId AND p.user.id = f.followee.id
-            WHERE p.typeId = :typeId
+            WHERE p.typeEntity.id = :typeId
               AND p.state <> 0
               AND EXISTS (
                   SELECT 1

@@ -2,17 +2,16 @@ package com.example.carespawbe.entity.Forum;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "forum_post_to_category")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
+//@Data
+@Getter
+@Setter
 public class ForumPostToCategoryEntity {
 
     @Id

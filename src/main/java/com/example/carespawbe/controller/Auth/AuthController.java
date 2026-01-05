@@ -78,7 +78,6 @@ import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.mapper.Auth.UserMapper;
 import com.example.carespawbe.security.JwtService;
 import com.example.carespawbe.service.Auth.AuthService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -125,9 +124,9 @@ public class AuthController {
         // Trả lại dữ liệu cho frontend
         return ResponseEntity.ok(Map.of(
                 "message", "Login successful",
-                "userId", userEntity.getId(),
-                "role", userEntity.getRole(),
-                "email", userEntity.getEmail(),
+                "userId", userEntity.getId(), // need to fix
+                "role", userEntity.getRole(), // need to fix
+                "email", userEntity.getEmail(), // need to fix
                 "token", token
         ));
 

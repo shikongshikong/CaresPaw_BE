@@ -61,6 +61,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Long userIdLong = jwtService.extractUserId(token);
         request.setAttribute("userId", userIdLong); // vd: "ROLE_SHOP_OWNER", "ROLE_USER"
 
+        Long expertId = jwtService.extractExpertId(token);
+        if (expertId != null) {
+            request.setAttribute("expertId", expertId);
+        }
+
 //        if (role == null) {
 //            role = "ROLE_USER";   // fallback nếu token không có field role
 //        }

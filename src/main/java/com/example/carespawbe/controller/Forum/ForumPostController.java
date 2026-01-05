@@ -57,6 +57,10 @@ public class ForumPostController {
         System.out.println("Search key: " + keyword);
         Long userId = (Long) request.getAttribute("userId");
 
+        if (userId == null) {
+            userId = 0L;
+        }
+
         List<ShortForumPostResponse> posts = forumPostService.getForumPostByKeyword(keyword, userId);
         return ResponseEntity.ok(posts);
     }
@@ -64,6 +68,11 @@ public class ForumPostController {
     @PostMapping("/add-post")
     public ResponseEntity<?> addPost(@RequestBody ForumPostRequest postData, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+
+        if (userId == null) {
+            userId = 0L;
+        }
+
         System.out.println("UserEntity id in add-forumPostEntity: " + userId);
         postData.setUserId(userId);
 
@@ -78,6 +87,9 @@ public class ForumPostController {
     @GetMapping("/post-detail/{postId}")
     public ResponseEntity<?> getForumDetail(@PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            userId = 0L;
+        }
 //        System.out.println("UserEntity id in get forum detail: " + userId);
         ForumPostDetailResponse response = ForumPostDetailResponse.builder()
                 .post(forumPostService.getForumPostById(postId, userId, request))
@@ -99,6 +111,9 @@ public class ForumPostController {
     @PatchMapping("/save-post")
     public ResponseEntity<String> saveForumPosts(@RequestBody List<SaveStatusUpdateRequest> requests, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            userId = 0L;
+        }
         if (userId != 0L) {
             forumPostSaveService.updateSaveStatuses(requests, userId);
         }
@@ -118,6 +133,9 @@ public class ForumPostController {
     public ResponseEntity<String> saveForumPostDetail(@PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         System.out.println("Save forumPostEntity detail: " + userId);
+        if (userId == null) {
+            userId = 0L;
+        }
         if (!userId.equals(0L)) {
             forumPostSaveService.updateDetailSaveStatus(postId, userId);
         }
@@ -127,6 +145,9 @@ public class ForumPostController {
     @PostMapping("/add-cm")
     public ResponseEntity<?> addCm(@RequestBody ForumPostCommentRequest forumPostCommentRequest, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            userId = 0L;
+        }
         System.out.println("UserEntity id in add-cm: " + forumPostCommentRequest.getContent());
         if (!userId.equals(0L)) {
             forumPostCommentRequest.setUserId(userId);
@@ -140,6 +161,9 @@ public class ForumPostController {
     @PatchMapping("/like/{postId}")
     public ResponseEntity<String> likePost(@RequestBody LikeStateUpdateRequest stateUpdateRequest, @PathVariable Long postId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            userId = 0L;
+        }
 
         forumPostLikeService.updateLikeStatuses(userId, postId,stateUpdateRequest.getStatusId());
         return ResponseEntity.ok("Change like status successful");
@@ -153,6 +177,9 @@ public class ForumPostController {
     ) {
         Long userId = (Long) request.getAttribute("userId");
         //Long userId = 0L;
+        if (userId == null) {
+            userId = 0L;
+        }
         System.out.println("UserEntity id in getForumData: " + userId);
 
         return ResponseEntity.ok(forumService.getForumData(userId, includeHistory, page));
@@ -161,6 +188,9 @@ public class ForumPostController {
     @GetMapping("/post-list")
     public ResponseEntity<?> getPostList(HttpServletRequest request, int page) {
         Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            userId = 0L;
+        }
         Page<ShortForumPostResponse> posts = forumPostService.getForumPostListByPage(userId, page);
         return ResponseEntity.ok(posts);
     }
@@ -186,6 +216,10 @@ public class ForumPostController {
     @GetMapping("/post-list/filter")
     public ResponseEntity<?> getPostListByTypeAndCategories(@RequestParam int page, @RequestParam int typeId, @RequestParam String categoryList, @RequestParam String colFilter, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+
+        if (userId == null) {
+            userId = 0L;
+        }
 
         if (colFilter.equals("recommend")) {
             return ResponseEntity.ok(forumPostService.getRecommendedPosts(userId));

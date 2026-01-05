@@ -41,6 +41,9 @@ public class ForumPostService {
     @Autowired
     private PostRecommendationService postRecommendationService;
 
+    @Autowired
+    private ForumPostTypeService forumPostTypeService;
+
     public List<ForumPostTrainingDTO> getForumPostsGroupCategory(){
         List<ForumPostEntity>  forumPostEntities = forumPostRepository.findAllWithCategories();
         List<ForumPostTrainingDTO> forumPostTrainingDTOs = forumPostEntities.stream()
@@ -50,7 +53,7 @@ public class ForumPostService {
                         p.getContent(),
                         p.getCreateAt(),
                         p.getState(),
-                        p.getTypeId(),
+                        p.getTypeEntity().getId(),
                         p.getToCategories().stream().map(tc -> tc.getForumPostCategoryEntity().getId())
                                 .distinct()
                                 .toList()
@@ -231,7 +234,7 @@ public class ForumPostService {
         forumPostEntity.setTitle(forumPostUpdateRequest.getTitle());
         forumPostEntity.setContent(forumPostUpdateRequest.getContent());
         forumPostEntity.setState(forumPostUpdateRequest.getState());
-        forumPostEntity.setTypeId(forumPostUpdateRequest.getTypeId());
+        forumPostEntity.setTypeEntity(forumPostTypeService.getForumPostTypeById(forumPostUpdateRequest.getTypeId()));
         forumPostEntity.setUpdateAt(LocalDate.now());
 
         return forumPostRepository.save(forumPostEntity);

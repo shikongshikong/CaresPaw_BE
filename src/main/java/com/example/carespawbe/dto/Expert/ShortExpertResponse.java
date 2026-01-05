@@ -1,7 +1,11 @@
 package com.example.carespawbe.dto.Expert;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @AllArgsConstructor
 public class ShortExpertResponse {
     private Long id;

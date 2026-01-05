@@ -2,16 +2,15 @@ package com.example.carespawbe.entity.Notification;
 
 import com.example.carespawbe.entity.Auth.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
 //@Entity
 @Table(name = "notification")
-@Data
+//@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
