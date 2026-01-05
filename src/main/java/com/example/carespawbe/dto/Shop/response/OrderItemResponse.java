@@ -13,7 +13,11 @@ public class OrderItemResponse {
     private Double orderItemPrice;
     private Double orderItemTotalPrice;
 
-//    private Long productVarriantId;
+    // ✅ SKU snapshot
+    private Long productSkuId;
+    private String skuCode;
+    private String variantText;
+
     private ProductResponse product;
     private Long shopOrderId;
 }

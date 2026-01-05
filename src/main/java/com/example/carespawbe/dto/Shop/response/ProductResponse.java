@@ -12,23 +12,29 @@ import java.util.List;
 public class ProductResponse {
     private Long productId;
     private String productName;
-    private String productDescribe;
     private Double productPrice;
-//    private Double productPriceSale;
     private Integer productAmount;
     private Integer productStatus;
     private String productUsing;
+
     private Long categoryId;
+    private String categoryName;
+
     private Long shopId;
     private String shopName;
-//    private List<String> productVarriants;
-    private List<ProductVarriantResponse> productVarriants;
+
     private List<String> imageUrls;
-//    private List<ImageProductResponse> imageUrls;
     private String productVideoUrl;
     private LocalDate productUpdatedAt;
     private LocalDate productCreatedAt;
 
+    private Long sold;
+    private Double rating;
 
+    // ✅ optional: trả luôn list SKU để FE render nhanh
+    private List<SkuResponse> skus;
+
+    // ✅ NEW: trả list varriant values để FE render chip (Phong cách/Size...)
+//    private List<VarriantValueResponse> varriantValues;
+    private List<VariantGroupResponse> variantGroups;
 }
-

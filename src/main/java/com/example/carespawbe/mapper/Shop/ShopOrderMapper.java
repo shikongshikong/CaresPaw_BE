@@ -12,7 +12,7 @@ import java.util.List;
 
 @Mapper(
         componentModel = "spring",
-        uses = { OrderItemMapper.class, VoucherMapper.class, ProductMapper.class,ProductVarriantMapper.class,  }, // Bỏ OrderMapper ra
+        uses = { OrderItemMapper.class, VoucherMapper.class, ProductMapper.class,  }, // Bỏ OrderMapper ra
         nullValueIterableMappingStrategy = NullValueMappingStrategy.RETURN_NULL,
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )

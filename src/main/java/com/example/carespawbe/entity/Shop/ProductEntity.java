@@ -1,5 +1,6 @@
 package com.example.carespawbe.entity.Shop;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,17 +25,11 @@ public class ProductEntity {
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String productName;
 
-//    @Column(nullable = false)
-//    private String productDescribe;
-
     @Column(nullable = false)
     private Double productPrice;
 
-//    @Column(nullable = true)
-//    private Double productPriceSale;
-
     @Column(nullable = false)
-    private Integer productAmount;
+    private Integer productAmount = 0;
 
     @Column(nullable = false)
     private Integer productStatus;
@@ -54,6 +49,12 @@ public class ProductEntity {
     @Column(nullable = true)
     private LocalDate productUpdatedAt;
 
+    @Column(name = "sold", columnDefinition = "bigint default 0")
+    private Long sold = 0L; // Số lượng đã bán
+
+    @Column(name = "rating", columnDefinition = "double default 0.0")
+    private Double rating = 0.0; // Điểm trung bình sao
+
     @ManyToOne
     @JoinColumn(name = "shop_id", nullable = false)
     private ShopEntity shop;
@@ -62,10 +63,13 @@ public class ProductEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
-    @OneToMany(mappedBy = "productVarriants",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<ProductVarriantEntity> productVarriantList = new ArrayList<>();
+//    @OneToMany(mappedBy = "productVarriants",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private List<ProductVarriantEntity> productVarriantList = new ArrayList<>();
 
     @OneToMany(mappedBy = "imageProduct", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ImageProductEntity> imageProductList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductSkuEntity> skuList = new ArrayList<>();
 
 }

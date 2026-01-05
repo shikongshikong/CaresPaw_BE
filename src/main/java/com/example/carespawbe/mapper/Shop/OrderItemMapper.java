@@ -2,10 +2,7 @@ package com.example.carespawbe.mapper.Shop;
 
 import com.example.carespawbe.dto.Shop.response.OrderItemResponse;
 import com.example.carespawbe.entity.Shop.OrderItemEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValueMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -16,8 +13,13 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface OrderItemMapper {
-    @Mapping(source = "product", target = "product") // Dòng này sẽ kích hoạt ProductMapper.toProductResponse()
-    @Mapping(source = "shopOrder.shopOrderId", target = "shopOrderId")
+
+    @Mapping(target = "product", source = "productSku.product") // ✅ product từ SKU
+    @Mapping(target = "productSkuId", source = "productSku.productSkuId")
+    @Mapping(target = "skuCode", source = "skuCode")
+    @Mapping(target = "variantText", source = "variantText")
+    @Mapping(target = "shopOrderId", source = "shopOrder.shopOrderId")
     OrderItemResponse toResponse(OrderItemEntity entity);
+
     List<OrderItemResponse> toResponseList(List<OrderItemEntity> entities);
 }

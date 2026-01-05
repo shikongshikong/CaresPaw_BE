@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface ImageProductRepository  extends JpaRepository<ImageProductEntity, Long> {
     List<ImageProductEntity> findByImageProduct(ProductEntity product);
+    List<ImageProductEntity> findByImageProduct_ProductId(Long productId);
     void deleteByImageProduct(ProductEntity product);
 
 }

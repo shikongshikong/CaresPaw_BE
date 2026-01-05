@@ -35,7 +35,7 @@ public class PostRecommendationService {
         );
 
         return webClient.post()
-                .uri("http://localhost:5000/getPostSimilar/")
+                .uri("http://localhost:5001/getPostSimilar/")
                 .bodyValue(body)
                 .retrieve()
                 .bodyToFlux(Long.class)

@@ -1,21 +1,24 @@
 package com.example.carespawbe.service.Shop;
 
 import com.example.carespawbe.dto.Shop.request.CartItemRequest;
-import com.example.carespawbe.dto.Shop.request.CartRequest;
-import com.example.carespawbe.dto.Shop.response.CartItemResponse;
 import com.example.carespawbe.dto.Shop.response.CartResponse;
-import com.example.carespawbe.dto.Shop.response.ImageProductResponse;
-import com.example.carespawbe.dto.Shop.response.ProductVarriantResponse;
-
-import java.util.List;
 
 public interface CartService {
-    CartResponse createCart(CartRequest request);
-    CartResponse updateCart(Long cartId, CartRequest request);
-    CartItemResponse updateCartItem(Long cartId, Long cartItemId, CartItemRequest request);
-    void deleteCart(Long cartId);
+
+    // tạo hoặc lấy cart của user (1 user 1 cart)
+    CartResponse getOrCreateCartByUserId(Long userId);
+
+    // lấy cart + items + sku + product + images + variant text
     CartResponse getCartByUserId(Long userId);
-    List<ProductVarriantResponse> getCartProductsVariantsByProductId(Long productId);
-    List<ImageProductResponse> getImageProduct(Long productId);
-//    List<CartResponse> getAllCarts();
+
+    // clear cart (xóa toàn bộ items)
+    void clearCart(Long cartId);
+
+    // xóa cart (hiếm khi cần, thường chỉ clear)
+    void deleteCart(Long cartId);
+
+    // thao tác nhanh trên cart (cart-level command)
+    CartResponse addItem(Long userId, CartItemRequest request);          // request chứa skuId + quantity
+    CartResponse updateItem(Long userId, Long cartItemId, CartItemRequest request);
+    CartResponse removeItem(Long userId, Long cartItemId);
 }
