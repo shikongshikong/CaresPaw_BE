@@ -31,7 +31,6 @@ public class PaymentEntity {
     @Column(nullable = false)
     private LocalDate paymentCreatedAt;
 
-
     @OneToOne(mappedBy = "payment")
     private OrderEntity order;
 }

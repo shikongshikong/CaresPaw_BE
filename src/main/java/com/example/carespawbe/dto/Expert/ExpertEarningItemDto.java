@@ -18,8 +18,6 @@ public class ExpertEarningItemDto {
 
     private AppointmentBriefDto appointmentEntity;
 
-    public ExpertEarningItemDto() {}
-
     public ExpertEarningItemDto(Long id, Long appointmentId, BigDecimal totalEarning, BigDecimal platformFee,
                                 BigDecimal expertGain, Integer status, LocalDateTime createAt) {
         this.id = id;

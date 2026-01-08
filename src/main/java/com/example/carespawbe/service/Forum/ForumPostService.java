@@ -2,6 +2,7 @@ package com.example.carespawbe.service.Forum;
 
 import com.example.carespawbe.dto.Forum.*;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
+import com.example.carespawbe.entity.Forum.ForumPostTypeEntity;
 import com.example.carespawbe.mapper.Forum.ForumPostMapper;
 import com.example.carespawbe.repository.Forum.ForumPostRepository;
 import com.example.carespawbe.utils.UserInfo;
@@ -71,6 +72,8 @@ public class ForumPostService {
 
     public ForumPostResponse addForumPost(ForumPostRequest forumPostRequest) {
         ForumPostEntity forumPostEntity = postMapper.toPostEntity(forumPostRequest);
+        ForumPostTypeEntity typeEntity = forumPostTypeService.getForumPostTypeById(forumPostRequest.getTypeId());
+        forumPostEntity.setTypeEntity(typeEntity);
         try {
             forumPostRepository.save(forumPostEntity);
 //          control category

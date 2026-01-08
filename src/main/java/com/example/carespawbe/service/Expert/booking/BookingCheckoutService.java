@@ -87,13 +87,15 @@ public class BookingCheckoutService {
         PaymentEntity payment = new PaymentEntity();
         payment.setPaymentMethod(req.getPayment().getMethod());
 
-        double amountBefore = slot.getPrice() != null ? slot.getPrice().doubleValue() : 0.0;
-        int coinUsed = req.getPayment().getCoinUsed() != null ? req.getPayment().getCoinUsed() : 0;
+//        double amountBefore = slot.getPrice() != null ? slot.getPrice().doubleValue() : 0.0;
+//        int coinUsed = req.getPayment().getCoinUsed() != null ? req.getPayment().getCoinUsed() : 0;
 
 //        double amountAfter = amountBefore; // TODO: trừ coin nếu có
 //        payment.setAmount_before(amountBefore);
 //        payment.setPaymentCoinUsed(coinUsed);
 //        payment.setAmount_after(amountAfter);
+        // set price
+        payment.setPricePayment(100000.0);
 
 //        payment.setPaymentStatus(PaymentStatus.PENDING);
         payment.setPaymentCreatedAt(LocalDate.now());
@@ -122,7 +124,7 @@ public class BookingCheckoutService {
         if (req.getSlotId() == null) throw new RuntimeException("slotId is required");
         if (req.getPet() == null || req.getPet().getMode() == null) throw new RuntimeException("pet.mode is required");
         if (req.getPayment() == null || req.getPayment().getMethod() == null) throw new RuntimeException("payment.method is required");
-        if (req.getPayment().getAgreed() == null || !req.getPayment().getAgreed()) throw new RuntimeException("Must agree to proceed");
+//        if (req.getPayment().getAgreed() == null || !req.getPayment().getAgreed()) throw new RuntimeException("Must agree to proceed");
     }
 
     private PetEntity resolvePet(PetSelection petSel, MultipartFile petImage, UserEntity user) {

@@ -24,26 +24,6 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("nowTime") LocalTime nowTime
     );
 
-//    Optional<AppointmentEntity> findFirstByExpert_IdAndSlot_StartTimeAfterOrderBySlot_StartTimeAsc(Long expertId, LocalDateTime now);
-
-//    long countByExpert_IdAndStatusAndSlot_StartTimeBetween(
-//            Long expertId,
-//            int status,
-//            LocalDateTime start,
-//            LocalDateTime end
-//    );
-
-//    long countByExpert_IdAndSlot_StartTimeBetween(Long expertId, LocalDateTime start, LocalDateTime end);
-
-//    @Query("SELECT COUNT(DISTINCT a.pet.id) FROM AppointmentEntity a " +
-//            "WHERE a.expert.id = :expertId " +
-//            "AND a.slot.startTime BETWEEN :start AND :end")
-//    long countDistinctPetsByExpertAndPeriod(
-//            @Param("expertId") Long expertId,
-//            @Param("start") LocalDateTime start,
-//            @Param("end") LocalDateTime end
-//    );
-
     Optional<AppointmentEntity> findById(Long id);
 
     @Query("""
@@ -65,15 +45,6 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             Pageable pageable
     );
 
-//    @Query(value = """
-//        select a
-//        from AppointmentEntity a
-//        join fetch a.slot s
-//        left join fetch a.user u
-//        where a.expert.id = :expertId
-//          and s.date between :from and :to
-//    """, nativeQuery = true)
-//    List<AppointmentEntity> findMonthAppointments(Long expertId, LocalDate from, LocalDate to);
     @Query(value = """
         SELECT a.*
             FROM appointment a
@@ -124,23 +95,6 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     """)
     Optional<AppointmentEntity> findOwnedByExpert(@Param("id") Long id, @Param("expertId") Long expertId);
 
-//    @Query("""
-//        select a from AppointmentEntity a
-//        join fetch a.slot s
-//        join fetch a.pet p
-//        join fetch a.user u
-//        where s.expert.id = :expertId
-//          and s.date = :today
-//          and s.startTime > :nowTime
-//          and a.status <> 3
-//        order by s.startTime asc
-//    """)
-//    List<AppointmentEntity> findTodayRemaining(
-//            @Param("expertId") Long expertId,
-//            @Param("today") LocalDate today,
-//            @Param("nowTime") LocalTime nowTime
-//    );
-
     @Query(value = """
     SELECT a.* FROM appointment a
      INNER JOIN availability_slot s ON a.slot_id = s.slot_id
@@ -159,39 +113,7 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("today") LocalDate today,
             @Param("nowTime") LocalTime nowTime
     );
-//    @Query("""
-//        select a from AppointmentEntity a
-//        join fetch a.slot s
-//        join fetch a.pet p
-//        join fetch a.user u
-//        where s.expert.id = :expertId
-//          and a.status <> 3
-//          and (
-//               s.date > :today
-//               or (s.date = :today and s.startTime between :nowTime and :endOfDay)
-//          )
-//        order by s.date asc, s.startTime asc
-//    """)
-//    List<AppointmentEntity> findUpcomingOrdered(
-//            @Param("expertId") Long expertId,
-//            @Param("today") LocalDate today,
-//            @Param("nowTime") java.sql.Time nowTime,
-//            @Param("endOfDay") java.sql.Time endOfDay
-//    );
 
-
-//    @Query("""
-//        select count(a) from AppointmentEntity a
-//        join a.slot s
-//        where s.expert.id = :expertId
-//          and a.status <> 3
-//          and s.date between :startDate and :endDate
-//    """)
-//    long countAppointmentsInDateRange(
-//            @Param("expertId") Long expertId,
-//            @Param("startDate") LocalDate startDate,
-//            @Param("endDate") LocalDate endDate
-//    );
     @Query(value = """
             SELECT COUNT(a.app_id)
                 FROM appointment a
@@ -206,19 +128,6 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("endDate") LocalDate endDate
     );
 
-//    @Query("""
-//        select count(distinct p.id) from AppointmentEntity a
-//        join a.slot s
-//        join a.pet p
-//        where s.expert.id = :expertId
-//          and a.status <> 3
-//          and s.date between :startDate and :endDate
-//    """)
-//    long countDistinctPetsInDateRange(
-//            @Param("expertId") Long expertId,
-//            @Param("startDate") LocalDate startDate,
-//            @Param("endDate") LocalDate endDate
-//    );
 
     @Query(value = """
     SELECT COUNT(DISTINCT p.pet_id)
@@ -235,19 +144,6 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             @Param("endDate") LocalDate endDate
     );
 
-//    @Query("""
-//        select count(a) from AppointmentEntity a
-//        join a.slot s
-//        where s.expert.id = :expertId
-//          and s.date = :today
-//          and s.startTime > :nowTime
-//          and a.status <> 3
-//    """)
-//    long countRemainingToday(
-//            @Param("expertId") Long expertId,
-//            @Param("today") LocalDate today,
-//            @Param("nowTime") LocalTime nowTime
-//    );
     @Query(value = """
         SELECT COUNT(a.app_id)
         FROM appointment a
@@ -272,11 +168,26 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
           and a.status <> 3
           and (
             s.date > :today
-            or (s.date = :today and s.startTime >= :nowTime)
+            or (s.date = :today and s.endTime >= :nowTime)
           )
         order by s.date asc, s.startTime asc
     """)
     List<AppointmentEntity> findUpcomingForUser(Long userId, LocalDate today, LocalTime nowTime);
+
+//    @Query("""
+//        select a from AppointmentEntity a
+//        join fetch a.slot s
+//        join fetch a.pet p
+//        join fetch a.expert e
+//        where a.user.id = :userId
+//          and a.status <> 3
+//          and (
+//            s.date < :today
+//            or (s.date = :today and s.endTime < :nowTime)
+//          )
+//        order by s.date desc, s.endTime desc
+//    """)
+//    List<AppointmentEntity> findUpcomingForUser(Long userId, LocalDate today, LocalTime nowTime);
 
     @Query("""
         select a from AppointmentEntity a
@@ -289,7 +200,7 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
             s.date < :today
             or (s.date = :today and s.endTime < :nowTime)
           )
-        order by s.date desc, s.startTime desc
+        order by s.date desc, s.endTime desc
     """)
     List<AppointmentEntity> findPastForUser(Long userId, LocalDate today, LocalTime nowTime);
 
@@ -304,15 +215,27 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     """)
     List<AppointmentEntity> findCancelledForUser(Long userId);
 
+//    @Query("""
+//        select a from AppointmentEntity a
+//        join fetch a.slot s
+//        join fetch a.pet p
+//        join fetch a.expert e
+//        where a.id = :appointmentId
+//          and a.user.id = :userId
+//    """)
+//    Optional<AppointmentEntity> findDetailForUser(Long appointmentId, Long userId);
     @Query("""
-        select a from AppointmentEntity a
-        join fetch a.slot s
-        join fetch a.pet p
-        join fetch a.expert e
-        where a.id = :appointmentId
-          and a.user.id = :userId
-    """)
-    Optional<AppointmentEntity> findDetailForUser(Long appointmentId, Long userId);
+            select a from AppointmentEntity a
+            join fetch a.slot s
+            join fetch a.expert e
+            join fetch a.pet p
+            where a.id = :appointmentId
+              and a.user.id = :userId
+        """)
+    Optional<AppointmentEntity> findDetailForUser(
+            @Param("appointmentId") Long appointmentId,
+            @Param("userId") Long userId
+    );
 
     @Query("""
         select a from AppointmentEntity a
@@ -322,4 +245,113 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     """)
     Optional<AppointmentEntity> findByIdWithSlotExpert(@Param("id") Long id);
 
+    // for calling
+    // ===== USER side =====
+    @Query("""
+        select a from AppointmentEntity a
+        join fetch a.slot s
+        join fetch a.expert e
+        join fetch a.pet p
+        where a.user.id = :userId
+          and a.status <> 3
+          and (
+              s.date > :today
+              or (s.date = :today and s.endTime >= :nowTime)
+          )
+        order by s.date asc, s.startTime asc
+    """)
+    List<AppointmentEntity> findUserUpcoming(
+            @Param("userId") Long userId,
+            @Param("today") LocalDate today,
+            @Param("nowTime") LocalTime nowTime
+    );
+
+    @Query("""
+        select a from AppointmentEntity a
+        join fetch a.slot s
+        join fetch a.expert e
+        join fetch a.pet p
+        where a.user.id = :userId
+          and a.status <> 3
+          and (
+              s.date < :today
+              or (s.date = :today and s.endTime < :nowTime)
+          )
+        order by s.date desc, s.startTime desc
+    """)
+    List<AppointmentEntity> findUserPast(
+            @Param("userId") Long userId,
+            @Param("today") LocalDate today,
+            @Param("nowTime") LocalTime nowTime
+    );
+
+    @Query("""
+        select a from AppointmentEntity a
+        join fetch a.slot s
+        join fetch a.expert e
+        join fetch a.pet p
+        where a.user.id = :userId
+          and a.status = 3
+        order by s.date desc, s.startTime desc
+    """)
+    List<AppointmentEntity> findUserCancelled(@Param("userId") Long userId);
+
+//    @Query("""
+//        select a from AppointmentEntity a
+//        join fetch a.slot s
+//        join fetch a.expert e
+//        join fetch a.pet p
+//        where a.id = :appointmentId
+//          and a.user.id = :userId
+//    """)
+//    Optional<AppointmentEntity> findDetailForUser(
+//            @Param("appointmentId") Long appointmentId,
+//            @Param("userId") Long userId
+//    );
+
+    // for expert calling
+    // ===== EXPERT side =====
+    @Query("""
+        select a from AppointmentEntity a
+        join fetch a.slot s
+        join fetch a.user u
+        join fetch a.pet p
+        where a.expert.id = :expertId
+          and s.date = :today
+          and a.status <> 3
+        order by s.startTime asc
+    """)
+    List<AppointmentEntity> findExpertToday(
+            @Param("expertId") Long expertId,
+            @Param("today") LocalDate today
+    );
+
+    @Query("""
+        select a from AppointmentEntity a
+        join fetch a.slot s
+        join fetch a.user u
+        join fetch a.pet p
+        where a.id = :appointmentId
+          and a.expert.id = :expertId
+    """)
+    Optional<AppointmentEntity> findDetailForExpert(
+            @Param("appointmentId") Long appointmentId,
+            @Param("expertId") Long expertId
+    );
+
+    @Query("""
+        select a from AppointmentEntity a
+        join fetch a.slot s
+        join fetch a.user u
+        join fetch a.expert e
+        where a.id = :id
+    """)
+    Optional<AppointmentEntity> findByIdWithSlotUserExpert(@Param("id") Long id);
+
+    @Query("""
+        select a from AppointmentEntity a
+        join fetch a.slot s
+        where a.id = :id
+    """)
+    Optional<AppointmentEntity> findByIdWithSlot(@Param("id") Long id);
 }

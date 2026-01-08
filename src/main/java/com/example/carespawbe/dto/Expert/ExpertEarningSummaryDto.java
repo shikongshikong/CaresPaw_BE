@@ -14,7 +14,6 @@ public class ExpertEarningSummaryDto {
     private BigDecimal unpaidAmount;
     private Long unpaidCount;
 
-    public ExpertEarningSummaryDto() {}
 
     public ExpertEarningSummaryDto(BigDecimal total, BigDecimal fee, BigDecimal net,
                                    BigDecimal unpaidAmount, Long unpaidCount) {

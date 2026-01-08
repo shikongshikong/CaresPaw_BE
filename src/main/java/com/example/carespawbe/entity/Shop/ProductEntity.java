@@ -49,10 +49,10 @@ public class ProductEntity {
     @Column(nullable = true)
     private LocalDate productUpdatedAt;
 
-    @Column(name = "sold", columnDefinition = "bigint default 0")
+    @Column(name = "sold")
     private Long sold = 0L; // Số lượng đã bán
 
-    @Column(name = "rating", columnDefinition = "double default 0.0")
+    @Column(name = "rating")
     private Double rating = 0.0; // Điểm trung bình sao
 
     @ManyToOne

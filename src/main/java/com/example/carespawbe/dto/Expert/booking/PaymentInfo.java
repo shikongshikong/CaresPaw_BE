@@ -7,7 +7,7 @@ import lombok.Setter;
 public class PaymentInfo {
     private String method;   // vnpay | momo | cash
     private Boolean agreed;
-    private Integer coinUsed; // optional
+//    private Integer coinUsed; // optional
 }
 
 
