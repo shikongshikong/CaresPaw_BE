@@ -1,9 +1,13 @@
 package com.example.carespawbe.repository.Shop;
 
+import com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO;
 import com.example.carespawbe.entity.Shop.OrderItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long> {
 
@@ -26,4 +30,20 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long
           AND so.shopOrderStatus = :status
     """)
     Long countTotalSoldByProductId(@Param("productId") Long productId, @Param("status") int status);
+
+    @Query("""
+        select new com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO(
+            o.userEntity.id,
+            p.productId,
+            o.orderCreatedAt
+        )
+        from OrderItemEntity oi
+        join oi.shopOrder so
+        join so.order o
+        join oi.productSku sku
+        join sku.product p
+        order by o.orderCreatedAt desc
+    """)
+    List<UserProductOrderTimeDTO> findUserProductOrderTimes();
+
 }

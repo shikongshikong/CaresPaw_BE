@@ -1,5 +1,6 @@
 package com.example.carespawbe.service.Shop;
 
+import com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
 import com.example.carespawbe.dto.Shop.response.OrderResponse;
 import com.example.carespawbe.dto.Shop.response.ShopOrderResponse;
@@ -17,4 +18,5 @@ public interface OrderService {
 
     ShopOrderResponse getShopOrderDetail(Long id);
 
+    List<UserProductOrderTimeDTO> findUserProductOrderTimes();
 }
