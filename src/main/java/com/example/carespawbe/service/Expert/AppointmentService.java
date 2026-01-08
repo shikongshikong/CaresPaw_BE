@@ -5,15 +5,22 @@ import com.example.carespawbe.dto.Expert.DashBoardStatisticItem;
 import com.example.carespawbe.dto.Expert.ExpertAppListItem;
 import com.example.carespawbe.dto.Expert.RemainApp;
 import com.example.carespawbe.dto.Expert.UpComingApp;
-import com.example.carespawbe.dto.Expert.videoCall.*;
+import com.example.carespawbe.dto.Expert.videoCall.AppointmentDetailResponse;
+import com.example.carespawbe.dto.Expert.videoCall.AppointmentListItemResponse;
+import com.example.carespawbe.dto.Expert.videoCall.JoinCallResponse;
+import com.example.carespawbe.dto.Expert.videoCall.StartCallResponse;
+import com.example.carespawbe.dto.Notification.NotificationCreateRequest;
+import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Expert.AppointmentEntity;
 import com.example.carespawbe.entity.Expert.AvailabilitySlotEntity;
 import com.example.carespawbe.entity.Expert.ExpertEntity;
 import com.example.carespawbe.entity.Expert.PetEntity;
 import com.example.carespawbe.enums.AppointmentStatus;
+import com.example.carespawbe.enums.NotificationType;
 import com.example.carespawbe.enums.CallJoinState;
 import com.example.carespawbe.repository.Expert.AppointmentRepository;
 import com.example.carespawbe.service.Expert.videoCalling.JitsiMeetService;
+import com.example.carespawbe.service.Notification.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +41,8 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final JitsiMeetService jitsiMeetService;
 
+    @Autowired
+    private NotificationService notificationService;
     private final Clock clock;
 
     public List<RemainApp> getTodayRemainingAppList(Long expertId) {
@@ -165,6 +174,23 @@ public class AppointmentService {
 
         // rõ ràng và an toàn (dù transactional có thể tự flush)
         appointmentRepository.save(appt);
+
+        // ===== NOTIFY EXPERT =====
+        if (appt.getExpert() != null && appt.getExpert().getUser() != null && appt.getExpert().getUser().getId() != null) {
+            notificationService.create(NotificationCreateRequest.builder()
+                    .userId(appt.getExpert().getUser().getId()) // expert nhận
+                    .actorId(appt.getUser() != null ? appt.getUser().getId() : null) // user là người hủy
+                    .type(NotificationType.EXPERT)
+                    .title("Appointment cancelled")
+                    .message(appt.getUser() != null
+                            ? (appt.getUser().getFullname() + " cancelled an appointment.")
+                            : "A user cancelled an appointment.")
+                    .link("/expert/appointments/" + appt.getId())
+                    .entityType("APPOINTMENT")
+                    .entityId(appt.getId())
+                    .build());
+        }
+
     }
 
 
@@ -212,6 +238,92 @@ public class AppointmentService {
     }
 
     // ========== CALL ACTIONS ==========
+    @Transactional
+    public StartCallResponse startCallAsExpert(Long appointmentId, Long expertId) {
+        AppointmentEntity a = appointmentRepository.findOwnedByExpert(appointmentId, expertId)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by expert"));
+
+        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
+            throw new IllegalStateException("Appointment already ended.");
+        }
+
+        // set status -> PROGRESS
+        a.setStatus(AppointmentStatus.PROGRESS);
+        appointmentRepository.save(a);
+
+        // ===== NOTIFY USER =====
+        if (a.getUser() != null && a.getUser().getId() != null) {
+            Long expertUserId = (a.getExpert() != null && a.getExpert().getUser() != null) ? a.getExpert().getUser().getId() : null;
+
+            notificationService.create(NotificationCreateRequest.builder()
+                    .userId(a.getUser().getId())                 // user nhận
+                    .actorId(expertUserId)                       // expert là người thực hiện
+                    .type(NotificationType.EXPERT)
+                    .title("Your appointment is starting")
+                    .message(a.getExpert() != null ? (a.getExpert().getFullName() + " started the call.") : "Expert started the call.")
+                    .link("/user/appointments/" + a.getId())
+                    .entityType("APPOINTMENT")
+                    .entityId(a.getId())
+                    .build());
+        }
+
+
+        String roomName = jitsiMeetService.buildRoomName(a.getId());
+        String joinUrl = jitsiMeetService.buildJoinUrl(roomName);
+        String jwt = jitsiMeetService.maybeGenerateJwt(roomName, a.getExpert().getFullName(), "expert");
+
+        return new StartCallResponse(a.getId(), a.getStatus(), roomName, joinUrl, jwt);
+    }
+
+    @Transactional
+    public StartCallResponse joinCallAsUser(Long appointmentId, Long userId) {
+        AppointmentEntity a = appointmentRepository.findOwnedByUser(appointmentId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by user"));
+
+        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
+            throw new IllegalStateException("Appointment already ended.");
+        }
+
+        // User join call: không bắt buộc set PROGRESS ở đây
+        // Nếu bạn muốn: chỉ set PROGRESS khi expert start call.
+        String roomName = jitsiMeetService.buildRoomName(a.getId());
+        String joinUrl = jitsiMeetService.buildJoinUrl(roomName);
+        String jwt = jitsiMeetService.maybeGenerateJwt(roomName, a.getUser().getFullname(), "user");
+
+        return new StartCallResponse(a.getId(), a.getStatus(), roomName, joinUrl, jwt);
+    }
+
+    @Transactional
+    public void endCallAsExpert(Long appointmentId, Long expertId, boolean markSuccess) {
+        AppointmentEntity a = appointmentRepository.findOwnedByExpert(appointmentId, expertId)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by expert"));
+
+        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
+            return; // idempotent
+        }
+
+        if (markSuccess) a.setStatus(AppointmentStatus.SUCCESS);
+        else a.setStatus(AppointmentStatus.CANCELED); // hoặc giữ PROGRESS tuỳ nghiệp vụ
+
+        appointmentRepository.save(a);
+
+        // ===== NOTIFY USER =====
+        if (a.getUser() != null && a.getUser().getId() != null) {
+            Long expertUserId = (a.getExpert() != null && a.getExpert().getUser() != null) ? a.getExpert().getUser().getId() : null;
+
+            notificationService.create(NotificationCreateRequest.builder()
+                    .userId(a.getUser().getId())
+                    .actorId(expertUserId)
+                    .type(NotificationType.EXPERT)
+                    .title("Appointment finished")
+                    .message(markSuccess ? "Your appointment has been completed." : "Your appointment has been cancelled.")
+                    .link("/user/appointments/" + a.getId())
+                    .entityType("APPOINTMENT")
+                    .entityId(a.getId())
+                    .build());
+        }
+
+    }
 //    @Transactional
 //    public StartCallResponse startCallAsExpert(Long appointmentId, Long expertId) {
 //        AppointmentEntity a = appointmentRepository.findOwnedByExpert(appointmentId, expertId)

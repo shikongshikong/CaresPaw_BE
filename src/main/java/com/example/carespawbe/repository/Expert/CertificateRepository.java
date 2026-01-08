@@ -12,4 +12,5 @@ public interface CertificateRepository  extends JpaRepository<CertificateEntity,
     List<CertificateEntity> findByExpert_IdAndStatusOrderByIdDesc(Long expertId, Integer status);
 
     Optional<CertificateEntity> findByIdAndExpert_Id(Long id, Long expertId);
+
 }

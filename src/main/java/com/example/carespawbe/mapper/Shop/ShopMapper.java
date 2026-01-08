@@ -17,6 +17,8 @@ public interface ShopMapper {
     @Mapping(source = "shopDescription", target = "shopDescription")
     @Mapping(source = "shopBanner", target = "shopBanner")
     @Mapping(source = "status", target = "status")
+
+    @Mapping(target = "fullName", source = "user.fullname")
     ShopResponse toResponse(ShopEntity shop);
 
 }

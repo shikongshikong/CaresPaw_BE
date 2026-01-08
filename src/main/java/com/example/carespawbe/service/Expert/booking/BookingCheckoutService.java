@@ -108,6 +108,8 @@ public class BookingCheckoutService {
         String paymentUrl;
 
         if ("cash".equalsIgnoreCase(method)) {
+//            payment.setPaymentStatus(PaymentStatus.PAID);
+//            payment.setPaymentUpdatedAt(LocalDate.now());
             paymentRepository.save(payment);
             paymentUrl = null;
         } else {

@@ -19,4 +19,7 @@ public class ExpertApplyRequest {
     private Long userId;
     private String portfolioLink;
     private List<Long> expertCategoryIds;
+
+    private String idImageUrl;
+    private String idImagePublicId;
 }

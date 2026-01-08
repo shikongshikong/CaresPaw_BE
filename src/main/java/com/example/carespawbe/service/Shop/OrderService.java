@@ -15,4 +15,6 @@ public interface OrderService {
 //    List<ShopOrderResponse> updateOrderStatus(Long userId);
     ShopOrderResponse updateShopOrderStatus(Long shopOrderId, Integer newStatus);
 
+    ShopOrderResponse getShopOrderDetail(Long id);
+
 }

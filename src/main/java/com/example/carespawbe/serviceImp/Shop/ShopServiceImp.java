@@ -11,6 +11,8 @@ import com.example.carespawbe.security.JwtService;
 import com.example.carespawbe.service.CloudinaryService;
 import com.example.carespawbe.service.Shop.ShopService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -138,4 +140,26 @@ public class ShopServiceImp implements ShopService {
         return shopMapper.toResponse(shop);
     }
 
+
+    @Override
+    public Page<ShopResponse> getAllShopsForAdmin(int page, int size) {
+        return shopRepository.findAll(PageRequest.of(page, size))
+                .map(shopMapper::toResponse);
+    }
+
+    @Override
+    public void lockShop(Long shopId) {
+        ShopEntity shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+        shop.setStatus(0); // 0 = locked
+        shopRepository.save(shop);
+    }
+
+    @Override
+    public void unlockShop(Long shopId) {
+        ShopEntity shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+        shop.setStatus(1); // 1 = active
+        shopRepository.save(shop);
+    }
 }
