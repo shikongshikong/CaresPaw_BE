@@ -22,9 +22,11 @@ public class ShopOrderController {
     }
 
     @PutMapping("/{shopOrderId}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable Long shopOrderId,
-                                          @RequestBody UpdateStatusRequest req) {
-        shopOrderService.updateShopOrderStatus(shopOrderId, req.getStatus());
+    public ResponseEntity<?> updateStatus(
+            @PathVariable Long shopOrderId,
+            @RequestBody UpdateStatusRequest req
+    ) {
+        orderService.updateShopOrderStatus(shopOrderId, req.getStatus());
         return ResponseEntity.ok("Updated");
     }
 

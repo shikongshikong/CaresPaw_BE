@@ -1,5 +1,6 @@
 package com.example.carespawbe.controller.Shop;
 
+import com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
 import com.example.carespawbe.dto.Shop.response.OrderResponse;
 import com.example.carespawbe.dto.Shop.response.ShopOrderResponse;
@@ -56,5 +57,9 @@ public class OrderController {
         return ResponseEntity.ok(res);
     }
 
+    @GetMapping("/user-product-times")
+    public List<UserProductOrderTimeDTO> getUserProductTimes() {
+        return orderService.findUserProductOrderTimes();
+    }
 
 }

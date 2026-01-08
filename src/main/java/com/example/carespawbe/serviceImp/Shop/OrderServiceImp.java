@@ -1,6 +1,7 @@
 package com.example.carespawbe.serviceImp.Shop;
 
 import com.example.carespawbe.dto.Notification.NotificationCreateRequest;
+import com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO;
 import com.example.carespawbe.dto.Shop.request.OrderItemRequest;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
 import com.example.carespawbe.dto.Shop.request.ShopOrderRequest;
@@ -47,7 +48,7 @@ public class OrderServiceImp implements OrderService {
     @Autowired
     private UserAddressRepository userAddressRepo;
     @Autowired
-    private OrderItemRepository orderItemRepo;
+    private OrderItemRepository orderItemRepository;
     @Autowired
     private NotificationService notificationService;
 
@@ -347,6 +348,11 @@ public class OrderServiceImp implements OrderService {
         shopOrder.setUpdatedAt(LocalDateTime.now());
         ShopOrderEntity saved = shopOrderRepo.save(shopOrder);
 
+        // ✅ SYNC parent Order status based on ALL ShopOrders
+        if (saved.getOrder() != null) {
+            syncParentOrderStatus(saved.getOrder().getOrderId());
+        }
+
         // ===== NOTIFY USER (owner of parent order) =====
         Long buyerId = null;
         if (saved.getOrder() != null && saved.getOrder().getUserEntity() != null) {
@@ -412,6 +418,11 @@ public class OrderServiceImp implements OrderService {
         return shopOrderMapper.toResponse(shopOrder);
     }
 
+    @Override
+    public List<UserProductOrderTimeDTO> findUserProductOrderTimes() {
+        return orderItemRepository.findUserProductOrderTimes();
+    }
+
     private String statusText(Integer st) {
         if (st == null) return "Unknown";
         if (st.equals(OrderStatus.PENDING_CONFIRMATION.getValue())) return "Pending confirmation";
@@ -422,6 +433,23 @@ public class OrderServiceImp implements OrderService {
         if (st.equals(OrderStatus.CANCELLED.getValue())) return "Cancelled";
         if (st.equals(OrderStatus.RETURN_REFUND.getValue())) return "Return/Refund";
         return "Updated";
+    }
+
+    private void syncParentOrderStatus(Long orderId) {
+        List<ShopOrderEntity> shopOrders = shopOrderRepo.findAllByOrder_OrderId(orderId);
+        if (shopOrders == null || shopOrders.isEmpty()) return;
+
+        boolean allCompleted = shopOrders.stream()
+                .allMatch(so -> so.getShopOrderStatus() == OrderStatus.COMPLETED.getValue());
+
+        boolean allCancelled = shopOrders.stream()
+                .allMatch(so -> so.getShopOrderStatus() == OrderStatus.CANCELLED.getValue());
+
+        if (allCompleted) {
+            orderRepo.updateOrderStatus(orderId, OrderStatus.COMPLETED.getValue(), LocalDate.now());
+        } else if (allCancelled) {
+            orderRepo.updateOrderStatus(orderId, OrderStatus.CANCELLED.getValue(), LocalDate.now());
+        }
     }
 
 }
