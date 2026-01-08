@@ -24,6 +24,9 @@ public class CertificateEntity {
     private String image;
     private Integer status; // 0: pending, 1: approved, 2: rejected
 
+    @Column(name = "image_public_id")
+    private String imagePublicId;
+
     @ManyToOne
     @JoinColumn(name = "expert_id")
     private ExpertEntity expert;

@@ -14,6 +14,7 @@ import com.example.carespawbe.mapper.Expert.ExpertEntityMapper;
 import com.example.carespawbe.repository.Auth.UserRepository;
 import com.example.carespawbe.repository.Expert.ExpertCategoryRepository;
 import com.example.carespawbe.repository.Expert.ExpertRepository;
+import com.example.carespawbe.service.CloudinaryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +39,33 @@ public class ExpertEntityService {
 
     @Autowired private ExpertCategoryRepository categoryRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     public ExpertEntity addExpert(ExpertApplyRequest applyRequest) {
         ExpertEntity expertEntity = expertEntityMapper.toExpertEntity(applyRequest);
-        // just save file name
-        expertEntity.setIdImage(applyRequest.getIdImage().getOriginalFilename());
 
         try {
+            // ✅ Upload CCCD giống chứng chỉ
+            if (applyRequest.getIdImage() != null && !applyRequest.getIdImage().isEmpty()) {
+                Map<String, String> uploaded = cloudinaryService.uploadImageUrlAndPublicId(
+                        applyRequest.getIdImage(),
+                        "experts/cccd"
+                );
+
+                if (uploaded == null || uploaded.get("url") == null || uploaded.get("public_id") == null) {
+                    throw new RuntimeException("Upload CCCD image failed");
+                }
+
+                expertEntity.setIdImage(uploaded.get("url"));
+                expertEntity.setIdImagePublicId(uploaded.get("public_id"));
+            } else {
+                expertEntity.setIdImage(null);
+                expertEntity.setIdImagePublicId(null);
+            }
+
             return expertRepository.save(expertEntity);
-        }  catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Save Entity Error!: " + e.getMessage());
             return null;
         }

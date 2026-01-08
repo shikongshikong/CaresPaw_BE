@@ -67,5 +67,7 @@ public interface ExpertRepository extends JpaRepository<ExpertEntity, Long>, Jpa
     """)
     Optional<ExpertEntity> findByIdWithCertificates(@Param("expertId") Long expertId);
 
-    Optional<ExpertEntity> findByUser_Id(Long userId);
+    List<ExpertEntity> findByStatusOrderByIdDesc(Integer status);
+
+    List<ExpertEntity> findAllByOrderByIdDesc();
 }

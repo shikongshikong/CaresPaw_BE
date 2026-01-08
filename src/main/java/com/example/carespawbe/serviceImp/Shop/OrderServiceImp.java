@@ -1,5 +1,6 @@
 package com.example.carespawbe.serviceImp.Shop;
 
+import com.example.carespawbe.dto.Notification.NotificationCreateRequest;
 import com.example.carespawbe.dto.Shop.request.OrderItemRequest;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
 import com.example.carespawbe.dto.Shop.request.ShopOrderRequest;
@@ -8,11 +9,13 @@ import com.example.carespawbe.dto.Shop.response.ShopOrderResponse;
 import com.example.carespawbe.entity.Auth.UserAddressEntity;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Shop.*;
+import com.example.carespawbe.enums.NotificationType;
 import com.example.carespawbe.enums.OrderStatus;
 import com.example.carespawbe.mapper.Shop.OrderMapper;
 import com.example.carespawbe.mapper.Shop.ShopOrderMapper;
 import com.example.carespawbe.repository.Auth.UserAddressRepository;
 import com.example.carespawbe.repository.Shop.*;
+import com.example.carespawbe.service.Notification.NotificationService;
 import com.example.carespawbe.service.Shop.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +32,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImp implements OrderService {
 
-    @Autowired private CartItemRepository cartItemRepo;
-    @Autowired private OrderRepository orderRepo;
-    @Autowired private ShopOrderRepository shopOrderRepo;
-    @Autowired private VoucherRepository voucherRepo;
-    @Autowired private ShopRepository shopRepo;
-    @Autowired private ProductRepository productRepo;
-    @Autowired private UserAddressRepository userAddressRepo;
-    @Autowired private OrderItemRepository orderItemRepo;
+    @Autowired
+    private CartItemRepository cartItemRepo;
+    @Autowired
+    private OrderRepository orderRepo;
+    @Autowired
+    private ShopOrderRepository shopOrderRepo;
+    @Autowired
+    private VoucherRepository voucherRepo;
+    @Autowired
+    private ShopRepository shopRepo;
+    @Autowired
+    private ProductRepository productRepo;
+    @Autowired
+    private UserAddressRepository userAddressRepo;
+    @Autowired
+    private OrderItemRepository orderItemRepo;
+    @Autowired
+    private NotificationService notificationService;
+
 
     // ✅ NEW: cần SKU repo để check/trừ/hoàn stock + update sold
     @Autowired private ProductSkuRepository productSkuRepo;
@@ -250,6 +264,17 @@ public class OrderServiceImp implements OrderService {
 
         cartItemRepo.deleteAllByCart_UserEntity_IdAndCartItemIdIn(userId, cartItemIds);
 
+        notificationService.create(NotificationCreateRequest.builder()
+                .userId(userId)
+                .actorId(null)
+                .type(NotificationType.SHOP)
+                .title("Order placed successfully")
+                .message("Your order #" + order.getOrderId() + " has been created.")
+                .link("/shop/orders/" + order.getOrderId())
+                .entityType("ORDER")
+                .entityId(order.getOrderId())
+                .build());
+
         return orderMapper.toResponse(order);
     }
 
@@ -322,6 +347,24 @@ public class OrderServiceImp implements OrderService {
         shopOrder.setUpdatedAt(LocalDateTime.now());
         ShopOrderEntity saved = shopOrderRepo.save(shopOrder);
 
+        // ===== NOTIFY USER (owner of parent order) =====
+        Long buyerId = null;
+        if (saved.getOrder() != null && saved.getOrder().getUserEntity() != null) {
+            buyerId = saved.getOrder().getUserEntity().getId();
+        }
+        if (buyerId != null) {
+            notificationService.create(NotificationCreateRequest.builder()
+                    .userId(buyerId)
+                    .actorId(null) // nếu bạn muốn actor là shopOwnerId thì phải lấy từ shop/user
+                    .type(NotificationType.SHOP)
+                    .title("Order update from shop")
+                    .message("Your order status changed to: " + statusText(newStatus))
+                    .link("/shop/orders/" + saved.getOrder().getOrderId())
+                    .entityType("SHOP_ORDER")
+                    .entityId(saved.getShopOrderId())
+                    .build());
+        }
+
         // ✅ DONE: cộng sold cho SKU + sync product.sold
         if (isDoneNow) {
             List<OrderItemEntity> items = shopOrder.getOrderItemEntities();
@@ -359,4 +402,26 @@ public class OrderServiceImp implements OrderService {
 
         return shopOrderMapper.toResponse(saved);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ShopOrderResponse getShopOrderDetail(Long id) {
+        ShopOrderEntity shopOrder = shopOrderRepo.findDetail(id)
+                .orElseThrow(() -> new RuntimeException("ShopOrder not found: " + id));
+
+        return shopOrderMapper.toResponse(shopOrder);
+    }
+
+    private String statusText(Integer st) {
+        if (st == null) return "Unknown";
+        if (st.equals(OrderStatus.PENDING_CONFIRMATION.getValue())) return "Pending confirmation";
+        if (st.equals(OrderStatus.AWAITING_PICKUP.getValue())) return "Confirmed";
+        if (st.equals(OrderStatus.SHIPPING.getValue())) return "Packing";
+        if (st.equals(OrderStatus.AWAITING_DELIVERY.getValue())) return "Shipping";
+        if (st.equals(OrderStatus.COMPLETED.getValue())) return "Delivered";
+        if (st.equals(OrderStatus.CANCELLED.getValue())) return "Cancelled";
+        if (st.equals(OrderStatus.RETURN_REFUND.getValue())) return "Return/Refund";
+        return "Updated";
+    }
+
 }

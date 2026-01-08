@@ -9,14 +9,17 @@ import com.example.carespawbe.dto.Expert.videoCall.AppointmentDetailResponse;
 import com.example.carespawbe.dto.Expert.videoCall.AppointmentListItemResponse;
 import com.example.carespawbe.dto.Expert.videoCall.JoinCallResponse;
 import com.example.carespawbe.dto.Expert.videoCall.StartCallResponse;
+import com.example.carespawbe.dto.Notification.NotificationCreateRequest;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Expert.AppointmentEntity;
 import com.example.carespawbe.entity.Expert.AvailabilitySlotEntity;
 import com.example.carespawbe.entity.Expert.ExpertEntity;
 import com.example.carespawbe.entity.Expert.PetEntity;
 import com.example.carespawbe.enums.AppointmentStatus;
+import com.example.carespawbe.enums.NotificationType;
 import com.example.carespawbe.repository.Expert.AppointmentRepository;
 import com.example.carespawbe.service.Expert.videoCalling.JitsiMeetService;
+import com.example.carespawbe.service.Notification.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,9 @@ public class AppointmentService {
     @Autowired
     private AppointmentRepository  appointmentRepository;
     private final JitsiMeetService jitsiMeetService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public List<RemainApp> getTodayRemainingAppList(Long expertId) {
         LocalDate  today = LocalDate.now();
@@ -260,6 +266,23 @@ public class AppointmentService {
 
         // rõ ràng và an toàn (dù transactional có thể tự flush)
         appointmentRepository.save(appt);
+
+        // ===== NOTIFY EXPERT =====
+        if (appt.getExpert() != null && appt.getExpert().getUser() != null && appt.getExpert().getUser().getId() != null) {
+            notificationService.create(NotificationCreateRequest.builder()
+                    .userId(appt.getExpert().getUser().getId()) // expert nhận
+                    .actorId(appt.getUser() != null ? appt.getUser().getId() : null) // user là người hủy
+                    .type(NotificationType.EXPERT)
+                    .title("Appointment cancelled")
+                    .message(appt.getUser() != null
+                            ? (appt.getUser().getFullname() + " cancelled an appointment.")
+                            : "A user cancelled an appointment.")
+                    .link("/expert/appointments/" + appt.getId())
+                    .entityType("APPOINTMENT")
+                    .entityId(appt.getId())
+                    .build());
+        }
+
     }
 
 
@@ -319,6 +342,23 @@ public class AppointmentService {
         a.setStatus(AppointmentStatus.PROGRESS);
         appointmentRepository.save(a);
 
+        // ===== NOTIFY USER =====
+        if (a.getUser() != null && a.getUser().getId() != null) {
+            Long expertUserId = (a.getExpert() != null && a.getExpert().getUser() != null) ? a.getExpert().getUser().getId() : null;
+
+            notificationService.create(NotificationCreateRequest.builder()
+                    .userId(a.getUser().getId())                 // user nhận
+                    .actorId(expertUserId)                       // expert là người thực hiện
+                    .type(NotificationType.EXPERT)
+                    .title("Your appointment is starting")
+                    .message(a.getExpert() != null ? (a.getExpert().getFullName() + " started the call.") : "Expert started the call.")
+                    .link("/user/appointments/" + a.getId())
+                    .entityType("APPOINTMENT")
+                    .entityId(a.getId())
+                    .build());
+        }
+
+
         String roomName = jitsiMeetService.buildRoomName(a.getId());
         String joinUrl = jitsiMeetService.buildJoinUrl(roomName);
         String jwt = jitsiMeetService.maybeGenerateJwt(roomName, a.getExpert().getFullName(), "expert");
@@ -357,6 +397,23 @@ public class AppointmentService {
         else a.setStatus(AppointmentStatus.CANCELED); // hoặc giữ PROGRESS tuỳ nghiệp vụ
 
         appointmentRepository.save(a);
+
+        // ===== NOTIFY USER =====
+        if (a.getUser() != null && a.getUser().getId() != null) {
+            Long expertUserId = (a.getExpert() != null && a.getExpert().getUser() != null) ? a.getExpert().getUser().getId() : null;
+
+            notificationService.create(NotificationCreateRequest.builder()
+                    .userId(a.getUser().getId())
+                    .actorId(expertUserId)
+                    .type(NotificationType.EXPERT)
+                    .title("Appointment finished")
+                    .message(markSuccess ? "Your appointment has been completed." : "Your appointment has been cancelled.")
+                    .link("/user/appointments/" + a.getId())
+                    .entityType("APPOINTMENT")
+                    .entityId(a.getId())
+                    .build());
+        }
+
     }
 
     @Transactional

@@ -382,4 +382,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "AND p.state <> 0 " +
             "ORDER BY p.createAt DESC")
     ShortForumPostResponse findByPostId(@Param("postId") Long postId, @Param("userId") Long userId);
+
+    Long countByCreateAt(LocalDate createAt);
+
 }

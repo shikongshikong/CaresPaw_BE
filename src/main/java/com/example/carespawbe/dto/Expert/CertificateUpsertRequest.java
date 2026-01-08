@@ -11,6 +11,6 @@ public class CertificateUpsertRequest {
     private String issue_place;
     private LocalDate issue_date;
     private LocalDate expiry_date;
-    private String image;
+//    private String image;
 }
 

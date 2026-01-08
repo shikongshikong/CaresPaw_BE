@@ -3,8 +3,11 @@ package com.example.carespawbe.entity.Expert;
 import com.example.carespawbe.entity.Auth.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +36,14 @@ public class ExpertEntity {
     private BigDecimal sessionPrice;
     private String portfolioLink;
 
+    @Column(name = "id_image_public_id")
+    private String idImagePublicId;
+
+    // ✅ Ngày nộp / tạo hồ sơ
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDate createdAt;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private UserEntity user;
@@ -51,6 +62,7 @@ public class ExpertEntity {
 
     @PrePersist
     protected void onCreate() {
+        createdAt = LocalDate.now();
         status = 0;
     }
 }

@@ -324,4 +324,9 @@ public class ForumPostService {
         }
         return shortSimilarPosts;
     }
+
+    public ForumPostEntity getPostEntityById(Long postId) {
+        return forumPostRepository.findById(postId).orElse(null);
+    }
+
 }
