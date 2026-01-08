@@ -1,5 +1,6 @@
 package com.example.carespawbe.repository.Shop;
 
+import com.example.carespawbe.dto.Shop.response.ProductInfoDTO;
 import com.example.carespawbe.entity.Shop.ProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,4 +59,19 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
         WHERE product_id = :productId
     """, nativeQuery = true)
     void syncProductSoldFromSkus(@Param("productId") Long productId);
+
+    @Query("""
+        select new com.example.carespawbe.dto.Shop.response.ProductInfoDTO(
+            p.productId,
+            p.productName,
+            p.productUsing,
+            p.productCreatedAt,
+            p.category.categoryId,
+            p.shop.shopId
+        )
+        from ProductEntity p
+        order by p.productCreatedAt desc
+    """)
+    List<ProductInfoDTO> findAllProductInfos();
 }
+

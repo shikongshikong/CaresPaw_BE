@@ -21,6 +21,6 @@ public class ForumPostResponse {
     private String avatar;
     private boolean saved;
     private int followState;
-
+    private int userRole;
 //    lack of updateAt
 }

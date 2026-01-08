@@ -4,6 +4,7 @@ import com.example.carespawbe.dto.Forum.*;
 import com.example.carespawbe.dto.Like.LikeStateUpdateRequest;
 import com.example.carespawbe.dto.Save.SaveStatusUpdateRequest;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
+import com.example.carespawbe.repository.Expert.ExpertRepository;
 import com.example.carespawbe.service.Forum.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class ForumPostController {
 
     @Autowired
     private ForumPostLikeService forumPostLikeService;
+
+    @Autowired
+    private ExpertRepository expertRepository;
 
 //    @GetMapping("")
 //    public ResponseEntity<?> getForumData(HttpServletRequest request) {
@@ -231,5 +235,10 @@ public class ForumPostController {
     public ResponseEntity<?> getPostTrainingData() {
 
         return ResponseEntity.ok(forumService.getForumTrainData());
+    }
+
+    @GetMapping("/getExpertOwner/{userId}")
+    public ResponseEntity<?> getExpertOwner(@PathVariable Long userId) {
+        return ResponseEntity.ok(expertRepository.findByUserId(userId).getId());
     }
 }

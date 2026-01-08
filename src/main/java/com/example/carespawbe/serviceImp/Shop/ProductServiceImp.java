@@ -499,4 +499,9 @@ public ProductDetailResponse getProductDetailById(Long productId) {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ProductInfoDTO> getAllProductInfos() {
+        return productRepository.findAllProductInfos();
+    }
+
 }

@@ -70,4 +70,6 @@ public interface ExpertRepository extends JpaRepository<ExpertEntity, Long>, Jpa
     List<ExpertEntity> findByStatusOrderByIdDesc(Integer status);
 
     List<ExpertEntity> findAllByOrderByIdDesc();
+
+    ExpertEntity findByUserId(Long userId);
 }
