@@ -20,7 +20,7 @@ public class PostRecommendationService {
         );
 
         return webClient.post()
-                .uri("http://localhost:5000/getPostRecommender/")
+                .uri("http://localhost:5001/getPostRecommender/")
                 .bodyValue(body)
                 .retrieve()
                 .bodyToFlux(Long.class)
