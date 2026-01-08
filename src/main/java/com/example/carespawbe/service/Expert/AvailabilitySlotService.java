@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class AvailabilitySlotService {
                         s.getId(),
                         s.getStartTime(),
                         s.getEndTime(),
+//                        new BigDecimal("100000"),
                         s.getPrice(),
                         s.getBooked()
                 ))

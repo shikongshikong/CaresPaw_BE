@@ -5,29 +5,24 @@ import com.example.carespawbe.dto.Expert.DashBoardStatisticItem;
 import com.example.carespawbe.dto.Expert.ExpertAppListItem;
 import com.example.carespawbe.dto.Expert.RemainApp;
 import com.example.carespawbe.dto.Expert.UpComingApp;
-import com.example.carespawbe.dto.Expert.videoCall.AppointmentDetailResponse;
-import com.example.carespawbe.dto.Expert.videoCall.AppointmentListItemResponse;
-import com.example.carespawbe.dto.Expert.videoCall.JoinCallResponse;
-import com.example.carespawbe.dto.Expert.videoCall.StartCallResponse;
-import com.example.carespawbe.entity.Auth.UserEntity;
+import com.example.carespawbe.dto.Expert.videoCall.*;
 import com.example.carespawbe.entity.Expert.AppointmentEntity;
 import com.example.carespawbe.entity.Expert.AvailabilitySlotEntity;
 import com.example.carespawbe.entity.Expert.ExpertEntity;
 import com.example.carespawbe.entity.Expert.PetEntity;
 import com.example.carespawbe.enums.AppointmentStatus;
+import com.example.carespawbe.enums.CallJoinState;
 import com.example.carespawbe.repository.Expert.AppointmentRepository;
 import com.example.carespawbe.service.Expert.videoCalling.JitsiMeetService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.*;
 import java.util.*;
@@ -36,8 +31,10 @@ import java.util.*;
 public class AppointmentService {
 
     @Autowired
-    private AppointmentRepository  appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
     private final JitsiMeetService jitsiMeetService;
+
+    private final Clock clock;
 
     public List<RemainApp> getTodayRemainingAppList(Long expertId) {
         LocalDate  today = LocalDate.now();
@@ -55,7 +52,7 @@ public class AppointmentService {
     public UpComingApp getUpComingApp(Long expertId) {
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
-        LocalTime endOfDay = LocalTime.of(23, 59, 59);
+//        LocalTime endOfDay = LocalTime.of(23, 59, 59);
 //        java.sql.Time now = java.sql.Time.valueOf(LocalTime.now());
 //        java.sql.Time endOfDay = java.sql.Time.valueOf(LocalTime.of(23, 59, 59));
         List<AppointmentEntity> list = appointmentRepository.findUpcomingOrdered(expertId, today, now);
@@ -73,33 +70,6 @@ public class AppointmentService {
         return null;
     }
 
-//    public DashBoardStatisticItem getMonthlyGrowth() {
-//        // 1. Xác định mốc thời gian tháng này (01/2026)
-//        YearMonth currentMonth = YearMonth.now();
-//        LocalDateTime startCurrent = currentMonth.atDay(1).atStartOfDay();
-//        LocalDateTime endCurrent = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-//
-//        // 2. Xác định mốc thời gian tháng trước (12/2025)
-//        YearMonth lastMonth = currentMonth.minusMonths(1);
-//        LocalDateTime startLast = lastMonth.atDay(1).atStartOfDay();
-//        LocalDateTime endLast = lastMonth.atEndOfMonth().atTime(23, 59, 59);
-//
-//        // 3. Truy vấn số lượng
-//        long countThisMonth = appointmentRepository.countBySlot_StartTimeBetween(startCurrent, endCurrent);
-//        long countLastMonth = appointmentRepository.countBySlot_StartTimeBetween(startLast, endLast);
-//
-//        // 4. Tính phần trăm tăng trưởng
-//        double growthRate = 0.0;
-//        if (countLastMonth > 0) {
-//            growthRate = ((double) (countThisMonth - countLastMonth) / countLastMonth) * 100;
-//        } else if (countThisMonth > 0) {
-//            growthRate = 100.0; // Nếu tháng trước bằng 0 và tháng này có lịch, tăng trưởng 100%
-//        }
-//
-//        DashBoardStatisticItem appTotal = new DashBoardStatisticItem(countThisMonth, Math.round(growthRate * 100.0) / 100.0);
-//
-//        return appTotal;
-//    }
     private static double growthRate(long current, long last) {
         if (last > 0) return ((double) (current - last) / last) * 100.0;
         if (current > 0) return 100.0;
@@ -111,27 +81,7 @@ public class AppointmentService {
     }
 
     public DashBoardStatisticItem<Long> getMonthlyAppointmentGrowth(Long expertId) {
-    //    YearMonth currentMonth = YearMonth.now();
-    //    LocalDateTime startCurrent = currentMonth.atDay(1).atStartOfDay();
-    //    LocalDateTime endCurrent = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-    //
-    //    YearMonth lastMonth = currentMonth.minusMonths(1);
-    //    LocalDateTime startLast = lastMonth.atDay(1).atStartOfDay();
-    //    LocalDateTime endLast = lastMonth.atEndOfMonth().atTime(23, 59, 59);
-    //
-    //    long countThisMonth = appointmentRepository.countByExpert_IdAndSlot_StartTimeBetween(
-    //            expertId, startCurrent, endCurrent);
-    //    long countLastMonth = appointmentRepository.countByExpert_IdAndSlot_StartTimeBetween(
-    //            expertId, startLast, endLast);
-    //
-    //    double growthRate = 0.0;
-    //    if (countLastMonth > 0) {
-    //        growthRate = ((double) (countThisMonth - countLastMonth) / countLastMonth) * 100;
-    //    } else if (countThisMonth > 0) {
-    //        growthRate = 100.0;
-    //    }
-    //
-    //    return DashBoardStatisticItem.of(countThisMonth, Math.round(growthRate * 100.0) / 100.0);
+
         YearMonth currentMonth = YearMonth.now();
         LocalDate startCurrent = currentMonth.atDay(1);
         LocalDate endCurrent = currentMonth.atEndOfMonth();
@@ -147,43 +97,11 @@ public class AppointmentService {
         return DashBoardStatisticItem.of(thisMonth, round2(growth));
     }
 
-
     public Long getRemainingCount(Long expertId) {
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime endOfDay = now.with(LocalTime.MAX); // 23:59:59.999
-//        int status = 0;
-//
-//        return appointmentRepository.countByExpert_IdAndStatusAndSlot_StartTimeBetween(
-//                expertId,
-//                status,
-//                now,
-//                endOfDay
-//        );
         return appointmentRepository.countRemainingToday(expertId, LocalDate.now(), LocalTime.now());
     }
 
     public DashBoardStatisticItem<Long> getMonthlyPetGrowth(Long expertId) {
-//        YearMonth currentMonth = YearMonth.now();
-//        LocalDateTime startCurrent = currentMonth.atDay(1).atStartOfDay();
-//        LocalDateTime endCurrent = currentMonth.atEndOfMonth().atTime(23, 59, 59);
-//
-//        YearMonth lastMonth = currentMonth.minusMonths(1);
-//        LocalDateTime startLast = lastMonth.atDay(1).atStartOfDay();
-//        LocalDateTime endLast = lastMonth.atEndOfMonth().atTime(23, 59, 59);
-//
-//        long petsThisMonth = appointmentRepository.countDistinctPetsByExpertAndPeriod(
-//                expertId, startCurrent, endCurrent);
-//        long petsLastMonth = appointmentRepository.countDistinctPetsByExpertAndPeriod(
-//                expertId, startLast, endLast);
-//
-//        double growthRate = 0.0;
-//        if (petsLastMonth > 0) {
-//            growthRate = ((double) (petsThisMonth - petsLastMonth) / petsLastMonth) * 100;
-//        } else if (petsThisMonth > 0) {
-//            growthRate = 100.0;
-//        }
-//
-//        return DashBoardStatisticItem.of(petsThisMonth, Math.round(growthRate * 100.0) / 100.0);
         YearMonth currentMonth = YearMonth.now();
         LocalDate startCurrent = currentMonth.atDay(1);
         LocalDate endCurrent = currentMonth.atEndOfMonth();
@@ -209,9 +127,6 @@ public class AppointmentService {
         int safePage = Math.max(page, 1) - 1;               // FE 1-based -> BE 0-based
         int safeSize = Math.min(Math.max(pageSize, 1), 100);
 
-//        Sort sortSpec = "oldest".equalsIgnoreCase(sort)
-//                ? Sort.by("date").ascending().and(Sort.by("time").ascending())
-//                : Sort.by("date").descending().and(Sort.by("time").descending());
         Sort sortSpec = "oldest".equalsIgnoreCase(sort)
                 ? Sort.by("slot.date").ascending().and(Sort.by("slot.startTime").ascending())
                 : Sort.by("slot.date").descending().and(Sort.by("slot.startTime").descending());
@@ -225,16 +140,6 @@ public class AppointmentService {
                 .total(pageData.getTotalElements())
                 .build();
     }
-
-//    @Transactional
-//    public void cancelByPublicId(Long appId) {
-//        AppointmentEntity appt = appointmentRepository.findById(appId)
-//                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appId));
-//
-//        // 3 = CANCELED
-//        if (appt.getStatus() == 3) return;
-//        appt.setStatus(3);
-//    }
 
     @Transactional
     public void cancelByPublicId(Long appId) {
@@ -264,37 +169,38 @@ public class AppointmentService {
 
 
     // calling by jitsi
-    public AppointmentService(AppointmentRepository appointmentRepository, JitsiMeetService jitsiMeetService) {
+    public AppointmentService(AppointmentRepository appointmentRepository, JitsiMeetService jitsiMeetService, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.jitsiMeetService = jitsiMeetService;
+        this.clock = clock;
     }
 
     // ========== LIST ==========
-    @Transactional()
-    public Page<AppointmentListItemResponse> listForUser(Long userId, int page, int size) {
-        Page<AppointmentEntity> p = appointmentRepository.findByUserId(userId, PageRequest.of(page, size));
-        for (AppointmentEntity entity : p.getContent()) {
-            System.out.println("status: " + entity.getStatus());
-        }
-        return p.map(this::toListItem);
-    }
+//    @Transactional()
+//    public Page<AppointmentListItemResponse> listForUser(Long userId, int page, int size) {
+//        Page<AppointmentEntity> p = appointmentRepository.findByUserId(userId, PageRequest.of(page, size));
+//        for (AppointmentEntity entity : p.getContent()) {
+//            System.out.println("status: " + entity.getStatus());
+//        }
+//        return p.map(this::toListItem);
+//    }
 
 //    @Transactional(readOnly = true)
     @Transactional()
     public Page<AppointmentListItemResponse> listForExpert(Long expertId, int page, int size) {
         Page<AppointmentEntity> p = appointmentRepository.findByExpertId(expertId, PageRequest.of(page, size));
-        return p.map(this::toListItem);
+        return p.map(this::toExpertAppListItem);
     }
 
     // ========== DETAIL ==========
 //    @Transactional(readOnly = true)
-    @Transactional()
-    public AppointmentDetailResponse getDetailForUser(Long appointmentId, Long userId) {
-        AppointmentEntity a = appointmentRepository.findOwnedByUser(appointmentId, userId)
-                .flatMap(x -> appointmentRepository.findDetailById(x.getId()))
-                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by user"));
-        return toDetail(a, "user");
-    }
+//    @Transactional()
+//    public AppointmentDetailResponse getDetailForUser(Long appointmentId, Long userId) {
+//        AppointmentEntity a = appointmentRepository.findOwnedByUser(appointmentId, userId)
+//                .flatMap(x -> appointmentRepository.findDetailById(x.getId()))
+//                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by user"));
+//        return toDetail(a, "user");
+//    }
 
 //    @Transactional(readOnly = true)
     @Transactional()
@@ -306,58 +212,58 @@ public class AppointmentService {
     }
 
     // ========== CALL ACTIONS ==========
-    @Transactional
-    public StartCallResponse startCallAsExpert(Long appointmentId, Long expertId) {
-        AppointmentEntity a = appointmentRepository.findOwnedByExpert(appointmentId, expertId)
-                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by expert"));
-
-        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
-            throw new IllegalStateException("Appointment already ended.");
-        }
-
-        // set status -> PROGRESS
-        a.setStatus(AppointmentStatus.PROGRESS);
-        appointmentRepository.save(a);
-
-        String roomName = jitsiMeetService.buildRoomName(a.getId());
-        String joinUrl = jitsiMeetService.buildJoinUrl(roomName);
-        String jwt = jitsiMeetService.maybeGenerateJwt(roomName, a.getExpert().getFullName(), "expert");
-
-        return new StartCallResponse(a.getId(), a.getStatus(), roomName, joinUrl, jwt);
-    }
-
-    @Transactional
-    public StartCallResponse joinCallAsUser(Long appointmentId, Long userId) {
-        AppointmentEntity a = appointmentRepository.findOwnedByUser(appointmentId, userId)
-                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by user"));
-
-        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
-            throw new IllegalStateException("Appointment already ended.");
-        }
-
-        // User join call: không bắt buộc set PROGRESS ở đây
-        // Nếu bạn muốn: chỉ set PROGRESS khi expert start call.
-        String roomName = jitsiMeetService.buildRoomName(a.getId());
-        String joinUrl = jitsiMeetService.buildJoinUrl(roomName);
-        String jwt = jitsiMeetService.maybeGenerateJwt(roomName, a.getUser().getFullname(), "user");
-
-        return new StartCallResponse(a.getId(), a.getStatus(), roomName, joinUrl, jwt);
-    }
-
-    @Transactional
-    public void endCallAsExpert(Long appointmentId, Long expertId, boolean markSuccess) {
-        AppointmentEntity a = appointmentRepository.findOwnedByExpert(appointmentId, expertId)
-                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by expert"));
-
-        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
-            return; // idempotent
-        }
-
-        if (markSuccess) a.setStatus(AppointmentStatus.SUCCESS);
-        else a.setStatus(AppointmentStatus.CANCELED); // hoặc giữ PROGRESS tuỳ nghiệp vụ
-
-        appointmentRepository.save(a);
-    }
+//    @Transactional
+//    public StartCallResponse startCallAsExpert(Long appointmentId, Long expertId) {
+//        AppointmentEntity a = appointmentRepository.findOwnedByExpert(appointmentId, expertId)
+//                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by expert"));
+//
+//        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
+//            throw new IllegalStateException("Appointment already ended.");
+//        }
+//
+//        // set status -> PROGRESS
+//        a.setStatus(AppointmentStatus.PROGRESS);
+//        appointmentRepository.save(a);
+//
+//        String roomName = jitsiMeetService.buildRoomName(a.getId());
+//        String joinUrl = jitsiMeetService.buildJoinUrl(roomName);
+//        String jwt = jitsiMeetService.maybeGenerateJwt(roomName, a.getExpert().getFullName(), "expert");
+//
+//        return new StartCallResponse(a.getId(), a.getStatus(), roomName, joinUrl, jwt);
+//    }
+//
+//    @Transactional
+//    public StartCallResponse joinCallAsUser(Long appointmentId, Long userId) {
+//        AppointmentEntity a = appointmentRepository.findOwnedByUser(appointmentId, userId)
+//                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by user"));
+//
+//        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
+//            throw new IllegalStateException("Appointment already ended.");
+//        }
+//
+//        // User join call: không bắt buộc set PROGRESS ở đây
+//        // Nếu bạn muốn: chỉ set PROGRESS khi expert start call.
+//        String roomName = jitsiMeetService.buildRoomName(a.getId());
+//        String joinUrl = jitsiMeetService.buildJoinUrl(roomName);
+//        String jwt = jitsiMeetService.maybeGenerateJwt(roomName, a.getUser().getFullname(), "user");
+//
+//        return new StartCallResponse(a.getId(), a.getStatus(), roomName, joinUrl, jwt);
+//    }
+//
+//    @Transactional
+//    public void endCallAsExpert(Long appointmentId, Long expertId, boolean markSuccess) {
+//        AppointmentEntity a = appointmentRepository.findOwnedByExpert(appointmentId, expertId)
+//                .orElseThrow(() -> new EntityNotFoundException("Appointment not found or not owned by expert"));
+//
+//        if (a.getStatus() == AppointmentStatus.CANCELED || a.getStatus() == AppointmentStatus.SUCCESS) {
+//            return; // idempotent
+//        }
+//
+//        if (markSuccess) a.setStatus(AppointmentStatus.SUCCESS);
+//        else a.setStatus(AppointmentStatus.CANCELED); // hoặc giữ PROGRESS tuỳ nghiệp vụ
+//
+//        appointmentRepository.save(a);
+//    }
 
     @Transactional
     public void cancelAsUser(Long appointmentId, Long userId) {
@@ -376,7 +282,7 @@ public class AppointmentService {
     }
 
     // ========== MAPPERS ==========
-    private AppointmentListItemResponse toListItem(AppointmentEntity a) {
+    private AppointmentListItemResponse toExpertAppListItem(AppointmentEntity a) {
         var s = a.getSlot();
         var p = a.getPet();
         var u = a.getUser();
@@ -460,7 +366,7 @@ public class AppointmentService {
 
     }
 
-    public List<AppointmentListItemResponse> getMyAppointments(Long userId, String type) {
+    public List<AppointmentListItemResponse> getMyAppointmentList(Long userId, String type) {
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
 
@@ -468,6 +374,7 @@ public class AppointmentService {
         String t = (type == null) ? "upcoming" : type.toLowerCase();
 
         switch (t) {
+            case "upcoming" -> list = appointmentRepository.findUpcomingForUser(userId, today, now);
             case "past" -> list = appointmentRepository.findPastForUser(userId, today, now);
             case "cancelled" -> list = appointmentRepository.findCancelledForUser(userId);
             case "all" -> {
@@ -482,271 +389,331 @@ public class AppointmentService {
             default -> list = appointmentRepository.findUpcomingForUser(userId, today, now);
         }
 
+        return list.stream().map(this::toExpertAppListItem).toList();
+    }
+//
+//    public AppointmentDetailResponse getMyAppointmentDetail(Long userId, Long appointmentId) {
+//        AppointmentEntity a = appointmentRepository.findDetailForUser(appointmentId, userId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+//
+//        return toDetail(a);
+//    }
+
+//    @Value("${app.jitsi.domain:meet.jit.si}")
+//    private String jitsiDomain;
+//    private AppointmentDetailResponse toDetail(AppointmentEntity a) {
+//        AvailabilitySlotEntity s = (a != null) ? a.getSlot() : null;
+//
+//        // expert: ưu tiên lấy từ Appointment, nếu null thì lấy từ slot
+//        ExpertEntity e = null;
+//        if (a != null && a.getExpert() != null) e = a.getExpert();
+//        else if (s != null && s.getExpert() != null) e = s.getExpert();
+//
+//        UserEntity u = (a != null) ? a.getUser() : null;
+//        PetEntity p = (a != null) ? a.getPet() : null;
+//
+//        // ===== Pet snapshot =====
+//        AppointmentDetailResponse.PetSnapshot petSnapshot =
+//                AppointmentDetailResponse.PetSnapshot.builder()
+//                        .id(p != null ? p.getId() : null)
+//                        .name(p != null ? p.getName() : null)
+//                        .breed(p != null ? p.getBreed() : null)
+//                        .gender(p != null ? p.getGender() : null)
+//                        .dateOfBirth(p != null && p.getDateOfBirth() != null ? p.getDateOfBirth().toString() : null)
+//                        .imageUrl(p != null ? p.getImageUrl() : null)
+//                        .description(p != null ? p.getDescription() : null)
+//                        .microchipId(p != null ? p.getMicrochipId() : null)
+//                        .allergies(p != null ? p.getAllergies() : null)
+//                        .chronicDiseases(p != null ? p.getChronic_diseases() : null)
+//                        .weight(p != null ? p.getWeight() : null)
+//                        .build();
+//
+//        // ===== User snapshot =====
+//        AppointmentDetailResponse.UserSnapshot userSnapshot =
+//                AppointmentDetailResponse.UserSnapshot.builder()
+//                        .id(u != null ? u.getId() : null)
+//                        .fullName(u != null ? u.getFullname() : null) // nếu entity dùng getFullName() thì đổi ở đây
+//                        .build();
+//
+//        // ===== Expert snapshot =====
+//        AppointmentDetailResponse.ExpertSnapshot expertSnapshot =
+//                AppointmentDetailResponse.ExpertSnapshot.builder()
+//                        .id(e != null ? e.getId() : null)
+//                        .fullName(e != null ? e.getFullName() : null)
+//                        .build();
+//
+//        // ===== Jitsi info =====
+//        String roomName = "app_" + (a != null ? a.getId() : "unknown");
+//
+//        String domain = (jitsiDomain == null || jitsiDomain.isBlank())
+//                ? "meet.jit.si"
+//                : jitsiDomain.trim()
+//                .replace("https://", "")
+//                .replace("http://", "")
+//                .replaceAll("/+$", "");
+//
+//        String joinUrl = "https://" + domain + "/" + roomName;
+//
+//        AppointmentDetailResponse.JitsiCallInfo jitsi =
+//                new AppointmentDetailResponse.JitsiCallInfo(roomName, joinUrl, null);
+//
+//        // ===== Build response =====
+//        return AppointmentDetailResponse.builder()
+//                .appointmentId(a != null ? a.getId() : null)
+//                .status(a != null ? a.getStatus() : null)
+//                .price(a != null ? a.getPrice() : null)
+//                .userNote(a != null ? a.getUserNote() : null)
+//
+//                .slotId(s != null ? s.getId() : null)
+//                .date(s != null ? s.getDate() : null)
+//                .startTime(s != null ? s.getStartTime() : null)
+//                .endTime(s != null ? s.getEndTime() : null)
+//
+//                .pet(petSnapshot)
+//                .user(userSnapshot)
+//                .expert(expertSnapshot)
+//
+//                .jitsi(jitsi)
+//                .build();
+//    }
+
+    // for calling
+    private final String jitsiDomain = "https://meet.jit.si";
+
+    public List<UserAppointmentListItem> getMyAppointments(Long userId, String type) {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        List<AppointmentEntity> list = switch (type == null ? "upcoming" : type) {
+            case "past" -> appointmentRepository.findUserPast(userId, today, now);
+            case "cancelled" -> appointmentRepository.findUserCancelled(userId);
+            default -> appointmentRepository.findUserUpcoming(userId, today, now);
+        };
+
         return list.stream().map(this::toListItem).toList();
     }
 
-    public AppointmentDetailResponse getMyAppointmentDetail(Long userId, Long appointmentId) {
+    public UserAppointmentDetailResponse getMyAppointmentDetail(Long userId, Long appointmentId) {
         AppointmentEntity a = appointmentRepository.findDetailForUser(appointmentId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
 
         return toDetail(a);
     }
 
-//    public JoinCallResponse joinCall(Long userId, Long appointmentId) {
-//        AppointmentEntity a = appointmentRepository.findDetailForUser(appointmentId, userId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
-//
-//        if (a.getStatus() != null && a.getStatus() == 3) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Appointment is cancelled");
-//        }
-//
-//        AvailabilitySlotEntity s = a.getSlot();
-//        if (s == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing slot");
-//
-//        // Join window: start - 10m to end + 15m
-//        LocalDate date = s.getDate();
-//        LocalTime start = s.getStartTime();
-//        LocalTime end = s.getEndTime();
-//        if (date == null || start == null || end == null) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid schedule");
-//        }
-//
-//        LocalDateTime startDt = LocalDateTime.of(date, start);
-//        LocalDateTime endDt = LocalDateTime.of(date, end);
-//
-//        LocalDateTime windowStart = startDt.minusMinutes(10);
-//        LocalDateTime windowEnd = endDt.plusMinutes(15);
-//
-//        LocalDateTime now = LocalDateTime.now();
-//        if (now.isBefore(windowStart) || now.isAfter(windowEnd)) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.BAD_REQUEST,
-//                    "Join is only available near the appointment time"
-//            );
-//        }
-//
-//        // roomId derive theo appointmentId
-//        String roomId = "app_" + a.getId();
-//
-//        // Nếu bạn có hệ thống call riêng, có thể build joinUrl luôn:
-//        // String joinUrl = "https://your-domain/call/" + roomId;
-//        String joinUrl = null;
-//
-//        return new JoinCallResponse(roomId, joinUrl);
-//    }
+    private void validateSlot(AvailabilitySlotEntity s) {
+        if (s == null || s.getDate() == null || s.getStartTime() == null || s.getEndTime() == null) {
+            throw new IllegalStateException("Slot time is invalid");
+        }
+    }
 
-//    private AppointmentListItemResponse toListItem(AppointmentEntity a) {
-//        AvailabilitySlotEntity s = a.getSlot();
-//        ExpertEntity e = a.getExpert();
-//        PetEntity p = a.getPet();
-//
-//        return new AppointmentListItemResponse(
-//                a.getId(),
-//                a.getStatus(),
-//                s != null ? s.getDate() : null,
-//                s != null ? s.getStartTime() : null,
-//                s != null ? s.getEndTime() : null,
-//                a.getPrice(),
-//                a.getUserNote(),
-//
-//                e != null ? e.getId() : null,
-//                e != null ? e.getFullName() : null,
-//                e != null ? e.getIdImage() : null, // avatar
-//
-//                p != null ? p.getId() : null,
-//                p != null ? p.getName() : null
-//        );
-//    }
+    public JoinCallResponse joinCall(Long userId, Long appointmentId) {
+        AppointmentEntity a = appointmentRepository.findDetailForUser(appointmentId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
 
-//    private AppointmentDetailResponse toDetail(AppointmentEntity a) {
-//        AvailabilitySlotEntity s = a.getSlot();
-//        ExpertEntity e = a.getExpert();
-//        PetEntity p = a.getPet();
-//
-//        var slotSnapshot = AppointmentDetailResponse.SlotSnapshot.builder()
-//                .slotId(s != null ? s.getId() : null)
-//                .date(s != null && s.getDate() != null ? s.getDate().toString() : null)
-//                .startTime(s != null && s.getStartTime() != null ? s.getStartTime().toString() : null)
-//                .endTime(s != null && s.getEndTime() != null ? s.getEndTime().toString() : null)
-//                .price(s != null ? s.getPrice() : null)
-//                .booked(s != null ? s.getBooked() : null)
-//                .build();
-//
-//        var expertSnapshot = AppointmentDetailResponse.ExpertSnapshot.builder()
-//                .expertId(e != null ? e.getId() : null)
-//                .fullName(e != null ? e.getFullName() : null)
-//                .avatar(e != null ? e.getIdImage() : null)
-//                .build();
-//
-//        var petSnapshot = AppointmentDetailResponse.PetSnapshot.builder()
-//                .id(p != null ? p.getId() : null)
-//                .name(p != null ? p.getName() : null)
-//                .breed(p != null ? p.getBreed() : null)
-//                .gender(p != null ? p.getGender() : null)
-//                .dateOfBirth(p != null && p.getDateOfBirth() != null ? p.getDateOfBirth().toString() : null)
-//                .imageUrl(p != null ? p.getImageUrl() : null)
-//                .description(p != null ? p.getDescription() : null)
-//                .microchipId(p != null ? p.getMicrochipId() : null)
-//                .allergies(p != null ? p.getAllergies() : null)
-//                .chronicDiseases(p != null ? p.getChronic_diseases() : null)
-//                .weight(p != null ? p.getWeight() : null)
-//                .build();
-//
-//        return AppointmentDetailResponse.builder()
-//                .appointmentId(a.getId())
-//                .status(a.getStatus())
-//                .userNote(a.getUserNote())
-//                .price(a.getPrice())
-//                .slot(slotSnapshot)
-//                .expert(expertSnapshot)
-//                .pet(petSnapshot)
-//                .build();
-//    }
-//private AppointmentDetailResponse toDetail(AppointmentEntity a) {
-//    AvailabilitySlotEntity s = a != null ? a.getSlot() : null;
-//
-//    // expert có thể lấy từ Appointment hoặc từ Slot (tuỳ entity bạn set ở đâu)
-//    ExpertEntity e = null;
-//    if (a != null && a.getExpert() != null) e = a.getExpert();
-//    else if (s != null && s.getExpert() != null) e = s.getExpert();
-//
-//    UserEntity u = a != null ? a.getUser() : null;
-//    PetEntity p = a != null ? a.getPet() : null;
-//
-//    // ===== pet snapshot =====
-//    var petSnapshot = AppointmentDetailResponse.PetSnapshot.builder()
-//            .id(p != null ? p.getId() : null)
-//            .name(p != null ? p.getName() : null)
-//            .breed(p != null ? p.getBreed() : null)
-//            .gender(p != null ? p.getGender() : null)
-//            .dateOfBirth(p != null && p.getDateOfBirth() != null ? p.getDateOfBirth().toString() : null)
-//            .imageUrl(p != null ? p.getImageUrl() : null)
-//            .description(p != null ? p.getDescription() : null)
-//            .microchipId(p != null ? p.getMicrochipId() : null)
-//            .allergies(p != null ? p.getAllergies() : null)
-//            .chronicDiseases(p != null ? p.getChronic_diseases() : null)
-//            .weight(p != null ? p.getWeight() : null)
-//            .build();
-//
-//    // ===== user snapshot =====
-//    var userSnapshot = AppointmentDetailResponse.UserSnapshot.builder()
-//            .id(u != null ? u.getId() : null)
-//            .fullName(u != null ? u.getFullname() : null) // chú ý: entity bạn là fullname
-//            .build();
-//
-//    // ===== expert snapshot =====
-//    var expertSnapshot = AppointmentDetailResponse.ExpertSnapshot.builder()
-//            .id(e != null ? e.getId() : null)
-//            .fullName(e != null ? e.getFullName() : null)
-//            .build();
-//
-//    // ===== jitsi =====
-//    // nếu bạn có @Value("${app.jitsi.domain:meet.jit.si}") private String jitsiDomain;
-//    String roomName = "app_" + (a != null ? a.getId() : "unknown");
-//    String domain = (jitsiDomain == null || jitsiDomain.isBlank())
-//            ? "meet.jit.si"
-//            : jitsiDomain.trim().replace("https://", "").replace("http://", "").replaceAll("/+$", "");
-//    String joinUrl = "https://" + domain + "/" + roomName;
-//
-//    var jitsiInfo = new AppointmentDetailResponse.JitsiCallInfo(
-//            roomName,
-//            joinUrl,
-//            null // jwt optional
-//    );
-//
-//    return AppointmentDetailResponse.builder()
-//            .appointmentId(a != null ? a.getId() : null)
-//            .status(a != null ? a.getStatus() : null)
-//            .price(a != null ? a.getPrice() : null)
-//            .userNote(a != null ? a.getUserNote() : null)
-//
-//            .slotId(s != null ? s.getId() : null)
-//            .date(s != null ? s.getDate() : null)
-//            .startTime(s != null ? s.getStartTime() : null)
-//            .endTime(s != null ? s.getEndTime() : null)
-//
-//            .pet(petSnapshot)
-//            .user(userSnapshot)
-//            .expert(expertSnapshot)
-//
-//            .jitsi(jitsiInfo)
-//            .build();
-//}
-    @Value("${app.jitsi.domain:meet.jit.si}")
-    private String jitsiDomain;
-    private AppointmentDetailResponse toDetail(AppointmentEntity a) {
-        AvailabilitySlotEntity s = (a != null) ? a.getSlot() : null;
+        if (a.getStatus() == 3) {
+            return buildEnded(a, "cancelled");
+        }
 
-        // expert: ưu tiên lấy từ Appointment, nếu null thì lấy từ slot
-        ExpertEntity e = null;
-        if (a != null && a.getExpert() != null) e = a.getExpert();
-        else if (s != null && s.getExpert() != null) e = s.getExpert();
+        AvailabilitySlotEntity s = a.getSlot();
+        LocalDate date = s.getDate();
+        LocalTime start = s.getStartTime();
+        LocalTime end = s.getEndTime();
 
-        UserEntity u = (a != null) ? a.getUser() : null;
-        PetEntity p = (a != null) ? a.getPet() : null;
+        validateSlot(s);
 
-        // ===== Pet snapshot =====
-        AppointmentDetailResponse.PetSnapshot petSnapshot =
-                AppointmentDetailResponse.PetSnapshot.builder()
-                        .id(p != null ? p.getId() : null)
-                        .name(p != null ? p.getName() : null)
-                        .breed(p != null ? p.getBreed() : null)
-                        .gender(p != null ? p.getGender() : null)
-                        .dateOfBirth(p != null && p.getDateOfBirth() != null ? p.getDateOfBirth().toString() : null)
-                        .imageUrl(p != null ? p.getImageUrl() : null)
-                        .description(p != null ? p.getDescription() : null)
-                        .microchipId(p != null ? p.getMicrochipId() : null)
-                        .allergies(p != null ? p.getAllergies() : null)
-                        .chronicDiseases(p != null ? p.getChronic_diseases() : null)
-                        .weight(p != null ? p.getWeight() : null)
-                        .build();
+        int durationMin = durationMinFromSlot(s);
 
-        // ===== User snapshot =====
-        AppointmentDetailResponse.UserSnapshot userSnapshot =
-                AppointmentDetailResponse.UserSnapshot.builder()
-                        .id(u != null ? u.getId() : null)
-                        .fullName(u != null ? u.getFullname() : null) // nếu entity dùng getFullName() thì đổi ở đây
-                        .build();
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
 
-        // ===== Expert snapshot =====
-        AppointmentDetailResponse.ExpertSnapshot expertSnapshot =
-                AppointmentDetailResponse.ExpertSnapshot.builder()
-                        .id(e != null ? e.getId() : null)
-                        .fullName(e != null ? e.getFullName() : null)
-                        .build();
+        ZoneId zone = ZoneId.systemDefault();
 
-        // ===== Jitsi info =====
-        String roomName = "app_" + (a != null ? a.getId() : "unknown");
+        Instant nowInstant = ZonedDateTime.of(today, now, zone).toInstant();
+        Instant startInstant = ZonedDateTime.of(date, start, zone).toInstant();
+        Instant endInstant = ZonedDateTime.of(date, end, zone).toInstant();
 
-        String domain = (jitsiDomain == null || jitsiDomain.isBlank())
-                ? "meet.jit.si"
-                : jitsiDomain.trim()
-                .replace("https://", "")
-                .replace("http://", "")
-                .replaceAll("/+$", "");
+        long nowMs = nowInstant.toEpochMilli();
+        long startMs = startInstant.toEpochMilli();
+        long endMs = endInstant.toEpochMilli();
 
-        String joinUrl = "https://" + domain + "/" + roomName;
+        // BEFORE start -> WAITING
+        if (nowMs < startMs) {
+            int secondsToStart = (int) Math.max(0, (startMs - nowMs) / 1000);
+            return new JoinCallResponse(
+                    CallJoinState.WAITING,
+                    a.getId(),
+                    date.toString(),
+                    start.toString().substring(0, 5),
+                    end.toString().substring(0, 5),
+                    durationMin,
 
-        AppointmentDetailResponse.JitsiCallInfo jitsi =
-                new AppointmentDetailResponse.JitsiCallInfo(roomName, joinUrl, null);
+                    nowMs, startMs, endMs,
+                    secondsToStart,
+                    null,
+                    null
+            );
+        }
 
-        // ===== Build response =====
-        return AppointmentDetailResponse.builder()
-                .appointmentId(a != null ? a.getId() : null)
-                .status(a != null ? a.getStatus() : null)
-                .price(a != null ? a.getPrice() : null)
-                .userNote(a != null ? a.getUserNote() : null)
+        // AFTER end -> ENDED
+        if (nowMs > endMs) {
+            return new JoinCallResponse(
+                    CallJoinState.ENDED,
+                    a.getId(),
+                    date.toString(),
+                    start.toString().substring(0, 5),
+                    end.toString().substring(0, 5),
+                    durationMin,
 
-                .slotId(s != null ? s.getId() : null)
-                .date(s != null ? s.getDate() : null)
-                .startTime(s != null ? s.getStartTime() : null)
-                .endTime(s != null ? s.getEndTime() : null)
+                    nowMs, startMs, endMs,
+                    null,
+                    0,
+                    null
+            );
+        }
 
-                .pet(petSnapshot)
-                .user(userSnapshot)
-                .expert(expertSnapshot)
+        // ACTIVE
+        int remainingSec = (int) Math.max(0, (endMs - nowMs) / 1000);
 
-                .jitsi(jitsi)
-                .build();
+        String roomName = "appt_" + a.getId();
+        String joinUrl = jitsiDomain + "/" + roomName;
+        JitsiCallInfo jitsi = new JitsiCallInfo(roomName, joinUrl, null);
+
+        return new JoinCallResponse(
+                CallJoinState.ACTIVE,
+                a.getId(),
+                date.toString(),
+                start.toString().substring(0, 5),
+                end.toString().substring(0, 5),
+                durationMin,
+
+                nowMs, startMs, endMs,
+                null,
+                remainingSec,
+                jitsi
+        );
+    }
+
+    private int durationMinFromSlot(AvailabilitySlotEntity s) {
+        if (s == null) return 0;
+        LocalTime start = s.getStartTime();
+        LocalTime end = s.getEndTime();
+        if (start == null || end == null) return 0;
+
+        long minutes = java.time.Duration.between(start, end).toMinutes();
+        return (int) Math.max(0, minutes);
+    }
+
+    private int safeDurationMin(AppointmentEntity a) {
+        Integer d = durationMinFromSlot(a.getSlot());
+        return (d == null || d < 0) ? 0 : d;
+    }
+
+    private JoinCallResponse buildEnded(AppointmentEntity a, String reason) {
+        AvailabilitySlotEntity s = a.getSlot();
+        ZoneId zone = ZoneId.systemDefault();
+        Instant nowInstant = Instant.now();
+        Instant startInstant = ZonedDateTime.of(s.getDate(), s.getStartTime(), zone).toInstant();
+        Instant endInstant = ZonedDateTime.of(s.getDate(), s.getEndTime(), zone).toInstant();
+
+        return new JoinCallResponse(
+                CallJoinState.ENDED,
+                a.getId(),
+                s.getDate().toString(),
+                s.getStartTime().toString().substring(0,5),
+                s.getEndTime().toString().substring(0,5),
+                safeDurationMin(a),
+
+                nowInstant.toEpochMilli(),
+                startInstant.toEpochMilli(),
+                endInstant.toEpochMilli(),
+                null,
+                0,
+                null
+        );
+    }
+
+    private UserAppointmentListItem toListItem(AppointmentEntity a) {
+        AvailabilitySlotEntity s = a.getSlot();
+        return new UserAppointmentListItem(
+                a.getId(),
+                s.getDate().toString(),
+                s.getStartTime().toString().substring(0,5),
+                s.getEndTime().toString().substring(0,5),
+                safeDurationMin(a),
+                a.getStatus(),
+                a.getExpert().getFullName(),
+                a.getPet().getName(),
+                a.getPet().getImageUrl()
+        );
+    }
+
+    private UserAppointmentDetailResponse toDetail(AppointmentEntity a) {
+        AvailabilitySlotEntity s = a.getSlot();
+        ExpertEntity e = a.getExpert();
+        PetEntity p = a.getPet();
+
+        return new UserAppointmentDetailResponse(
+                a.getId(),
+                a.getStatus(),
+                safeDurationMin(a),
+                a.getUserNote(),
+
+                s.getDate().toString(),
+                s.getStartTime().toString().substring(0,5),
+                s.getEndTime().toString().substring(0,5),
+
+                e.getFullName(),
+                e.getUser().getEmail(),
+
+                p.getName(),
+                p.getBreed(),
+                p.getImageUrl()
+        );
+    }
+
+    @Transactional
+    public void markProgressIfNeeded(Long appointmentId) {
+        AppointmentEntity a = appointmentRepository.findByIdWithSlot(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+
+        if (a.getStatus() == null) a.setStatus(0);
+        if (a.getStatus() == 3) return; // canceled -> ignore
+
+        // chỉ chuyển pending -> progress
+        if (a.getStatus() == 0) {
+            a.setStatus(1);
+        }
+    }
+
+    @Transactional
+    public void endCall(Long appointmentId, Long actorUserId, Long actorExpertId) {
+        AppointmentEntity a = appointmentRepository.findByIdWithSlotUserExpert(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+
+        if (a.getStatus() == null) a.setStatus(0);
+        if (a.getStatus() == 3) return; // canceled -> ignore
+
+        // AuthZ: chỉ user của appointment hoặc expert của appointment mới được end
+        boolean isOwnerUser = (actorUserId != null && a.getUser() != null && actorUserId.equals(a.getUser().getId()));
+        boolean isOwnerExpert = (actorExpertId != null && a.getExpert() != null && actorExpertId.equals(a.getExpert().getId()));
+
+        if (!isOwnerUser && !isOwnerExpert) {
+            throw new SecurityException("Not allowed to end this call");
+        }
+
+        // Nếu đang pending/progress -> success
+        // Bạn có thể siết thêm: chỉ cho end khi now >= startTime, tuỳ policy
+        a.setStatus(2);
+    }
+
+    // Helpers nếu bạn muốn check time (optional)
+    public boolean isNowWithinSlot(AppointmentEntity a) {
+        AvailabilitySlotEntity s = a.getSlot();
+        if (s == null || s.getDate() == null || s.getStartTime() == null || s.getEndTime() == null) return false;
+        ZoneId zone = ZoneId.systemDefault();
+        Instant now = Instant.now(clock);
+        Instant start = LocalDateTime.of(s.getDate(), s.getStartTime()).atZone(zone).toInstant();
+        Instant end = LocalDateTime.of(s.getDate(), s.getEndTime()).atZone(zone).toInstant();
+        return !now.isBefore(start) && now.isBefore(end);
     }
 }

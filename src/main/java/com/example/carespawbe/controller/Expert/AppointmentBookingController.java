@@ -2,6 +2,7 @@ package com.example.carespawbe.controller.Expert;
 
 import com.example.carespawbe.dto.Expert.booking.BookingCheckoutRequest;
 import com.example.carespawbe.dto.Expert.booking.BookingCheckoutResult;
+import com.example.carespawbe.dto.Expert.booking.PaymentInfo;
 import com.example.carespawbe.dto.Expert.booking.SlotForBookingResponse;
 import com.example.carespawbe.service.Expert.AvailabilitySlotService;
 import com.example.carespawbe.service.Expert.booking.BookingCheckoutService;
@@ -35,25 +36,28 @@ public class AppointmentBookingController {
     }
 
     @PostMapping(value = "/checkout", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, Object>> checkout(
+    public ResponseEntity<?> checkout(
             @RequestPart("metadata") String metadataJson,
             @RequestPart(value = "petImage", required = false) MultipartFile petImage,
             HttpServletRequest request
     ) throws Exception {
 
-        // tuỳ security của bạn: attribute / session / jwt principal...
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) userId = (Long) request.getSession().getAttribute("userId");
         if (userId == null) throw new RuntimeException("Unauthenticated");
 
         BookingCheckoutRequest req = objectMapper.readValue(metadataJson, BookingCheckoutRequest.class);
+        PaymentInfo info =  objectMapper.readValue(metadataJson, PaymentInfo.class);
+        info.setMethod("cash");
+        req.setPayment(info);
         BookingCheckoutResult result = bookingCheckoutService.checkout(req, petImage, userId);
 
-        return ResponseEntity.ok(Map.of(
-                "appointmentId", result.getAppointmentId(),
-                "paymentId", result.getPaymentId(),
-                "paymentUrl", result.getPaymentUrl()
-        ));
+//        return ResponseEntity.ok(Map.of(
+//                "appointmentId", result.getAppointmentId(),
+//                "paymentId", result.getPaymentId(),
+//                "paymentUrl", result.getPaymentUrl()
+//        ));
+        return ResponseEntity.ok("ok");
     }
 
 //    @PostMapping(value = "/checkout", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

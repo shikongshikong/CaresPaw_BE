@@ -27,6 +27,9 @@ public class AppointmentEntity {
     @JoinColumn(name = "slot_id")
     private AvailabilitySlotEntity slot;
 
+    @OneToOne(mappedBy = "appointment")
+    private MedicalRecordEntity medicalRecord;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity  user;

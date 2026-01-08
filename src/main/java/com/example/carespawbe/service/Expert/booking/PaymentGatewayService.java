@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 public class PaymentGatewayService {
 
     public String createPaymentUrl(PaymentEntity payment, AppointmentEntity app) {
-        String method = payment.getPayment_method();
+        String method = payment.getPaymentMethod();
         if ("vnpay".equalsIgnoreCase(method)) {
             return "https://sandbox-vnpay/pay?paymentId=" + payment.getPaymentId() + "&appId=" + app.getId();
         }
