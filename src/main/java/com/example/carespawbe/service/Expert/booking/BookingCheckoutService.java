@@ -108,8 +108,6 @@ public class BookingCheckoutService {
         String paymentUrl;
 
         if ("cash".equalsIgnoreCase(method)) {
-//            payment.setPaymentStatus(PaymentStatus.PAID);
-//            payment.setPaymentUpdatedAt(LocalDate.now());
             paymentRepository.save(payment);
             paymentUrl = null;
         } else {
@@ -124,7 +122,7 @@ public class BookingCheckoutService {
         if (req.getSlotId() == null) throw new RuntimeException("slotId is required");
         if (req.getPet() == null || req.getPet().getMode() == null) throw new RuntimeException("pet.mode is required");
         if (req.getPayment() == null || req.getPayment().getMethod() == null) throw new RuntimeException("payment.method is required");
-        if (req.getPayment().getAgreed() == null || !req.getPayment().getAgreed()) throw new RuntimeException("Must agree to proceed");
+//        if (req.getPayment().getAgreed() == null || !req.getPayment().getAgreed()) throw new RuntimeException("Must agree to proceed");
     }
 
     private PetEntity resolvePet(PetSelection petSel, MultipartFile petImage, UserEntity user) {

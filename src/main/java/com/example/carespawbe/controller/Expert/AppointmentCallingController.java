@@ -59,7 +59,7 @@ public class AppointmentCallingController {
         return ResponseEntity.ok(appointmentService.joinCall(userId, appointmentId));
     }
 
-    @PostMapping("{appointmentId}/end")
+    @PostMapping("/{appointmentId}/end")
     public ResponseEntity<?> endCallAsUser(
             @PathVariable("appointmentId") Long appointmentId,
             HttpServletRequest request

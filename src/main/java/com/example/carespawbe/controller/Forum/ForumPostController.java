@@ -78,9 +78,9 @@ public class ForumPostController {
 
         System.out.println("Content of new post: " + postData.getContent());
         System.out.println("Title of new post: " + postData.getTitle());
+        System.out.println("Type of new post: " + postData.getTypeId());
         System.out.println("Categories of new post: " + postData.getSelectedCategoryList());
         ForumPostResponse post = forumPostService.addForumPost(postData);
-//        ForumPostResponse post = null;
         return ResponseEntity.ok(post);
     }
 
@@ -119,15 +119,6 @@ public class ForumPostController {
         }
         return ResponseEntity.ok("Save successful");
     }
-
-//    @GetMapping("/post-list/type/{typeId}")
-//    public ResponseEntity<?> getPostListByType(@PathVariable int typeId, HttpServletRequest request) {
-//        Long userId = (Long) request.getAttribute("userId");
-//        if (userId != 0L) {
-//            return ResponseEntity.ok(forumPostService.getPostListByType(typeId, userId));
-//        }
-//        return ResponseEntity.ok(getPostList(request));
-//    }
 
     @PatchMapping("/save-post-detail/{postId}")
     public ResponseEntity<String> saveForumPostDetail(@PathVariable Long postId, HttpServletRequest request) {
