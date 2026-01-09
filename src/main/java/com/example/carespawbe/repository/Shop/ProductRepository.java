@@ -1,5 +1,6 @@
 package com.example.carespawbe.repository.Shop;
 
+import com.example.carespawbe.dto.Shop.response.ProductInfoDTO;
 import com.example.carespawbe.entity.Shop.ProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,4 +59,34 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
         WHERE product_id = :productId
     """, nativeQuery = true)
     void syncProductSoldFromSkus(@Param("productId") Long productId);
+
+    @Query("""
+        select new com.example.carespawbe.dto.Shop.response.ProductInfoDTO(
+            p.productId,
+            p.productName,
+            p.productUsing,
+            p.productCreatedAt,
+            p.category.categoryId,
+            p.shop.shopId
+        )
+        from ProductEntity p
+        order by p.productCreatedAt desc
+    """)
+    List<ProductInfoDTO> findAllProductInfos();
+
+    @Query("""
+    SELECT p
+    FROM ProductEntity p
+    JOIN FETCH p.shop s
+    JOIN FETCH p.category c
+    WHERE
+        (:kw IS NULL OR :kw = '' OR
+         LOWER(p.productName) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+         LOWER(p.productUsing) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+         LOWER(s.shopName) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+         LOWER(c.categoryName) LIKE LOWER(CONCAT('%', :kw, '%'))
+        )
+    ORDER BY p.productCreatedAt DESC
+""")
+    List<ProductEntity> searchEntities(@Param("kw") String keyword);
 }

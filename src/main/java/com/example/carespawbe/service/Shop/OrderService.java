@@ -1,5 +1,6 @@
 package com.example.carespawbe.service.Shop;
 
+import com.example.carespawbe.dto.Shop.RevenueTimelineDTO;
 import com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
 import com.example.carespawbe.dto.Shop.response.OrderResponse;
@@ -19,4 +20,6 @@ public interface OrderService {
     ShopOrderResponse getShopOrderDetail(Long id);
 
     List<UserProductOrderTimeDTO> findUserProductOrderTimes();
+
+    List<RevenueTimelineDTO> getRevenueTimeline(Long shopId, int monthsBack, int monthsForward);
 }

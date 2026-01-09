@@ -25,6 +25,7 @@ public interface ProductMapper {
     @Mapping(target = "categoryName", source = "category.categoryName")
     @Mapping(target = "shopId", source = "shop.shopId")
     @Mapping(target = "shopName", source = "shop.shopName")
+    @Mapping(target = "shopLogo", source = "shop.shopLogo")
     @Mapping(target = "imageUrls", expression = "java(mapImages(productEntity.getImageProductList()))")
 
     // ✅ QUAN TRỌNG: map sold của product (tổng sold)
