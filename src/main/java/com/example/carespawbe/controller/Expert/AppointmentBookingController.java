@@ -59,11 +59,6 @@ public class AppointmentBookingController {
         req.setPayment(info);
         BookingCheckoutResult result = bookingCheckoutService.checkout(req, petImage, userId);
 
-//        return ResponseEntity.ok(Map.of(
-//                "appointmentId", result.getAppointmentId(),
-//                "paymentId", result.getPaymentId(),
-//                "paymentUrl", result.getPaymentUrl()
-//        ));
         return ResponseEntity.ok("ok");
     }
 
