@@ -7,6 +7,7 @@ import com.example.carespawbe.mapper.Shop.ProductMapper;
 import com.example.carespawbe.repository.Shop.*;
 import com.example.carespawbe.security.JwtService;
 import com.example.carespawbe.service.CloudinaryService;
+import com.example.carespawbe.service.Shop.ProductRecommendationService;
 import com.example.carespawbe.service.Shop.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class ProductServiceImp implements ProductService {
     private final ImageProductRepository imageProductRepository;
     private final ProductSkuValueRepository productSkuValueRepository;
     private final JwtService jwtService;
+    private final ProductRecommendationService productRecommendationService;
 
     private Long getUserIdFromAuthHeader(String authorizationHeader) {
         String token = authorizationHeader != null && authorizationHeader.startsWith("Bearer ")
@@ -162,8 +164,8 @@ public class ProductServiceImp implements ProductService {
         }
     }
 
-@Override
-public ProductDetailResponse getProductDetailById(Long productId) {
+    @Override
+    public ProductDetailResponse getProductDetailById(Long productId) {
     ProductEntity p = productRepository.findWithSkus(productId)
             .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -261,6 +263,7 @@ public ProductDetailResponse getProductDetailById(Long productId) {
             .categoryName(p.getCategory() != null ? p.getCategory().getCategoryName() : null)
             .shopId(p.getShop() != null ? p.getShop().getShopId() : null)
             .shopName(p.getShop() != null ? p.getShop().getShopName() : null)
+            .shopLogo(p.getShop() != null ? p.getShop().getShopLogo() : null)
             .imageUrls(imageUrls)
             .productVideoUrl(p.getProductVideoUrl())
             .productCreatedAt(p.getProductCreatedAt())
@@ -271,126 +274,6 @@ public ProductDetailResponse getProductDetailById(Long productId) {
             .skus(skus)
             .build();
 }
-
-
-    private List<SkuResponse> mapSkuResponses(ProductEntity product) {
-        if (product.getSkuList() == null) return List.of();
-
-        return product.getSkuList().stream()
-                .filter(s -> Boolean.TRUE.equals(s.getIsActive()))
-                .map(sku -> {
-                    List<Long> valueIds = (sku.getSkuValues() == null) ? List.of()
-                            : sku.getSkuValues().stream()
-                            .map(x -> x.getVarriantValue() != null ? x.getVarriantValue().getVarriantValueId() : null)
-                            .filter(Objects::nonNull)
-                            .distinct()
-                            .toList();
-
-                    return SkuResponse.builder()
-                            .productSkuId(sku.getProductSkuId())
-                            .skuCode(sku.getSkuCode())
-                            .skuName(sku.getSkuName())
-                            .stock(Optional.ofNullable(sku.getStock()).orElse(0))
-                            .price(Optional.ofNullable(sku.getPrice()).orElse(BigDecimal.ZERO))
-                            .isActive(sku.getIsActive())
-                            .varriantValueIds(valueIds) // ✅ not null
-                            .build();
-                })
-                .toList();
-    }
-
-    private Map<Long, Integer> calcTotalStockByValueId(List<SkuResponse> skus) {
-        Map<Long, Integer> m = new HashMap<>();
-        for (SkuResponse s : skus) {
-            int stock = Optional.ofNullable(s.getStock()).orElse(0);
-            List<Long> ids = (s.getVarriantValueIds() == null) ? List.of() : s.getVarriantValueIds();
-            for (Long id : ids) {
-                if (id == null) continue;
-                m.put(id, m.getOrDefault(id, 0) + stock);
-            }
-        }
-        return m;
-    }
-
-    private List<VariantGroupResponse> buildVariantGroupsFromSkuValues(
-            ProductEntity product,
-            Map<Long, Integer> totalStockByValueId,
-            List<SkuResponse> skus
-    ) {
-        if (product.getSkuList() == null) return List.of();
-
-        // varriantId -> (varriantName, valueId->valueName)
-        Map<Long, VariantGroupResponse> groupMap = new LinkedHashMap<>();
-        Map<Long, String> valueNameMap = new HashMap<>(); // valueId -> name
-
-        for (ProductSkuEntity sku : product.getSkuList()) {
-            if (!Boolean.TRUE.equals(sku.getIsActive())) continue;
-            if (sku.getSkuValues() == null) continue;
-
-            for (ProductSkuValueEntity sv : sku.getSkuValues()) {
-                VarriantEntity v = sv.getVarriant();
-                VarriantValueEntity vv = sv.getVarriantValue();
-                if (v == null || vv == null) continue;
-                if (Boolean.FALSE.equals(vv.getIsActive())) continue;
-
-                groupMap.putIfAbsent(
-                        v.getVarriantId(),
-                        VariantGroupResponse.builder()
-                                .varriantId(v.getVarriantId())
-                                .varriantName(v.getVarriantName())
-                                .values(new ArrayList<>())
-                                .build()
-                );
-
-                valueNameMap.put(vv.getVarriantValueId(), vv.getValueName());
-            }
-        }
-
-        // build value list unique by group
-        for (VariantGroupResponse g : groupMap.values()) {
-            // collect valueIds belonging to this varriant from skuValues
-            Set<Long> valueIds = new LinkedHashSet<>();
-            for (ProductSkuEntity sku : product.getSkuList()) {
-                if (!Boolean.TRUE.equals(sku.getIsActive())) continue;
-                if (sku.getSkuValues() == null) continue;
-
-                for (ProductSkuValueEntity sv : sku.getSkuValues()) {
-                    if (sv.getVarriant() == null || sv.getVarriantValue() == null) continue;
-                    if (!Objects.equals(sv.getVarriant().getVarriantId(), g.getVarriantId())) continue;
-                    if (Boolean.FALSE.equals(sv.getVarriantValue().getIsActive())) continue;
-
-                    valueIds.add(sv.getVarriantValue().getVarriantValueId());
-                }
-            }
-
-            List<VariantGroupResponse.Value> values = new ArrayList<>();
-            for (Long valueId : valueIds) {
-                Integer totalStock = totalStockByValueId.getOrDefault(valueId, 0);
-
-                // optional: min/max price của các SKU chứa value này (để FE show tham khảo)
-                Double minP = null, maxP = null;
-                for (SkuResponse s : skus) {
-                    if (s.getVarriantValueIds() == null) continue;
-                    if (!s.getVarriantValueIds().contains(valueId)) continue;
-
-                    double price = s.getPrice() != null ? s.getPrice().doubleValue() : 0.0;
-                    minP = (minP == null) ? price : Math.min(minP, price);
-                    maxP = (maxP == null) ? price : Math.max(maxP, price);
-                }
-
-                values.add(VariantGroupResponse.Value.builder()
-                        .varriantValueId(valueId)
-                        .valueName(valueNameMap.getOrDefault(valueId, ""))
-                        .totalStock(totalStock) // ✅ FE disable nếu 0
-                        .minPrice(minP)
-                        .maxPrice(maxP)
-                        .build());
-            }
-            g.setValues(values);
-        }
-
-        return new ArrayList<>(groupMap.values());
-    }
 
     @Override
     public void deleteProduct(Long productId, String authorizationHeader) {
@@ -450,44 +333,6 @@ public ProductDetailResponse getProductDetailById(Long productId) {
                 .collect(Collectors.toList());
     }
 
-    private List<VarriantValueResponse> buildVarriantValues(ProductEntity product) {
-        if (product.getSkuList() == null) return List.of();
-
-        // distinct theo varriantId + varriantValueId
-        java.util.Map<String, com.example.carespawbe.dto.Shop.response.VarriantValueResponse> map = new java.util.LinkedHashMap<>();
-
-        for (ProductSkuEntity sku : product.getSkuList()) {
-            if (sku.getSkuValues() == null) continue;
-
-            for (ProductSkuValueEntity sv : sku.getSkuValues()) {
-                VarriantEntity v = sv.getVarriant();
-                VarriantValueEntity vv = sv.getVarriantValue();
-                if (v == null || vv == null) continue;
-
-                Long varriantId = v.getVarriantId();
-                Long varriantValueId = vv.getVarriantValueId();
-                if (varriantId == null || varriantValueId == null) continue;
-
-                String key = varriantId + ":" + varriantValueId;
-
-                map.putIfAbsent(key,
-                        com.example.carespawbe.dto.Shop.response.VarriantValueResponse.builder()
-                                .varriantValueId(varriantValueId)
-                                .varriantId(varriantId)
-                                .varriantName(v.getVarriantName())
-                                .valueName(vv.getValueName())
-                                .isActive(vv.getIsActive() == null ? true : vv.getIsActive())
-                                .build()
-                );
-            }
-        }
-
-        // nếu muốn chỉ trả active values:
-        return map.values().stream()
-                .filter(x -> x.getIsActive() == null || Boolean.TRUE.equals(x.getIsActive()))
-                .toList();
-    }
-
     // =========================
     // ✅ ADD: Best Seller Products
     // =========================
@@ -499,4 +344,73 @@ public ProductDetailResponse getProductDetailById(Long productId) {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ProductInfoDTO> getAllProductInfos() {
+        return productRepository.findAllProductInfos();
+    }
+
+    @Override
+    public List<ProductResponse> getRecommendedProducts(Long userId, int limit) {
+        if (userId == null) userId = 0L;
+        if (limit <= 0) limit = 6;
+
+        List<Long> ids = productRecommendationService.getRecommendedProducts(userId);
+        if (ids == null || ids.isEmpty()) return List.of();
+
+        if (ids.size() > limit) {
+            ids = ids.subList(0, limit);
+        }
+
+        // load entities
+        List<ProductEntity> products = productRepository.findAllById(ids);
+        if (products.isEmpty()) return List.of();
+
+        // map id -> entity
+        Map<Long, ProductEntity> map = products.stream()
+                .collect(Collectors.toMap(ProductEntity::getProductId, p -> p, (a, b) -> a));
+
+        // keep original order from AI
+        return ids.stream()
+                .map(map::get)
+                .filter(Objects::nonNull)
+                .map(productMapper::toProductResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ProductCardResponse> searchProductCards(String keyword) {
+        String kw = (keyword == null) ? "" : keyword.trim();
+
+        // ✅ cách 100% chạy: search entity đã fetch shop + category
+        List<ProductEntity> products = productRepository.searchEntities(kw);
+        if (products == null || products.isEmpty()) return List.of();
+
+        List<Long> ids = products.stream().map(ProductEntity::getProductId).toList();
+
+        // lấy ảnh theo list productIds
+        List<ImageProductEntity> images = imageProductRepository.findImagesByProductIds(ids);
+
+        // map productId -> first image url
+        java.util.Map<Long, String> thumbMap = new java.util.HashMap<>();
+        for (ImageProductEntity img : images) {
+            Long pid = img.getImageProduct().getProductId();
+            // chỉ set ảnh đầu tiên (uploadedAt ASC)
+            thumbMap.putIfAbsent(pid, img.getImageProductUrl());
+        }
+
+        return products.stream().map(p -> ProductCardResponse.builder()
+                .productId(p.getProductId())
+                .productName(p.getProductName())
+                .productPrice(p.getProductPrice())
+                .rating(p.getRating() == null ? 0.0 : p.getRating())
+                .sold(p.getSold() == null ? 0L : p.getSold())
+                .shopId(p.getShop() != null ? p.getShop().getShopId() : null)
+                .shopName(p.getShop() != null ? p.getShop().getShopName() : null)
+                .shopLogo(p.getShop() != null ? p.getShop().getShopLogo() : null)
+                .categoryId(p.getCategory() != null ? p.getCategory().getCategoryId() : null)
+                .categoryName(p.getCategory() != null ? p.getCategory().getCategoryName() : null)
+                .thumbnailUrl(thumbMap.get(p.getProductId()))
+                .build()
+        ).toList();
+    }
 }

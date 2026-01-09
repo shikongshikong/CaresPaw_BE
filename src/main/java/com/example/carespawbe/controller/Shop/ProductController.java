@@ -1,10 +1,13 @@
 package com.example.carespawbe.controller.Shop;
 
 import com.example.carespawbe.dto.Shop.request.ProductRequest;
+import com.example.carespawbe.dto.Shop.response.ProductCardResponse;
 import com.example.carespawbe.dto.Shop.response.ProductDetailResponse;
+import com.example.carespawbe.dto.Shop.response.ProductInfoDTO;
 import com.example.carespawbe.dto.Shop.response.ProductResponse;
 import com.example.carespawbe.service.Shop.ProductService;
 import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -176,4 +179,36 @@ public class ProductController {
         return productService.getBestSellers();
     }
 
+    @GetMapping("/infos")
+    public ResponseEntity<List<ProductInfoDTO>> getAllProductInfos() {
+        return ResponseEntity.ok(productService.getAllProductInfos());
+    }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<?> recommendProducts(
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "6") int limit,
+            @RequestParam(required = false) Long userId // fallback test nếu chưa có auth filter set attribute
+    ) {
+        try {
+            Long uid = (Long) request.getAttribute("userId");
+            if (uid == null || uid == 0L) {
+                uid = (userId != null) ? userId : 0L;
+            }
+
+            List<ProductResponse> rs = productService.getRecommendedProducts(uid, limit);
+            return ResponseEntity.ok(rs);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchProducts(@RequestParam(defaultValue = "") String keyword) {
+        System.out.println("Search product key: " + keyword);
+        List<ProductCardResponse> rs = productService.searchProductCards(keyword);
+        return ResponseEntity.ok(rs);
+    }
 }

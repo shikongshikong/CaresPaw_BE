@@ -60,7 +60,7 @@ public class ForumPostCommentService {
                     .type(NotificationType.FORUM)
                     .title(cm.getUser().getFullname() + " replied your forum post")
                     .message(cm.getContent())
-                    .link("/forum/posts/" + post.getId())
+                    .link("/forum/post-detail/" + post.getId())
                     .build());
         }
 
