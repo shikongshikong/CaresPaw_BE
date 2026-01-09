@@ -20,12 +20,14 @@ import com.example.carespawbe.service.Notification.NotificationService;
 import com.example.carespawbe.service.Shop.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,79 @@ public class OrderServiceImp implements OrderService {
     @Autowired private OrderMapper orderMapper;
     @Autowired private ShopOrderMapper shopOrderMapper;
 
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+//    private void saveToRedis(OrderEntity orderEntity) {
+//        Long userId = orderEntity.getUserEntity().getId();
+//        long now = System.currentTimeMillis();
+//        String key = "user:" + userId + ":purchase";
+//
+//        List<Long> productIds = orderItemRepository.findDistinctProductIdsByOrderId(orderEntity.getOrderId());
+//        if (productIds == null || productIds.isEmpty()) return;
+//
+////        for (Long productId : productIds) {
+////            redisTemplate.opsForZSet()
+////                    .add(key, productId.toString(), now);
+////        }
+//
+//        int i = 0;
+//        for (Long productId : productIds) {
+//            redisTemplate.opsForZSet().add(key, productId.toString(), now + (i++ * 0.001));
+//        }
+//
+//        long maxSize = 100;
+//        Long size = redisTemplate.opsForZSet().zCard(key);
+//        if (size != null && size > maxSize) {
+//            // remove oldest elements (lowest score)
+//            redisTemplate.opsForZSet().removeRange(key, 0, size - maxSize - 1);
+//        }
+//
+//        // TTL 7 days
+//        redisTemplate.expire(key, 7, TimeUnit.DAYS);
+//    }
+    private static final int MAX_HISTORY_SIZE = 100;
+    private static final long TTL_DAYS = 7;
+    private void saveToRedis(OrderEntity orderEntity) {
+        if (orderEntity == null
+                || orderEntity.getUserEntity() == null
+                || orderEntity.getUserEntity().getId() == null
+                || orderEntity.getOrderId() == null) {
+            return;
+        }
+
+        Long userId = orderEntity.getUserEntity().getId();
+        String key = "user:" + userId + ":purchase";
+
+        // Lấy danh sách productId trong order
+        List<Long> productIds =
+                orderItemRepository.findDistinctProductIdsByOrderId(orderEntity.getOrderId());
+
+        if (productIds == null || productIds.isEmpty()) return;
+
+        long now = System.currentTimeMillis();
+
+        // Add vào ZSET với score = timestamp.
+        // Thêm offset nhỏ để tránh trùng score khi 1 order có nhiều product => thứ tự ổn định hơn.
+        int i = 0;
+        for (Long productId : productIds) {
+            if (productId == null) continue;
+            double score = now + (i++ * 0.001d);
+            redisTemplate.opsForZSet().add(key, String.valueOf(productId), score);
+        }
+
+        // Trim: giữ lại MAX_HISTORY_SIZE phần tử mới nhất (score lớn nhất)
+        Long size = redisTemplate.opsForZSet().zCard(key);
+        if (size != null && size > MAX_HISTORY_SIZE) {
+            long removeCount = size - MAX_HISTORY_SIZE; // số phần tử cũ cần xóa
+            // Xóa từ rank 0 (cũ nhất) đến rank removeCount-1
+            redisTemplate.opsForZSet().removeRange(key, 0, removeCount - 1);
+        }
+
+        // TTL 7 ngày (mỗi lần mua lại refresh TTL)
+        redisTemplate.expire(key, TTL_DAYS, TimeUnit.DAYS);
+    }
+
     @Override
     @Transactional
     public OrderResponse checkout(Long userId, OrderRequest req) {
@@ -66,6 +141,8 @@ public class OrderServiceImp implements OrderService {
         if (req == null || req.getShopOrders() == null || req.getShopOrders().isEmpty()) {
             throw new RuntimeException("shopOrders is empty");
         }
+
+        List<Long> productIds = new ArrayList<>();
 
         // ===== 1) LẤY cartItemIds từ request =====
         List<Long> cartItemIds = req.getShopOrders().stream()
@@ -142,6 +219,12 @@ public class OrderServiceImp implements OrderService {
                 .build();
 
         order = orderRepo.save(order);
+
+        try {
+            saveToRedis(order);
+        } catch (Exception e) {
+            System.out.println("Redis save purchase failed" + e.getMessage());
+        }
 
         List<ShopOrderEntity> shopOrdersToSave = new ArrayList<>();
 

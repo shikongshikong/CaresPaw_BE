@@ -94,7 +94,6 @@ public class ForumPostController {
         if (userId == null) {
             userId = 0L;
         }
-//        System.out.println("UserEntity id in get forum detail: " + userId);
         ForumPostDetailResponse response = ForumPostDetailResponse.builder()
                 .post(forumPostService.getForumPostById(postId, userId, request))
                 .comments(forumPostCommentService.getPostCommentsByPostId(postId))
@@ -104,13 +103,6 @@ public class ForumPostController {
         System.out.println("save of forum detail: " + response.getPost().isSaved());
         return ResponseEntity.ok(response);
     }
-
-//    @GetMapping("/post-list")
-//    public ResponseEntity<?> getPostList(HttpServletRequest request) {
-//        Long userId = (Long) request.getAttribute("userId");
-//        List<ShortForumPostResponse> posts = forumPostService.getForumPostListReverse(userId);
-//        return ResponseEntity.ok(posts);
-//    }
 
     @PatchMapping("/save-post")
     public ResponseEntity<String> saveForumPosts(@RequestBody List<SaveStatusUpdateRequest> requests, HttpServletRequest request) {
@@ -233,7 +225,6 @@ public class ForumPostController {
 
     @GetMapping("/getRcmPostDB")
     public ResponseEntity<?> getPostTrainingData() {
-
         return ResponseEntity.ok(forumService.getForumTrainData());
     }
 

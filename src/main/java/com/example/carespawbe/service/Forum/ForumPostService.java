@@ -220,6 +220,7 @@ public class ForumPostService {
 
     public Page<ShortForumPostResponse> getForumPostByPage(Long userId, int page, int size) {
         System.out.println("User id in post service: " + userId);
+        System.out.println("User id in post service: " + userId);
         return forumPostRepository.findPageShortByCreateAt(userId, PageRequest.of(page - 1, size));
     }
 

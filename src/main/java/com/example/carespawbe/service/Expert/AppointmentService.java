@@ -8,14 +8,12 @@ import com.example.carespawbe.dto.Expert.UpComingApp;
 import com.example.carespawbe.dto.Expert.videoCall.*;
 import com.example.carespawbe.dto.Notification.NotificationCreateRequest;
 import com.example.carespawbe.entity.Auth.UserEntity;
-import com.example.carespawbe.entity.Expert.AppointmentEntity;
-import com.example.carespawbe.entity.Expert.AvailabilitySlotEntity;
-import com.example.carespawbe.entity.Expert.ExpertEntity;
-import com.example.carespawbe.entity.Expert.PetEntity;
+import com.example.carespawbe.entity.Expert.*;
 import com.example.carespawbe.enums.AppointmentStatus;
 import com.example.carespawbe.enums.NotificationType;
 import com.example.carespawbe.enums.CallJoinState;
 import com.example.carespawbe.repository.Expert.AppointmentRepository;
+import com.example.carespawbe.repository.Expert.ExpertEarningRepository;
 import com.example.carespawbe.service.Expert.videoCalling.JitsiMeetService;
 import com.example.carespawbe.service.Notification.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,14 +26,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
 
 @Service
 public class AppointmentService {
+    private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.05");
 
     @Autowired
     private final AppointmentRepository appointmentRepository;
+    private final ExpertEarningRepository expertEarningRepository;
     private final JitsiMeetService jitsiMeetService;
 
     @Autowired
@@ -192,8 +193,9 @@ public class AppointmentService {
 
 
     // calling by jitsi
-    public AppointmentService(AppointmentRepository appointmentRepository, JitsiMeetService jitsiMeetService, Clock clock) {
+    public AppointmentService(AppointmentRepository appointmentRepository, ExpertEarningRepository expertEarningRepository, JitsiMeetService jitsiMeetService, Clock clock) {
         this.appointmentRepository = appointmentRepository;
+        this.expertEarningRepository = expertEarningRepository;
         this.jitsiMeetService = jitsiMeetService;
         this.clock = clock;
     }
@@ -794,26 +796,72 @@ public class AppointmentService {
         }
     }
 
+//    @Transactional
+//    public void endCall(Long appointmentId, Long actorUserId, Long actorExpertId) {
+//        AppointmentEntity a = appointmentRepository.findByIdWithSlotUserExpert(appointmentId)
+//                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+//
+//        if (a.getStatus() == null) a.setStatus(0);
+//        if (a.getStatus() == 3) return; // canceled -> ignore
+//
+//        boolean isOwnerUser = (actorUserId != null && a.getUser() != null && actorUserId.equals(a.getUser().getId()));
+//        boolean isOwnerExpert = (actorExpertId != null && a.getExpert() != null && actorExpertId.equals(a.getExpert().getId()));
+//
+//        if (!isOwnerUser && !isOwnerExpert) {
+//            throw new SecurityException("Not allowed to end this call");
+//        }
+//
+//        a.setStatus(2);
+//    }
     @Transactional
     public void endCall(Long appointmentId, Long actorUserId, Long actorExpertId) {
         AppointmentEntity a = appointmentRepository.findByIdWithSlotUserExpert(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
 
         if (a.getStatus() == null) a.setStatus(0);
-        if (a.getStatus() == 3) return; // canceled -> ignore
 
-        // AuthZ: chỉ user của appointment hoặc expert của appointment mới được end
-        boolean isOwnerUser = (actorUserId != null && a.getUser() != null && actorUserId.equals(a.getUser().getId()));
-        boolean isOwnerExpert = (actorExpertId != null && a.getExpert() != null && actorExpertId.equals(a.getExpert().getId()));
+        // idempotent & safety
+        if (a.getStatus() == 3) return; // cancelled
+        if (a.getStatus() == 2) return; // already success → DO NOT create duplicate earning
+
+        boolean isOwnerUser =
+                actorUserId != null && a.getUser() != null && actorUserId.equals(a.getUser().getId());
+        boolean isOwnerExpert =
+                actorExpertId != null && a.getExpert() != null && actorExpertId.equals(a.getExpert().getId());
 
         if (!isOwnerUser && !isOwnerExpert) {
             throw new SecurityException("Not allowed to end this call");
         }
 
-        // Nếu đang pending/progress -> success
-        // Bạn có thể siết thêm: chỉ cho end khi now >= startTime, tuỳ policy
+        // 1️⃣ mark appointment success
         a.setStatus(2);
+        appointmentRepository.save(a);
+
+        // 2️⃣ create NEW earning record
+        createExpertEarning(a);
     }
+
+    private void createExpertEarning(AppointmentEntity a) {
+
+        BigDecimal total = a.getPrice() != null ? a.getPrice() : BigDecimal.ZERO;
+
+        BigDecimal platformFee = total.multiply(PLATFORM_FEE_RATE);
+        BigDecimal expertGain = total.subtract(platformFee);
+
+        ExpertEarningEntity earning = new ExpertEarningEntity();
+        earning.setAppointmentEntity(a);
+        earning.setExpertEntity(a.getExpert());
+
+        earning.setTotalEarning(total);
+        earning.setPlatformFee(platformFee);
+        earning.setExpertGain(expertGain);
+
+        earning.setStatus(0);                 // 0 = not paid yet
+        earning.setCreateAt(LocalDateTime.now());
+
+        expertEarningRepository.save(earning);
+    }
+
 
     // Helpers nếu bạn muốn check time (optional)
     public boolean isNowWithinSlot(AppointmentEntity a) {
