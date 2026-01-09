@@ -2,9 +2,11 @@ package com.example.carespawbe.service.Admin;
 
 import com.example.carespawbe.dto.Admin.AdminExpertVerifyItemResponse;
 import com.example.carespawbe.dto.Expert.CertificateResponse;
+import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Expert.CertificateEntity;
 import com.example.carespawbe.entity.Expert.ExpertEntity;
 import com.example.carespawbe.entity.Expert.ExpertToExpertCategoryEntity;
+import com.example.carespawbe.repository.Auth.UserRepository;
 import com.example.carespawbe.repository.Expert.CertificateRepository;
 import com.example.carespawbe.repository.Expert.ExpertRepository;
 import com.example.carespawbe.repository.Expert.ExpertToExpertCategoryRepository;
@@ -21,6 +23,7 @@ public class AdminExpertVerifyService {
     private final ExpertRepository expertRepository;
     private final CertificateRepository certificateRepository;
     private final ExpertToExpertCategoryRepository expertToExpertCategoryRepository;
+    private final UserRepository userRepository;
 
     public static final int PENDING = 0;
     public static final int ACTIVE  = 1;
@@ -57,6 +60,15 @@ public class AdminExpertVerifyService {
                 .orElseThrow(() -> new RuntimeException("Expert not found"));
         expert.setStatus(ACTIVE);
         expertRepository.save(expert);
+
+        UserEntity user = expert.getUser();
+        if (user == null) {
+            throw new RuntimeException("User not found for this expert");
+        }
+
+        if (user.getRole() == 0) return;
+        user.setRole(3);
+        userRepository.save(user);
     }
 
     @Transactional

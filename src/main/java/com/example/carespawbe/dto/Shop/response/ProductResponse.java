@@ -22,6 +22,7 @@ public class ProductResponse {
 
     private Long shopId;
     private String shopName;
+    private String shopLogo;
 
     private List<String> imageUrls;
     private String productVideoUrl;

@@ -1,10 +1,7 @@
 package com.example.carespawbe.service.Shop;
 
 import com.example.carespawbe.dto.Shop.request.ProductRequest;
-import com.example.carespawbe.dto.Shop.response.ImageProductResponse;
-import com.example.carespawbe.dto.Shop.response.ProductDetailResponse;
-import com.example.carespawbe.dto.Shop.response.ProductInfoDTO;
-import com.example.carespawbe.dto.Shop.response.ProductResponse;
+import com.example.carespawbe.dto.Shop.response.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -37,6 +34,7 @@ public interface ProductService {
 
     List<ProductInfoDTO> getAllProductInfos();
 
-//    List<> getRecommendedProducts(Long userId)
-//    List<int>
+    List<ProductResponse> getRecommendedProducts(Long userId, int limit);
+    List<ProductCardResponse> searchProductCards(String keyword);
+
 }

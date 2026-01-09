@@ -73,5 +73,21 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
         order by p.productCreatedAt desc
     """)
     List<ProductInfoDTO> findAllProductInfos();
+
+    @Query("""
+    SELECT p
+    FROM ProductEntity p
+    JOIN FETCH p.shop s
+    JOIN FETCH p.category c
+    WHERE
+        (:kw IS NULL OR :kw = '' OR
+         LOWER(p.productName) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+         LOWER(p.productUsing) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+         LOWER(s.shopName) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+         LOWER(c.categoryName) LIKE LOWER(CONCAT('%', :kw, '%'))
+        )
+    ORDER BY p.productCreatedAt DESC
+""")
+    List<ProductEntity> searchEntities(@Param("kw") String keyword);
 }
 

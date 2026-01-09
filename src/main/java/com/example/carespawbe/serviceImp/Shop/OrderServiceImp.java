@@ -1,6 +1,7 @@
 package com.example.carespawbe.serviceImp.Shop;
 
 import com.example.carespawbe.dto.Notification.NotificationCreateRequest;
+import com.example.carespawbe.dto.Shop.RevenueTimelineDTO;
 import com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO;
 import com.example.carespawbe.dto.Shop.request.OrderItemRequest;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
@@ -533,6 +534,47 @@ public class OrderServiceImp implements OrderService {
         } else if (allCancelled) {
             orderRepo.updateOrderStatus(orderId, OrderStatus.CANCELLED.getValue(), LocalDate.now());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RevenueTimelineDTO> getRevenueTimeline(Long shopId, int monthsBack, int monthsForward) {
+        if (shopId == null) throw new RuntimeException("shopId is required");
+
+        LocalDate now = LocalDate.now();
+        LocalDate start = now.minusMonths(monthsBack).withDayOfMonth(1);
+        LocalDate endExclusive = now.plusMonths(monthsForward + 1).withDayOfMonth(1); // exclusive
+
+        int COMPLETED = OrderStatus.COMPLETED.getValue();
+
+        List<Object[]> rows = orderItemRepository.revenueByMonthForShopCompleted(
+                shopId, COMPLETED, start, endExclusive
+        );
+
+        Map<String, Double> actualMap = new HashMap<>();
+        for (Object[] r : rows) {
+            int y = ((Number) r[0]).intValue();
+            int m = ((Number) r[1]).intValue();
+            double revenue = ((Number) r[2]).doubleValue();
+            actualMap.put(y + "-" + m, revenue);
+        }
+
+        List<RevenueTimelineDTO> result = new ArrayList<>();
+        LocalDate cursor = start;
+
+        while (cursor.isBefore(endExclusive)) {
+            int y = cursor.getYear();
+            int m = cursor.getMonthValue();
+            Double actual = actualMap.getOrDefault(y + "-" + m, 0.0);
+
+            // Forecast: để null hoặc sample (tuỳ bạn)
+            Double forecast = null;
+
+            result.add(new RevenueTimelineDTO(y, m, actual, forecast));
+            cursor = cursor.plusMonths(1);
+        }
+
+        return result;
     }
 
 }

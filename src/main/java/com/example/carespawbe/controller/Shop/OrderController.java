@@ -1,5 +1,6 @@
 package com.example.carespawbe.controller.Shop;
 
+import com.example.carespawbe.dto.Shop.RevenueTimelineDTO;
 import com.example.carespawbe.dto.Shop.UserProductOrderTimeDTO;
 import com.example.carespawbe.dto.Shop.request.OrderRequest;
 import com.example.carespawbe.dto.Shop.response.OrderResponse;
@@ -59,7 +60,17 @@ public class OrderController {
 
     @GetMapping("/user-product-times")
     public List<UserProductOrderTimeDTO> getUserProductTimes() {
+
         return orderService.findUserProductOrderTimes();
     }
 
+    @GetMapping("/shop/{shopId}/revenue-timeline")
+    public ResponseEntity<?> getRevenueTimeline(
+            @PathVariable Long shopId,
+            @RequestParam(defaultValue = "8") int monthsBack,
+            @RequestParam(defaultValue = "8") int monthsForward
+    ) {
+        List<RevenueTimelineDTO> res = orderService.getRevenueTimeline(shopId, monthsBack, monthsForward);
+        return ResponseEntity.ok(res);
+    }
 }
