@@ -47,6 +47,17 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, Long
     List<UserProductOrderTimeDTO> findUserProductOrderTimes();
 
     @Query("""
+        select distinct p.productId
+        from OrderEntity o
+        join o.shopOrders so
+        join so.orderItemEntities oi
+        join oi.productSku sku
+        join sku.product p
+        where o.orderId = :orderId
+    """)
+    List<Long> findDistinctProductIdsByOrderId(@Param("orderId") Long orderId);
+           
+   @Query("""
     select
       function('year', o.orderCreatedAt),
       function('month', o.orderCreatedAt),

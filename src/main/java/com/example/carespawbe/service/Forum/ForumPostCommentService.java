@@ -3,6 +3,7 @@ package com.example.carespawbe.service.Forum;
 import com.example.carespawbe.dto.Forum.ForumPostCommentRequest;
 import com.example.carespawbe.dto.Forum.ForumPostCommentResponse;
 import com.example.carespawbe.dto.Notification.NotificationCreateRequest;
+import com.example.carespawbe.entity.Auth.UserEntity;
 import com.example.carespawbe.entity.Forum.ForumPostCommentEntity;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
 import com.example.carespawbe.enums.NotificationType;
@@ -10,6 +11,7 @@ import com.example.carespawbe.mapper.Forum.ForumPostCommentMapper;
 import com.example.carespawbe.repository.Forum.FollowingRepository;
 import com.example.carespawbe.repository.Forum.ForumPostCommentRepository;
 import com.example.carespawbe.repository.Auth.UserRepository;
+import com.example.carespawbe.repository.Forum.ForumPostRepository;
 import com.example.carespawbe.service.Notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,9 @@ public class ForumPostCommentService {
     private ForumPostCommentMapper forumPostCommentMapper;
 
     @Autowired
+    private ForumPostRepository forumPostRepository;
+
+    @Autowired
     private ForumPostService forumPostService;
 
     @Autowired
@@ -38,11 +43,11 @@ public class ForumPostCommentService {
     private NotificationService notificationService;
 
     public ForumPostCommentResponse addPostComment(ForumPostCommentRequest forumPostCommentRequest, Long userId) {
-//        ForumPostEntity forumPostEntity = forumPostRepository.findById(forumPostCommentRequest.getPostId()).orElse(null);
-//        UserEntity userEntity = userRepository.findById(forumPostCommentRequest.getUserId()).orElse(null);
+        ForumPostEntity forumPostEntity = forumPostRepository.findById(forumPostCommentRequest.getPostId()).orElse(null);
+        UserEntity userEntity = userRepository.findById(forumPostCommentRequest.getUserId()).orElse(null);
         ForumPostCommentEntity cm = forumPostCommentMapper.toPostComment(forumPostCommentRequest);
-//        cm.setForumPostEntity(forumPostEntity);
-//        cm.setUserEntity(userEntity);
+        cm.setForumPostEntity(forumPostEntity);
+        cm.setUser(userEntity);
         forumPostCommentRepository.save(cm);
 
         ForumPostEntity post = forumPostService.getPostEntityById(forumPostCommentRequest.getPostId());
@@ -82,7 +87,7 @@ public class ForumPostCommentService {
 
         cmRes.setFollowState(followState);
         cmRes.setFullname(cm.getUser().getFullname());
-
+        System.out.println("fullname: " + cm.getUser().getFullname());
         return cmRes;
     }
 

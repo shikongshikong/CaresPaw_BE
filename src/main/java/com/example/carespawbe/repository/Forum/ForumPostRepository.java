@@ -112,7 +112,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPostEntity, Long
             "CASE " +
             "WHEN p.user.id = :userId THEN 0 " +
             "WHEN f.follower.id = :userId AND f.followee.id = p.user.id THEN 1 " +
-            "ELSE 2 END " +
+            "ELSE 2 END, p.user.role " +
             ") " +
             "FROM ForumPostEntity p " +
             "LEFT JOIN ForumPostSaveEntity s " +

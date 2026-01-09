@@ -7,6 +7,7 @@ import com.example.carespawbe.dto.UserProfile.UserHistoryResponse;
 import com.example.carespawbe.entity.Forum.ForumPostHistoryEntity;
 import com.example.carespawbe.mapper.Forum.ForumPostHistoryMapper;
 import com.example.carespawbe.repository.Forum.ForumPostHistoryRepository;
+import com.example.carespawbe.repository.Shop.OrderItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;

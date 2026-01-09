@@ -90,3 +90,4 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 """)
     List<ProductEntity> searchEntities(@Param("kw") String keyword);
 }
+

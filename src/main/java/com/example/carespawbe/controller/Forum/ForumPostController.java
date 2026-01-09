@@ -4,6 +4,7 @@ import com.example.carespawbe.dto.Forum.*;
 import com.example.carespawbe.dto.Like.LikeStateUpdateRequest;
 import com.example.carespawbe.dto.Save.SaveStatusUpdateRequest;
 import com.example.carespawbe.entity.Forum.ForumPostEntity;
+import com.example.carespawbe.repository.Expert.ExpertRepository;
 import com.example.carespawbe.service.Forum.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class ForumPostController {
 
     @Autowired
     private ForumPostLikeService forumPostLikeService;
+
+    @Autowired
+    private ExpertRepository expertRepository;
 
 //    @GetMapping("")
 //    public ResponseEntity<?> getForumData(HttpServletRequest request) {
@@ -90,7 +94,6 @@ public class ForumPostController {
         if (userId == null) {
             userId = 0L;
         }
-//        System.out.println("UserEntity id in get forum detail: " + userId);
         ForumPostDetailResponse response = ForumPostDetailResponse.builder()
                 .post(forumPostService.getForumPostById(postId, userId, request))
                 .comments(forumPostCommentService.getPostCommentsByPostId(postId))
@@ -100,13 +103,6 @@ public class ForumPostController {
         System.out.println("save of forum detail: " + response.getPost().isSaved());
         return ResponseEntity.ok(response);
     }
-
-//    @GetMapping("/post-list")
-//    public ResponseEntity<?> getPostList(HttpServletRequest request) {
-//        Long userId = (Long) request.getAttribute("userId");
-//        List<ShortForumPostResponse> posts = forumPostService.getForumPostListReverse(userId);
-//        return ResponseEntity.ok(posts);
-//    }
 
     @PatchMapping("/save-post")
     public ResponseEntity<String> saveForumPosts(@RequestBody List<SaveStatusUpdateRequest> requests, HttpServletRequest request) {
@@ -229,7 +225,11 @@ public class ForumPostController {
 
     @GetMapping("/getRcmPostDB")
     public ResponseEntity<?> getPostTrainingData() {
-
         return ResponseEntity.ok(forumService.getForumTrainData());
+    }
+
+    @GetMapping("/getExpertOwner/{userId}")
+    public ResponseEntity<?> getExpertOwner(@PathVariable Long userId) {
+        return ResponseEntity.ok(expertRepository.findByUserId(userId).getId());
     }
 }

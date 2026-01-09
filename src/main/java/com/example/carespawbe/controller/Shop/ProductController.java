@@ -5,6 +5,8 @@ import com.example.carespawbe.dto.Shop.response.ProductCardResponse;
 import com.example.carespawbe.dto.Shop.response.ProductDetailResponse;
 import com.example.carespawbe.dto.Shop.response.ProductInfoDTO;
 import com.example.carespawbe.dto.Shop.response.ProductResponse;
+import com.example.carespawbe.dto.Shop.response.ProductTrainDBResponse;
+import com.example.carespawbe.service.Shop.OrderService;
 import com.example.carespawbe.service.Shop.ProductService;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,8 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/products")
@@ -26,6 +27,7 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
+    private final OrderService orderService;
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
@@ -179,6 +181,24 @@ public class ProductController {
         return productService.getBestSellers();
     }
 
+    @GetMapping("/getRcmProductDB")
+    public ResponseEntity<?> getAllProductInfos() {
+        ProductTrainDBResponse response = new ProductTrainDBResponse();
+        List<ProductInfoDTO> productInfos = productService.getAllProductInfos();
+        response.setProductDb(productInfos);
+        response.setPurchaseDb(orderService.findUserProductOrderTimes());
+        return ResponseEntity.ok(response);
+    }
+
+//    @GetMapping("/recommend")
+//    public ResponseEntity<?> getRecommendProducts(HttpServletRequest request) {
+//        Long userId = (Long) request.getAttribute("userId");
+//
+//        if (userId == null) {
+//            userId = 0L;
+//        }
+//        return ResponseEntity.ok(productService.getRecommendedProducts(userId));
+//    }
     @GetMapping("/infos")
     public ResponseEntity<List<ProductInfoDTO>> getAllProductInfos() {
         return ResponseEntity.ok(productService.getAllProductInfos());

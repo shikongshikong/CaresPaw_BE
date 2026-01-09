@@ -27,9 +27,12 @@ public class AvailabilitySlotSettingCoordinator {
 //        BigDecimal price = expert.getSessionPrice() * (duration / 15);
         BigDecimal durationBD = BigDecimal.valueOf(duration);
         BigDecimal divisor = BigDecimal.valueOf(15);
+
         BigDecimal price = expert.getSessionPrice()
                 .multiply(durationBD)
                 .divide(divisor, 2, RoundingMode.HALF_UP);
+
+        System.out.println("session price: " + expert.getSessionPrice() + " : exact price: " + price );
 
         AvailabilitySlotEntity availabilitySlotEntity = availabilitySlotService.saveAvailabilitySlot(
                 new AvailabilitySlotEntity(slotSettingRequest.getDate(), startTime, endTime, price, isBooked, expert));

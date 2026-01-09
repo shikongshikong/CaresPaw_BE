@@ -376,7 +376,7 @@ public class ProductServiceImp implements ProductService {
                 .map(productMapper::toProductResponse)
                 .toList();
     }
-
+  
     @Override
     public List<ProductCardResponse> searchProductCards(String keyword) {
         String kw = (keyword == null) ? "" : keyword.trim();
